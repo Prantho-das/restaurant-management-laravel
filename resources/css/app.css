@@ -1,0 +1,96 @@
+@import "tailwindcss";
+
+@theme {
+    --color-brand-emerald: #004d3d;
+    --color-brand-emerald-light: #006652;
+    --color-brand-gold: #af8b3b;
+    --color-brand-gold-pale: #d4c39e;
+    --color-brand-red: #d32f2f;
+    --color-parchment: #fdfcf0;
+    --color-bg-base: #ffffff;
+
+    --font-serif: "Playfair Display", serif;
+    --font-sans: "Outfit", sans-serif;
+    --font-bengali: "Hind Siliguri", sans-serif;
+
+    --radius-xl: 1.5rem;
+    --radius-2xl: 2rem;
+
+    --shadow-premium: 0 10px 40px -10px rgba(0, 77, 61, 0.12);
+}
+
+@layer base {
+    body {
+        @apply bg-parchment text-brand-emerald font-sans antialiased;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        @apply font-serif italic text-brand-emerald;
+    }
+}
+
+@layer components {
+    .container-wide {
+        @apply max-w-7xl mx-auto px-6 lg:px-12;
+    }
+
+    .glass-light {
+        @apply bg-white/90 backdrop-blur-md border border-brand-gold/10;
+    }
+
+    .btn-royal {
+        @apply bg-brand-emerald text-parchment px-8 py-3 rounded-full font-bold transition-all duration-300 hover:bg-brand-emerald-light hover:shadow-premium hover:-translate-y-1;
+    }
+
+    .btn-royal-outline {
+        @apply border-2 border-brand-emerald text-brand-emerald px-8 py-3 rounded-full font-bold transition-all duration-300 hover:bg-brand-emerald hover:text-parchment;
+    }
+
+    .section-padding {
+        @apply py-24 lg:py-40;
+    }
+}
+
+/* Fixed Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-in-up {
+    animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.delay-100 {
+    animation-delay: 100ms;
+}
+.delay-200 {
+    animation-delay: 200ms;
+}
+.delay-300 {
+    animation-delay: 300ms;
+}
+
+/* Subtle Background Pattern */
+.bg-subtle-pattern {
+    background-image: radial-gradient(#af8b3b 1px, transparent 1px);
+    background-size: 40px 40px;
+    background-color: #fdfcf0;
+    opacity: 0.1;
+}
+
+/* Image Polish */
+img {
+    @apply transition-opacity duration-700;
+}
