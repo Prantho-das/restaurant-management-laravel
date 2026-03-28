@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Expense;
 use App\Models\Ingredient;
 use App\Models\Order;
+use App\Models\Payroll;
 use App\Models\User;
 use App\Models\Wastage;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -93,7 +94,22 @@ class ReportController extends Controller
             ->get()
             ->groupBy('category');
 
-        $pdf = Pdf::loadView('reports.profit-loss', compact('totalRevenue', 'totalExpenses', 'expensesByCategory', 'startDate', 'endDate'));
+        $totalPayroll = Payroll::whereBetween('payment_date', [$startDate, $endDate])
+            ->where('status', 'paid')
+            ->sum('net_paid');
+
+        // Combined total for the summary
+        $grandTotalExpenses = $totalExpenses + $totalPayroll;
+
+        $pdf = Pdf::loadView('reports.profit-loss', compact(
+            'totalRevenue',
+            'totalExpenses',
+            'expensesByCategory',
+            'totalPayroll',
+            'grandTotalExpenses',
+            'startDate',
+            'endDate'
+        ));
 
         return $pdf->download("profit-loss-{$startDate}-to-{$endDate}.pdf");
     }
