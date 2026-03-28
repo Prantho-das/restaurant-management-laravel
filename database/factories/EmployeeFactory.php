@@ -2,13 +2,13 @@
 
 namespace Database\Factories;
 
-use App\Models\LandingPage;
+use App\Models\Employee;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends Factory<LandingPage>
+ * @extends Factory<Employee>
  */
-class LandingPageFactory extends Factory
+class EmployeeFactory extends Factory
 {
     /**
      * Define the model's default state.

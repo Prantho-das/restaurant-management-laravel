@@ -2,8 +2,11 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
+use App\Models\Category;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\MenuItem;
+use App\Models\Outlet;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -20,7 +23,7 @@ class DatabaseSeeder extends Seeder
             'password' => bcrypt('password'),
         ]);
 
-        $outlet = \App\Models\Outlet::create([
+        $outlet = Outlet::create([
             'name' => 'Royal Dine Dhaka',
             'address' => 'Banani, Dhaka',
             'phone' => '01700000000',
@@ -34,10 +37,10 @@ class DatabaseSeeder extends Seeder
         ];
 
         foreach ($categories as $catData) {
-            $category = \App\Models\Category::create($catData);
+            $category = Category::create($catData);
 
             if ($catData['name'] === 'Royal Biryani') {
-                \App\Models\MenuItem::create([
+                MenuItem::create([
                     'category_id' => $category->id,
                     'outlet_id' => $outlet->id,
                     'name' => 'Shahi Mutton Kacchi',
@@ -49,7 +52,7 @@ class DatabaseSeeder extends Seeder
             }
 
             if ($catData['name'] === 'Heritage Curries') {
-                \App\Models\MenuItem::create([
+                MenuItem::create([
                     'category_id' => $category->id,
                     'outlet_id' => $outlet->id,
                     'name' => 'Heritage Beef Bhuna',
@@ -58,7 +61,7 @@ class DatabaseSeeder extends Seeder
                     'base_price' => 720,
                     'image' => 'bhuna_khichuri_beef_1774629196663.png',
                 ]);
-                \App\Models\MenuItem::create([
+                MenuItem::create([
                     'category_id' => $category->id,
                     'outlet_id' => $outlet->id,
                     'name' => 'Chittagong Mezban',
@@ -70,7 +73,7 @@ class DatabaseSeeder extends Seeder
             }
 
             if ($catData['name'] === 'Artisan Snacks') {
-                \App\Models\MenuItem::create([
+                MenuItem::create([
                     'category_id' => $category->id,
                     'outlet_id' => $outlet->id,
                     'name' => 'Boutique Fuchka',

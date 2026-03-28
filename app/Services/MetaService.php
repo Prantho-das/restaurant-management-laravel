@@ -8,9 +8,11 @@ use Illuminate\Support\Facades\Log;
 
 class MetaService
 {
-    protected string|null $pixelId;
-    protected string|null $accessToken;
-    protected string|null $testEventCode;
+    protected ?string $pixelId;
+
+    protected ?string $accessToken;
+
+    protected ?string $testEventCode;
 
     public function __construct()
     {
@@ -21,7 +23,7 @@ class MetaService
 
     public function sendEvent(string $eventName, array $data = [], array $userData = [])
     {
-        if (!$this->pixelId || !$this->accessToken) {
+        if (! $this->pixelId || ! $this->accessToken) {
             return;
         }
 
@@ -47,12 +49,12 @@ class MetaService
 
         try {
             $response = Http::post("https://graph.facebook.com/v19.0/{$this->pixelId}/events?access_token={$this->accessToken}", $payload);
-            
+
             if ($response->failed()) {
-                Log::error('Meta CAPI Error: ' . $response->body());
+                Log::error('Meta CAPI Error: '.$response->body());
             }
         } catch (\Exception $e) {
-            Log::error('Meta CAPI Exception: ' . $e->getMessage());
+            Log::error('Meta CAPI Exception: '.$e->getMessage());
         }
     }
 }

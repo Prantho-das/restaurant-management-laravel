@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
+use Database\Factories\SettingFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Setting extends Model
 {
-    /** @use HasFactory<\Database\Factories\SettingFactory> */
+    /** @use HasFactory<SettingFactory> */
     use HasFactory;
 
     protected $fillable = [
@@ -28,5 +29,10 @@ class Setting extends Model
             ['key' => $key],
             ['value' => $value, 'group' => $group, 'type' => $type]
         );
+    }
+
+    public static function exists(string $key): bool
+    {
+        return static::where('key', $key)->exists();
     }
 }

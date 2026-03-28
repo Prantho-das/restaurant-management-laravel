@@ -1,0 +1,413 @@
+
+<div x-data="{ 
+    offline: false,
+    syncing: false,
+    db: null,
+    lastReceipt: null,
+    init() {
+        this.db = new Dexie('POS_Offline_DB');
+        this.db.version(2).stores({
+            orders: '++id, cart, total, timestamp, details, synced'
+        });
+    },
+    async saveOfflineOrder(cart, total, details) {
+        await this.db.orders.add({
+            cart: JSON.parse(JSON.stringify(cart)),
+            total: total,
+            details: details,
+            timestamp: new Date().toISOString(),
+            synced: 0
+        });
+    },
+    async syncOrders() {
+        const unsyncedOrders = await this.db.orders.where('synced').equals(0).toArray();
+        if (unsyncedOrders.length === 0) return;
+        this.syncing = true;
+        for (const order of unsyncedOrders) {
+            try {
+                await $wire.processOfflineOrder(order.cart, order.total, order.details);
+                await this.db.orders.update(order.id, { synced: 1 });
+            } catch (e) {
+                console.error('Failed to sync order', e);
+            }
+        }
+        this.syncing = false;
+    }
+}"
+x-on:order-placed.window="syncOrders()"
+x-on:pos-receipt-ready.window="lastReceipt = $event.detail"
+class="flex h-full bg-[#F9FAFB] overflow-hidden font-sans relative text-[11px]"
+:class="{ 'overflow-hidden': $wire.showCart }">
+    
+    <!-- Mobile Cart Toggle -->
+    <button @click="$wire.showCart = true" class="lg:hidden fixed bottom-6 right-6 z-50 w-16 h-16 bg-brand-primary text-white rounded-full shadow-2xl flex items-center justify-center animate-bounce">
+        <div class="relative">
+            <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
+            <template x-if="$wire.cart.length > 0">
+                <span class="absolute -top-2 -right-2 bg-rose-500 text-white text-[10px] font-black w-6 h-6 rounded-full flex items-center justify-center border-2 border-white" x-text="$wire.cart.length"></span>
+            </template>
+        </div>
+    </button>
+    
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col min-w-0">
+        <!-- Modern Search & Status Header -->
+        <div class="bg-white px-3 md:px-5 py-2.5 border-b border-slate-100 flex flex-col md:flex-row items-center gap-3">
+            <div class="w-full md:flex-1 relative group">
+                <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none text-slate-400 group-focus-within:text-brand-primary transition-colors">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                </div>
+                <input wire:model.live.debounce.300ms="search" type="text" placeholder="Search menu items..." 
+                    class="w-full bg-slate-50 border border-slate-200 rounded-xl py-2 pl-10 pr-4 text-[10px] focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary outline-none transition-all">
+            </div>
+
+            <!-- Global Status Toggles -->
+            <div class="flex items-center gap-3">
+                <div x-show="offline" class="flex items-center gap-1.5 bg-rose-50 text-rose-600 px-3 py-1.5 rounded-lg border border-rose-100 text-[9px] font-bold uppercase tracking-wider animate-pulse">
+                    <span class="w-1.5 h-1.5 bg-rose-600 rounded-full"></span> Offline
+                </div>
+                <div x-show="syncing" class="flex items-center gap-1.5 text-brand-primary text-[9px] font-bold uppercase tracking-wider">
+                    <svg class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                    Syncing...
+                </div>
+            </div>
+        </div>
+
+        <!-- Modern Category Chips -->
+        <div class="bg-white px-3 md:px-5 py-2 border-b border-slate-100 flex items-center gap-2 overflow-x-auto scrollbar-hide">
+            <button wire:click="selectCategory(null)" 
+                class="px-4 py-1.5 rounded-xl text-[9px] font-bold uppercase tracking-wider transition-all flex-shrink-0 {{ !$selectedCategoryId ? 'bg-brand-primary text-white shadow-lg' : 'bg-slate-50 text-slate-500 hover:bg-slate-100' }}">
+                All Items
+            </button>
+            @foreach($categories as $category)
+                <button wire:click="selectCategory({{ $category->id }})" 
+                    class="px-4 py-1.5 rounded-xl text-[9px] font-bold uppercase tracking-wider transition-all flex-shrink-0 {{ $selectedCategoryId == $category->id ? 'bg-brand-primary text-white shadow-lg' : 'bg-slate-50 text-slate-500 hover:bg-slate-100' }}">
+                    {{ $category->name }}
+                </button>
+            @endforeach
+        </div>
+
+        <!-- Scrollable Product Grid -->
+        <div class="flex-1 overflow-y-auto p-4 custom-scrollbar">
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 px-1 md:px-0">
+                @foreach($items as $item)
+                    <div 
+                        wire:click="addToCart({{ $item->id }})"
+                        class="group bg-white rounded-2xl p-3 shadow-sm border border-slate-200 transition-all hover:shadow-lg hover:border-brand-primary/20 flex flex-col h-full relative cursor-pointer active:scale-[0.98]">
+                        <div class="relative aspect-[4/3] rounded-xl overflow-hidden mb-3 bg-slate-50">
+                            <img src="{{ $item->image ?? '/images/placeholders/kacchi_biryani_1774629083139.png' }}" 
+                                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+                            
+                            <!-- Price Float -->
+                            <div class="absolute top-2 right-2">
+                                <span class="bg-white/90 backdrop-blur-md px-2 py-0.5 rounded-lg text-[10px] font-black text-brand-primary shadow-lg border border-brand-primary/10">
+                                    ৳{{ number_format($item->final_price) }}
+                                </span>
+                            </div>
+
+                            @if($item->available_stock <= 0)
+                                <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px] flex items-center justify-center">
+                                    <span class="bg-rose-500 text-white text-[8px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full shadow-2xl">Out of Stock</span>
+                                </div>
+                            @endif
+                        </div>
+
+                        <div class="flex-1 px-0.5">
+                            <h3 class="text-[10px] font-black text-slate-800 uppercase tracking-tight mb-0.5 group-hover:text-brand-primary transition-colors line-clamp-1">{{ $item->name }}</h3>
+                            <p class="text-[8px] text-slate-400 font-bold mb-1.5 italic">{{ $item->category->name }}</p>
+                            
+                            <div class="mt-auto flex items-center justify-between gap-2">
+                                @if($item->available_stock > 0 && $item->available_stock < 5)
+                                    <span class="text-rose-500 text-[7px] font-black uppercase tracking-tighter">Only {{ $item->available_stock }} Left</span>
+                                @elseif($item->available_stock > 0)
+                                    <div class="flex items-center gap-1">
+                                        <div class="w-1.5 h-1.5 bg-brand-primary rounded-full"></div>
+                                        <span class="text-[7px] font-bold text-slate-400 uppercase">In Stock</span>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    </main>
+
+    <!-- Detailed Sidebar: Current Order -->
+    <aside 
+        class="fixed inset-y-0 right-0 w-full md:w-[380px] bg-white border-l border-slate-100 flex flex-col shadow-2xl z-50 transform transition-transform duration-500 ease-in-out lg:relative lg:translate-x-0"
+        :class="{ 'translate-x-0': $wire.showCart, 'translate-x-full': !$wire.showCart }"
+        @click.away="$wire.showCart = false">
+        <!-- Sidebar Header -->
+        <div class="px-4 py-3 border-b border-slate-50 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <button @click="$wire.showCart = false" class="lg:hidden text-slate-400">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+                <div class="w-9 h-9 rounded-xl bg-brand-primary/10 flex items-center justify-center text-brand-primary">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
+                </div>
+                <div>
+                    <h2 class="text-[10px] font-black text-slate-800 uppercase tracking-tight leading-none">Current Order</h2>
+                    <span class="text-[8px] text-slate-400 font-bold uppercase tracking-widest mt-0.5 inline-block">{{ count($cart) }} Items</span>
+                </div>
+            </div>
+            <button wire:click="clearCart" class="text-rose-400 hover:text-rose-600 transition-colors">
+                <div class="w-8 h-8 rounded-lg bg-rose-50 flex items-center justify-center">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                </div>
+            </button>
+        </div>
+
+        <!-- Scrollable Item List -->
+        <div class="flex-1 overflow-y-auto px-4 py-3 custom-scrollbar space-y-2">
+            @forelse($cart as $index => $item)
+                <div class="flex items-center gap-3 group animate-fadeIn bg-slate-50 rounded-xl px-3 py-2.5 border border-slate-100">
+                    <div class="flex-1 min-w-0">
+                        <h4 class="text-[10px] font-black text-slate-800 uppercase tracking-tight truncate mb-0.5">{{ $item['name'] }}</h4>
+                        <p class="text-brand-primary font-black text-[10px]">৳{{ number_format($item['price']) }}</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="flex items-center bg-white border border-slate-200 rounded-lg px-2 py-1">
+                            <button wire:click="updateQuantity({{ $index }}, -1)" class="w-5 h-5 flex items-center justify-center text-slate-400 hover:text-brand-primary transition-colors font-black text-[10px]">-</button>
+                            <span class="w-6 text-center text-[10px] font-black text-slate-800">{{ $item['quantity'] }}</span>
+                            <button wire:click="updateQuantity({{ $index }}, 1)" class="w-5 h-5 flex items-center justify-center text-slate-400 hover:text-brand-primary transition-colors font-black text-[10px]">+</button>
+                        </div>
+                    </div>
+                </div>
+            @empty
+                <div class="h-full flex flex-col items-center justify-center py-10 text-center opacity-30">
+                    <div class="w-20 h-20 mb-4 bg-slate-50 rounded-full flex items-center justify-center">
+                        <svg class="w-10 h-10 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
+                    </div>
+                    <h3 class="text-[10px] font-black text-slate-600 uppercase tracking-widest leading-relaxed">Your basket is waiting...<br><span class="text-[8px] font-bold opacity-60">Click on items to add them</span></h3>
+                </div>
+            @endforelse
+        </div>
+
+        <!-- Checkout Section -->
+        <div class="px-4 py-4 bg-slate-50 border-t border-slate-100 rounded-t-[2rem] shadow-[0_-10px_30px_rgba(0,0,0,0.03)] selection:bg-brand-primary selection:text-white">
+            <!-- Contextual Fields -->
+            <div class="grid grid-cols-2 gap-2.5 mb-4">
+                <div class="col-span-1 space-y-1">
+                    <label class="text-[7px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">Customer</label>
+                    <input wire:model="customerName" type="text" placeholder="Walking Customer" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-[10px] focus:ring-2 focus:ring-brand-primary/20 outline-none transition-all placeholder:text-slate-300 font-bold">
+                </div>
+                <div class="col-span-1 space-y-1">
+                    <label class="text-[7px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">Type</label>
+                    <select wire:model="orderType" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-[10px] focus:ring-2 focus:ring-brand-primary/20 outline-none transition-all font-bold appearance-none cursor-pointer">
+                        <option value="dine_in">WALK-IN</option>
+                        <option value="takeaway">TAKEAWAY</option>
+                        <option value="delivery">DELIVERY</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Manual Order Discount -->
+            <div class="space-y-2 mb-4">
+                <div class="flex items-center justify-between px-1">
+                    <span class="text-[8px] font-black text-slate-600 uppercase tracking-widest flex items-center gap-1.5">
+                        <svg class="w-3 h-3 text-brand-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" /></svg>
+                        Discount
+                    </span>
+                    <div class="flex items-center gap-1 bg-slate-200 p-0.5 rounded-lg">
+                        <button wire:click="$set('discountType', 'percentage')" class="px-2 py-0.5 rounded-md text-[8px] font-black transition-all {{ $discountType == 'percentage' ? 'bg-white text-brand-primary shadow-sm' : 'text-slate-500' }}">%</button>
+                        <button wire:click="$set('discountType', 'fixed')" class="px-2 py-0.5 rounded-md text-[8px] font-black transition-all {{ $discountType == 'fixed' ? 'bg-white text-brand-primary shadow-sm' : 'text-slate-500' }}">৳</button>
+                    </div>
+                </div>
+                <input wire:model.live="discountValue" type="number" placeholder="0.00" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-[10px] focus:ring-2 focus:ring-brand-primary/20 outline-none transition-all font-bold">
+            </div>
+
+            <!-- Totals & Payment -->
+            <div class="space-y-4 mb-5">
+                <div class="space-y-2 px-1">
+                    <div class="flex justify-between items-center">
+                        <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Subtotal</span>
+                        <span class="text-[10px] font-black text-slate-800">৳{{ number_format($this->subtotal) }}</span>
+                    </div>
+                    <div class="flex justify-between items-center text-rose-500">
+                        <span class="text-[9px] font-bold uppercase tracking-wider">Discount</span>
+                        <span class="text-[10px] font-black">-৳{{ number_format($this->discountAmount) }}</span>
+                    </div>
+                    <div class="pt-3 border-t border-slate-200 flex justify-between items-end">
+                        <span class="text-[10px] font-black text-slate-800 uppercase tracking-[0.1em]">Grand Payable</span>
+                        <span class="text-xl font-black text-rose-600 drop-shadow-sm">৳{{ number_format($this->total) }}</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-2">
+                    <button @click="$wire.paymentMethod = 'cash'" :class="$wire.paymentMethod == 'cash' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-500/20' : 'bg-white text-slate-400 border border-slate-200'" class="py-2.5 rounded-xl flex flex-col items-center gap-1 transition-all">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                        <span class="text-[6px] font-black uppercase tracking-widest">Cash</span>
+                    </button>
+                    <button @click="$wire.paymentMethod = 'mobile_pay'" :class="$wire.paymentMethod == 'mobile_pay' ? 'bg-sky-500 text-white shadow-lg shadow-sky-500/20' : 'bg-white text-slate-400 border border-slate-200'" class="py-2.5 rounded-xl flex flex-col items-center gap-1 transition-all">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+                        <span class="text-[6px] font-black uppercase tracking-widest">bKash</span>
+                    </button>
+                    <button @click="$wire.paymentMethod = 'card'" :class="$wire.paymentMethod == 'card' ? 'bg-cyan-500 text-white shadow-lg shadow-cyan-500/20' : 'bg-white text-slate-400 border border-slate-200'" class="py-2.5 rounded-xl flex flex-col items-center gap-1 transition-all">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
+                        <span class="text-[6px] font-black uppercase tracking-widest">Card</span>
+                    </button>
+                </div>
+
+                <!-- Reference No / Transaction ID - shown after payment options for non-cash -->
+                <template x-if="$wire.paymentMethod !== 'cash'">
+                    <div class="space-y-1 animate-fadeIn">
+                        <label class="text-[7px] font-black text-rose-500 uppercase tracking-[0.2em] px-1 flex items-center gap-1.5">
+                            <span class="w-1.5 h-1.5 bg-rose-500 rounded-full"></span>
+                            Reference No / Transaction ID (Required)
+                        </label>
+                        <input wire:model="referenceNo" type="text" placeholder="e.g. TRX-123456" class="w-full bg-white border border-rose-100 rounded-xl px-3 py-2 text-[10px] focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 outline-none transition-all font-bold">
+                    </div>
+                </template>
+            </div>
+
+
+            <div class="flex gap-2">
+                <button 
+                    @click="if(offline) { 
+                        await saveOfflineOrder($wire.cart, $wire.total, { 
+                            order_type: $wire.orderType, 
+                            payment_method: $wire.paymentMethod, 
+                            table_number: $wire.tableNumber, 
+                            customer_name: $wire.customerName, 
+                            reference_no: $wire.referenceNo, 
+                            notes: $wire.notes 
+                        }); 
+                        $wire.clearCart();
+                        window.dispatchEvent(new CustomEvent('notify', { detail: { type: 'success', message: 'Offline Order Saved! It will sync once online.' } }));
+
+                    } else { 
+                        $wire.placeOrder() 
+                    }"
+                    {{ empty($cart) ? 'disabled' : '' }}
+                    class="flex-1 py-3.5 bg-brand-primary text-white text-[10px] font-black uppercase tracking-[0.3em] rounded-xl shadow-2xl shadow-brand-primary/40 hover:bg-brand-primary-dark transition-all disabled:opacity-20 flex items-center justify-center gap-2.5 group active:scale-[0.98]">
+                    <svg class="w-4 h-4 group-hover:rotate-12 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    Confirm
+                </button>
+
+                {{-- Manual Print button - only shown when a receipt is available --}}
+                <button 
+                    @click="window.printPosReceipt(lastReceipt)"
+                    x-show="lastReceipt !== null"
+                    x-cloak
+                    title="Print Last Receipt"
+                    class="w-12 h-full py-3.5 bg-slate-700 text-white rounded-xl shadow-lg hover:bg-slate-800 transition-all flex items-center justify-center active:scale-[0.98] flex-shrink-0">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Global Notifications now handled by x-layout -->
+
+
+    <style>
+        [x-cloak] { display: none !important; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fadeIn { animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
+        .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.04); border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(0, 0, 0, 0.1); }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</div>
+
+@script
+<script>
+    // Listen for print-receipt event dispatched by PosSystem::placeOrder()
+    $wire.on('print-receipt', ({ receipt }) => {
+        // Update Alpine lastReceipt state via a bridge window event
+        window.dispatchEvent(new CustomEvent('pos-receipt-ready', { detail: receipt }));
+
+        if (receipt.auto_print) {
+            window.printPosReceipt(receipt);
+        }
+    });
+
+    window.printPosReceipt = function (r) {
+        if (!r) return;
+
+        const payLabel = { cash: 'Cash', card: 'Card', mobile_pay: 'bKash/MFS' }[r.payment_method] || r.payment_method;
+        const typeLabel = { dine_in: 'Dine-In', takeaway: 'Takeaway', delivery: 'Delivery' }[r.order_type] || r.order_type;
+
+        const itemsHtml = r.items.map(i =>
+            '<tr>' +
+            '<td style="padding:2px 0;word-break:break-word">' + i.name + '</td>' +
+            '<td style="text-align:center;padding:2px 4px">' + i.qty + '</td>' +
+            '<td style="text-align:right;padding:2px 0">' + Number(i.price).toFixed(0) + '</td>' +
+            '<td style="text-align:right;padding:2px 0">' + Number(i.subtotal).toFixed(0) + '</td>' +
+            '</tr>'
+        ).join('');
+
+        const discountRow = r.discount > 0
+            ? '<tr><td colspan="3" style="text-align:right;padding:2px 0">Discount' +
+              (r.discount_type === 'percentage' ? ' (' + r.discount_value + '%)' : '') +
+              '</td><td style="text-align:right;padding:2px 0">-' + Number(r.discount).toFixed(0) + '</td></tr>'
+            : '';
+
+        const tableRow = (r.order_type === 'dine_in' && r.table_number)
+            ? '<div>Table: <b>' + r.table_number + '</b></div>' : '';
+        const refRow = r.reference_no ? '<div>Ref: ' + r.reference_no + '</div>' : '';
+        const addressRow = r.restaurant_address ? '<div>' + r.restaurant_address + '</div>' : '';
+        const phoneRow = r.restaurant_phone ? '<div>' + r.restaurant_phone + '</div>' : '';
+
+        const html =
+            '<!DOCTYPE html><html><head><meta charset="UTF-8">' +
+            '<title>Receipt - ' + r.order_number + '</title>' +
+            '<style>' +
+            '* { margin:0;padding:0;box-sizing:border-box; }' +
+            'body { font-family:"Courier New",Courier,monospace;font-size:11px;width:80mm;margin:0 auto;color:#000; }' +
+            '.center { text-align:center; } .bold { font-weight:bold; } .big { font-size:15px; }' +
+            '.divider { border-top:1px dashed #000;margin:5px 0; }' +
+            'table { width:100%;border-collapse:collapse; }' +
+            'th { font-size:10px;border-bottom:1px dashed #000;padding-bottom:3px; }' +
+            '.total-row td { border-top:1px dashed #000;padding-top:4px;font-weight:bold;font-size:13px; }' +
+            '.footer { margin-top:8px;text-align:center;font-size:10px; }' +
+            '@media print { @page { size: 80mm auto; margin: 4mm; } body { width:78mm; } }' +
+            '</style></head><body>' +
+            '<div class="center"><div class="bold big">' + r.restaurant_name + '</div>' + addressRow + phoneRow + '</div>' +
+            '<div class="divider"></div>' +
+            '<div class="center bold" style="font-size:13px">** RECEIPT **</div>' +
+            '<div class="divider"></div>' +
+            '<div>Order: <b>' + r.order_number + '</b></div>' +
+            '<div>Date: ' + r.datetime + '</div>' +
+            '<div>Cashier: ' + r.cashier + '</div>' +
+            '<div>Type: <b>' + typeLabel + '</b></div>' +
+            tableRow +
+            '<div>Customer: ' + r.customer_name + '</div>' +
+            '<div>Payment: <b>' + payLabel + '</b></div>' +
+            refRow +
+            '<div class="divider"></div>' +
+            '<table><thead><tr>' +
+            '<th style="text-align:left">Item</th>' +
+            '<th style="text-align:center">Qty</th>' +
+            '<th style="text-align:right">Price</th>' +
+            '<th style="text-align:right">Total</th>' +
+            '</tr></thead><tbody>' + itemsHtml + '</tbody>' +
+            '<tfoot>' +
+            '<tr><td colspan="3" style="text-align:right;padding-top:4px">Subtotal</td>' +
+            '<td style="text-align:right;padding-top:4px">' + Number(r.subtotal).toFixed(0) + '</td></tr>' +
+            discountRow +
+            '<tr class="total-row"><td colspan="3" style="text-align:right">TOTAL</td>' +
+            '<td style="text-align:right">৳' + Number(r.total).toFixed(0) + '</td></tr>' +
+            '</tfoot></table>' +
+            '<div class="divider"></div>' +
+            '<div class="footer"><div>Thank you for dining with us!</div>' +
+            '<div style="margin-top:4px;font-size:9px">Powered by ' + r.restaurant_name + ' POS</div>' +
+            '</div></body></html>';
+
+        const win = window.open('', '_blank', 'width=340,height=600,toolbar=0,scrollbars=1,status=0');
+        if (!win) {
+            alert('Pop-up blocked. Please allow pop-ups for this site to print receipts.');
+            return;
+        }
+        win.document.write(html);
+        win.document.close();
+        win.focus();
+        setTimeout(() => { win.print(); }, 400);
+    };
+</script>
+@endscript

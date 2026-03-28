@@ -2,6 +2,8 @@
 
 namespace App\Providers\Filament;
 
+use App\Models\Setting;
+use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -10,13 +12,14 @@ use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
-use Filament\Widgets\AccountWidget;
-use Filament\Widgets\FilamentInfoWidget;
+use Filament\Support\Enums\Width;
+use Filament\View\PanelsRenderHook;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 class AdminPanelProvider extends PanelProvider
@@ -28,6 +31,13 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
+            ->spa()
+            ->brandName(fn () => Setting::getValue('site_name', config('app.name')))
+            ->brandLogo(fn () => view('components.filament-logo'))
+            ->favicon(fn () => Setting::getValue('site_favicon') ? Storage::url(Setting::getValue('site_favicon')) : asset('favicon.ico'))
+            ->globalSearch(false)
+            ->maxContentWidth(Width::Full)
+            ->sidebarWidth('16rem')
             ->colors([
                 'primary' => Color::Olive,
             ])
@@ -37,10 +47,8 @@ class AdminPanelProvider extends PanelProvider
                 Dashboard::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
-            ->widgets([
-                // AccountWidget::class,
-                // FilamentInfoWidget::class,
-            ])
+            ->widgets([])
+            ->plugin(FilamentShieldPlugin::make())
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
@@ -54,6 +62,26 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
-            ]);
+            ])
+            ->renderHook(
+                PanelsRenderHook::HEAD_END,
+                fn (): string => '<style>
+                    .fi-sidebar,
+                    .fi-sidebar-nav,
+                    .fi-sidebar-content,
+                    [data-fi-sidebar] {
+                        scrollbar-width: none !important;
+                        -ms-overflow-style: none !important;
+                    }
+                    .fi-sidebar::-webkit-scrollbar,
+                    .fi-sidebar-nav::-webkit-scrollbar,
+                    .fi-sidebar-content::-webkit-scrollbar,
+                    [data-fi-sidebar]::-webkit-scrollbar {
+                        display: none !important;
+                        width: 0 !important;
+                        height: 0 !important;
+                    }
+                </style>',
+            );
     }
 }

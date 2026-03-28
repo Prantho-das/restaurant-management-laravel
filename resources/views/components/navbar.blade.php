@@ -1,4 +1,8 @@
-<nav x-data="{ open: false, scrolled: false }" 
+@php
+    $cartCount = collect(session('cart', []))->sum('quantity');
+@endphp
+<nav x-data="{ open: false, scrolled: false, cartCount: {{ $cartCount }} }" 
+     @cart-updated.window="cartCount = $event.detail.count"
      @scroll.window="scrolled = (window.pageYOffset > 50) ? true : false"
      :class="{ 'glass-light py-2 shadow-premium': scrolled, 'bg-transparent py-6': !scrolled }"
      class="fixed top-0 left-0 w-full z-50 transition-all duration-500">
@@ -26,7 +30,16 @@
             
             <div class="h-8 w-px bg-brand-gold/20 mx-2"></div>
             
-            <a href="/order" class="btn-royal text-xs tracking-widest uppercase">Order Online</a>
+            <a href="/order" class="btn-brand text-xs tracking-widest uppercase relative">
+                Order Online
+                <span x-show="cartCount > 0"
+                      x-text="cartCount"
+                      x-transition:enter="transition ease-out duration-200"
+                      x-transition:enter-start="scale-0 opacity-0"
+                      x-transition:enter-end="scale-100 opacity-100"
+                      class="absolute -top-2 -right-2 bg-brand-red text-white text-[10px] font-bold min-w-5 h-5 px-1 rounded-full flex items-center justify-center shadow-md"
+                      style="display: none;"></span>
+            </a>
         </div>
 
         <!-- Mobile Toggle -->
@@ -48,6 +61,12 @@
         <a @click="open = false" href="/" class="font-serif italic text-5xl hover:text-brand-gold transition-colors">Home</a>
         <a @click="open = false" href="/#menu" class="font-serif italic text-5xl hover:text-brand-gold transition-colors">Our Menu</a>
         <a @click="open = false" href="/#reservation" class="font-serif italic text-5xl hover:text-brand-gold transition-colors">Book a Table</a>
-        <a @click="open = false" href="/order" class="btn-royal text-xl px-12 py-5">Order Online</a>
+        <a @click="open = false" href="/order" class="btn-brand text-xl px-12 py-5 relative">
+            Order Online
+            <span x-show="cartCount > 0"
+                  x-text="cartCount"
+                  class="absolute -top-2 -right-3 bg-brand-red text-white text-xs font-bold min-w-6 h-6 px-1 rounded-full flex items-center justify-center shadow-md"
+                  style="display: none;"></span>
+        </a>
     </div>
 </nav>

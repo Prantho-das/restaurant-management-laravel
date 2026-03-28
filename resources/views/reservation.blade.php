@@ -37,40 +37,7 @@
                     <div class="bg-white p-12 lg:p-20 rounded-2xl shadow-premium relative border border-brand-gold/10 overflow-hidden">
                         <div class="absolute top-0 right-0 w-32 h-32 bg-brand-gold/5 blur-3xl rounded-full"></div>
                         
-                        <form class="grid grid-cols-2 gap-10 relative z-10">
-                            <div class="col-span-2 md:col-span-1 flex flex-col gap-4">
-                                <label class="text-[10px] uppercase font-bold tracking-[0.3em] text-brand-gold">Your Name</label>
-                                <input type="text" placeholder="SHAHID KHAN" class="border-b-2 border-brand-gold/20 py-4 text-sm font-bold placeholder:text-brand-emerald/20 focus:outline-none focus:border-brand-emerald transition-colors text-brand-emerald">
-                            </div>
-                            <div class="col-span-2 md:col-span-1 flex flex-col gap-4">
-                                <label class="text-[10px] uppercase font-bold tracking-[0.3em] text-brand-gold">Contact Number</label>
-                                <input type="tel" placeholder="+880 17... " class="border-b-2 border-brand-gold/20 py-4 text-sm font-bold placeholder:text-brand-emerald/20 focus:outline-none focus:border-brand-emerald transition-colors text-brand-emerald">
-                            </div>
-
-                            <div class="col-span-2 md:col-span-1 flex flex-col gap-4">
-                                <label class="text-[10px] uppercase font-bold tracking-[0.3em] text-brand-gold">Preferred Date</label>
-                                <input type="date" class="border-b-2 border-brand-gold/20 py-4 text-sm font-bold placeholder:text-brand-emerald/20 focus:outline-none focus:border-brand-emerald transition-colors text-brand-emerald">
-                            </div>
-                            <div class="col-span-2 md:col-span-1 flex flex-col gap-4">
-                                <label class="text-[10px] uppercase font-bold tracking-[0.3em] text-brand-gold">Guest List Count</label>
-                                <select class="border-b-2 border-brand-gold/20 py-4 text-sm font-bold bg-transparent focus:outline-none focus:border-brand-emerald transition-colors text-brand-emerald">
-                                    <option>02 PERS</option>
-                                    <option>04 PERS</option>
-                                    <option>06 PERS</option>
-                                    <option>ROYAL TABLE (10+)</option>
-                                </select>
-                            </div>
-
-                            <div class="col-span-2 flex flex-col gap-4">
-                                <label class="text-[10px] uppercase font-bold tracking-[0.3em] text-brand-gold">Special Arrangement Notes</label>
-                                <textarea placeholder="ANY ALLERGIES OR CELEBRATION DETAILS..." rows="2" class="border-b-2 border-brand-gold/20 py-4 text-sm font-bold placeholder:text-brand-emerald/20 focus:outline-none focus:border-brand-emerald transition-colors text-brand-emerald bg-transparent"></textarea>
-                            </div>
-
-                            <div class="col-span-2 pt-10">
-                                <button type="button" class="btn-royal w-full py-6 text-xs tracking-[0.5em] uppercase shadow-xl hover:shadow-brand-emerald/20">Secure the Table</button>
-                                <p class="text-center text-[9px] uppercase font-bold tracking-[0.2em] text-brand-emerald/30 mt-8">Subject to availability. Our concierge will confirm via call.</p>
-                            </div>
-                        </form>
+                        <livewire:frontend.reservation-form />
                     </div>
                 </div>
             </div>

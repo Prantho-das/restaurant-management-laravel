@@ -1,27 +1,45 @@
 @import "tailwindcss";
 
 @theme {
-    --color-brand-emerald: #004d3d;
-    --color-brand-emerald-light: #006652;
-    --color-brand-gold: #af8b3b;
-    --color-brand-gold-pale: #d4c39e;
+    --color-brand-primary: #808000; /* Olive */
+    --color-brand-primary-light: #a4a400;
+    --color-brand-primary-dark: #5c5c00;
+    --color-brand-accent: #c5a059;
     --color-brand-red: #d32f2f;
-    --color-parchment: #fdfcf0;
-    --color-bg-base: #ffffff;
+    --color-bg-light: #f9fafb;
+    --color-bg-white: #ffffff;
+    --color-border-subtle: rgba(0, 0, 0, 0.05);
+
+    /* Status Colors */
+    --color-primary-50: #f5f5f0; /* Very light olive tint */
+    --color-primary-400: #a4a400;
+    --color-primary-600: #808000;
+    --color-success-50: #f0fdf4;
+    --color-success-400: #4ade80;
+    --color-success-600: #16a34a;
+    --color-warning-50: #fffbeb;
+    --color-warning-400: #fbbf24;
+    --color-warning-600: #d97706;
+    --color-danger-50: #fef2f2;
+    --color-danger-400: #f87171;
+    --color-danger-600: #dc2626;
+    --color-info-50: #f0f9ff;
+    --color-info-400: #38bdf8;
+    --color-info-600: #0284c7;
 
     --font-serif: "Playfair Display", serif;
-    --font-sans: "Outfit", sans-serif;
+    --font-sans: "Inter", "Outfit", sans-serif;
     --font-bengali: "Hind Siliguri", sans-serif;
 
-    --radius-xl: 1.5rem;
-    --radius-2xl: 2rem;
+    --radius-xl: 1rem;
+    --radius-2xl: 1.5rem;
 
-    --shadow-premium: 0 10px 40px -10px rgba(0, 77, 61, 0.12);
+    --shadow-premium: 0 10px 40px -10px rgba(0, 0, 0, 0.08);
 }
 
 @layer base {
     body {
-        @apply bg-parchment text-brand-emerald font-sans antialiased;
+        @apply bg-bg-light text-slate-800 font-sans antialiased;
     }
 
     h1,
@@ -30,7 +48,7 @@
     h4,
     h5,
     h6 {
-        @apply font-serif italic text-brand-emerald;
+        @apply font-sans font-bold text-slate-900;
     }
 }
 
@@ -40,15 +58,15 @@
     }
 
     .glass-light {
-        @apply bg-white/90 backdrop-blur-md border border-brand-gold/10;
+        @apply bg-white/90 backdrop-blur-md border border-brand-primary/10;
     }
 
-    .btn-royal {
-        @apply bg-brand-emerald text-parchment px-8 py-3 rounded-full font-bold transition-all duration-300 hover:bg-brand-emerald-light hover:shadow-premium hover:-translate-y-1;
+    .btn-brand {
+        @apply bg-brand-primary text-white px-8 py-3 rounded-full font-bold transition-all duration-300 hover:bg-brand-primary-light hover:shadow-premium hover:-translate-y-1;
     }
 
-    .btn-royal-outline {
-        @apply border-2 border-brand-emerald text-brand-emerald px-8 py-3 rounded-full font-bold transition-all duration-300 hover:bg-brand-emerald hover:text-parchment;
+    .btn-brand-outline {
+        @apply border-2 border-brand-primary text-brand-primary px-8 py-3 rounded-full font-bold transition-all duration-300 hover:bg-brand-primary hover:text-white;
     }
 
     .section-padding {
@@ -82,12 +100,15 @@
     animation-delay: 300ms;
 }
 
-/* Subtle Background Pattern */
+/* Subtle Background Pattern (Olive tinted) */
 .bg-subtle-pattern {
-    background-image: radial-gradient(#af8b3b 1px, transparent 1px);
+    background-image: radial-gradient(
+        var(--color-brand-primary) 1px,
+        transparent 1px
+    );
     background-size: 40px 40px;
-    background-color: #fdfcf0;
-    opacity: 0.1;
+    background-color: var(--color-bg-light);
+    opacity: 0.05;
 }
 
 /* Image Polish */

@@ -17,15 +17,15 @@
                     {{ $cms->hero_description ?? 'Experience the timeless flavors of Bangladesh.' }}
                 </p>
                 <div class="flex flex-wrap gap-6">
-                    <a href="#menu" class="btn-royal">Explore Menu</a>
-                    <a href="#reservation" class="btn-royal-outline">Book a Table</a>
+                    <a href="#menu" class="btn-brand">Explore Menu</a>
+                    <a href="#reservation" class="btn-brand-outline">Book a Table</a>
                 </div>
             </div>
 
             <!-- Image Composition -->
             <div class="lg:col-span-6 relative animate-fade-in-up delay-200">
                 <div class="relative z-10 rounded-2xl overflow-hidden shadow-premium transform rotate-2 hover:rotate-0 transition-transform duration-700 aspect-square lg:aspect-[4/5]">
-                    <img src="/images/placeholders/{{ $cms->hero_image ?? 'restaurant_interior_1774629009066.png' }}" alt="Royal Dine Interior" class="w-full h-full object-cover">
+                    <img src="{{ !empty($cms->hero_image) ? Storage::url($cms->hero_image) : '/images/placeholders/restaurant_interior_1774629009066.png' }}" alt="Royal Dine Interior" class="w-full h-full object-cover">
                 </div>
                 <!-- Decorative Elements -->
                 <div class="absolute -top-10 -right-10 w-40 h-40 border-2 border-brand-gold/20 rounded-full pointer-events-none"></div>
@@ -42,11 +42,11 @@
             <div class="order-2 lg:order-1 animate-fade-in-up">
                 <div class="grid grid-cols-2 gap-6">
                     <div class="pt-12">
-                         <img src="/images/placeholders/{{ $cms->heritage_image_1 ?? 'kacchi_biryani_1774629083139.png' }}" class="rounded-2xl shadow-premium aspect-square object-cover mb-6 border border-white/10">
-                         <img src="/images/placeholders/{{ $cms->heritage_image_2 ?? 'bhuna_khichuri_beef_1774629196663.png' }}" class="rounded-2xl shadow-premium aspect-square object-cover border border-white/10">
+                         <img src="{{ !empty($cms->heritage_image_1) ? Storage::url($cms->heritage_image_1) : '/images/placeholders/kacchi_biryani_1774629083139.png' }}" class="rounded-2xl shadow-premium aspect-square object-cover mb-6 border border-white/10">
+                         <img src="{{ !empty($cms->heritage_image_2) ? Storage::url($cms->heritage_image_2) : '/images/placeholders/bhuna_khichuri_beef_1774629196663.png' }}" class="rounded-2xl shadow-premium aspect-square object-cover border border-white/10">
                     </div>
                     <div>
-                         <img src="/images/placeholders/{{ $cms->heritage_image_3 ?? 'gallery_fuchka_1774630415473.png' }}" class="rounded-2xl shadow-premium aspect-[3/4] object-cover mb-6 border border-white/10">
+                         <img src="{{ !empty($cms->heritage_image_3) ? Storage::url($cms->heritage_image_3) : '/images/placeholders/gallery_fuchka_1774630415473.png' }}" class="rounded-2xl shadow-premium aspect-[3/4] object-cover mb-6 border border-white/10">
                     </div>
                 </div>
             </div>
@@ -81,20 +81,7 @@
                 <p class="text-brand-emerald/60">A curated journey through the finest delicacies of Bengal.</p>
             </div>
 
-            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-12">
-                @foreach($signatureMenuItems as $item)
-                    <!-- Item -->
-                    <div class="group animate-fade-in-up bg-parchment/50 p-6 rounded-3xl border border-brand-gold/5 hover:border-brand-gold/20 transition-all shadow-sm" wire:key="sig-{{ $item->id }}">
-                        <div class="relative mb-8 overflow-hidden rounded-2xl aspect-[4/5] shadow-premium">
-                            <img src="/images/placeholders/{{ $item->image ?? 'kacchi_biryani_1774629083139.png' }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
-                            <div class="absolute top-4 right-4 bg-white/90 backdrop-blur-md px-4 py-2 rounded-full text-[10px] font-black tracking-widest text-brand-emerald">৳ {{ number_format($item->base_price, 0) }}</div>
-                        </div>
-                        <h3 class="text-2xl mb-2 text-brand-emerald">{{ $item->name }}</h3>
-                        <p class="text-brand-emerald/60 text-xs mb-8 leading-relaxed">{{ $item->description }}</p>
-                        <a href="/order" class="btn-royal w-full text-center text-[10px] uppercase tracking-widest py-3">Order Now</a>
-                    </div>
-                @endforeach
-            </div>
+            <livewire:frontend.featured-menu />
 
             <div class="mt-20 text-center animate-fade-in-up">
                 <a href="/menu" class="btn-royal px-12 py-5 text-sm font-black tracking-[0.3em] uppercase inline-flex items-center gap-4">
@@ -148,33 +135,7 @@
 
                 <div class="lg:col-span-7 animate-fade-in-up delay-200">
                     <div class="bg-parchment p-10 lg:p-16 rounded-3xl shadow-2xl relative border border-brand-gold/10">
-                        <form class="grid grid-cols-2 gap-8">
-                            <div class="col-span-2 md:col-span-1 flex flex-col gap-4">
-                                <label class="text-[10px] uppercase font-bold tracking-[0.3em] text-brand-gold">Your Name</label>
-                                <input type="text" placeholder="SHAHID KHAN" class="border-b border-brand-gold/20 py-4 px-1 text-sm font-bold bg-transparent focus:outline-none focus:border-brand-emerald transition-colors text-brand-emerald">
-                            </div>
-                            <div class="col-span-2 md:col-span-1 flex flex-col gap-4">
-                                <label class="text-[10px] uppercase font-bold tracking-[0.3em] text-brand-gold">Date</label>
-                                <input type="date" class="border-b border-brand-gold/20 py-4 px-1 text-sm font-bold bg-transparent focus:outline-none focus:border-brand-emerald transition-colors text-brand-emerald">
-                            </div>
-                            <div class="col-span-2 md:col-span-1 flex flex-col gap-4">
-                                <label class="text-[10px] uppercase font-bold tracking-[0.3em] text-brand-gold">Guests</label>
-                                <select class="border-b border-brand-gold/20 py-4 px-1 text-sm font-bold bg-transparent focus:outline-none focus:border-brand-emerald transition-colors text-brand-emerald">
-                                    <option>02 PEOPLE</option>
-                                    <option>04 PEOPLE</option>
-                                    <option>LARGE TABLE (10+)</option>
-                                </select>
-                            </div>
-                            <div class="col-span-2 md:col-span-1 flex flex-col gap-4">
-                                <label class="text-[10px] uppercase font-bold tracking-[0.3em] text-brand-gold">Arrangement</label>
-                                <select class="border-b border-brand-gold/20 py-4 px-1 text-sm font-bold bg-transparent focus:outline-none focus:border-brand-emerald transition-colors text-brand-emerald">
-                                    <option>CASUAL DINING</option>
-                                    <option>VIP SECTION</option>
-                                    <option>OUTDOOR TERRACE</option>
-                                </select>
-                            </div>
-                            <button class="col-span-2 btn-royal py-5 text-xs font-black tracking-widest mt-8">Secure the Table</button>
-                        </form>
+                        <livewire:frontend.reservation-form />
                     </div>
                 </div>
             </div>

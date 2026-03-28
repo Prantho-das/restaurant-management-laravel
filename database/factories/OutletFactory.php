@@ -18,7 +18,10 @@ class OutletFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'name' => $this->faker->company().' Outlet',
+            'address' => $this->faker->address(),
+            'phone' => $this->faker->phoneNumber(),
+            'is_active' => true,
         ];
     }
 }
