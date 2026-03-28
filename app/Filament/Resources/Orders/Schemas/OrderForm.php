@@ -101,7 +101,7 @@ class OrderForm
                             ->itemLabel(fn (array $state): ?string => MenuItem::find($state['menu_item_id'] ?? null)?->name ?? null)
                             ->defaultItems(0)
                             ->addActionLabel('Add Item'),
-                    ]),
+                    ])->columnSpanFull(),
                 Section::make('Pricing')
                     ->schema([
                         TextInput::make('subtotal_amount')

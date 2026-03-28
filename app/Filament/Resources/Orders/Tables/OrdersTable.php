@@ -6,6 +6,7 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
+use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -55,6 +56,11 @@ class OrdersTable
                     ->searchable()
                     ->default('Walk-in')
                     ->color('gray'),
+                TextColumn::make('customer_phone')
+                    ->label('Phone')
+                    ->searchable()
+                    ->placeholder('N/A')
+                    ->toggleable(),
                 TextColumn::make('payment_method')
                     ->label('Payment')
                     ->badge()
@@ -134,6 +140,11 @@ class OrdersTable
                     ]),
             ])
             ->recordActions([
+                Action::make('printReceipt')
+                    ->label('Receipt')
+                    ->icon('heroicon-o-printer')
+                    ->color('success')
+                    ->action(fn ($record, $livewire) => $livewire->dispatch('print-order-receipt', receipt: $record->toReceiptArray())),
                 ViewAction::make(),
                 EditAction::make(),
             ])

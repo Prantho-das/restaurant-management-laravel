@@ -20,6 +20,7 @@ use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\HtmlString;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 class AdminPanelProvider extends PanelProvider
@@ -38,6 +39,7 @@ class AdminPanelProvider extends PanelProvider
             ->globalSearch(false)
             ->maxContentWidth(Width::Full)
             ->sidebarWidth('16rem')
+            ->sidebarCollapsibleOnDesktop()
             ->colors([
                 'primary' => Color::Olive,
             ])
@@ -66,6 +68,9 @@ class AdminPanelProvider extends PanelProvider
             ->renderHook(
                 PanelsRenderHook::HEAD_END,
                 fn (): string => '<style>
+                    .fi-header-heading {
+                        display: none !important;
+                    }
                     .fi-sidebar,
                     .fi-sidebar-nav,
                     .fi-sidebar-content,
@@ -82,6 +87,11 @@ class AdminPanelProvider extends PanelProvider
                         height: 0 !important;
                     }
                 </style>',
+            )
+            ->renderHook(
+                PanelsRenderHook::BODY_END,
+                fn (): string => new HtmlString(view('filament.hooks.order-receipt-script')->render()),
             );
+
     }
 }

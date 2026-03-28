@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\ReportController;
+use App\Livewire\TableMenu;
 use App\Models\Setting;
 use App\Services\MetaService;
 use Illuminate\Support\Facades\Route;
@@ -17,13 +19,15 @@ Route::get('/', function () {
 
     return view('welcome', compact('cms'));
 })->name('home');
+
 Route::view('/menu', 'menu')->name('menu');
 Route::view('/reservation', 'reservation')->name('reservation');
 Route::view('/order', 'order')->name('order');
 
-// Note: POS and KDS are now handled in Filament backpanel
-use App\Http\Controllers\ReportController;
+// QR Menu route points to Livewire component
+Route::get('/table/{table:slug}', TableMenu::class)->name('table.menu');
 
+// Note: Reports and other admin features
 Route::middleware(['auth'])->prefix('admin/reports')->group(function () {
     Route::get('/sales-summary', [ReportController::class, 'salesSummary'])->name('reports.sales-summary');
     Route::get('/product-performance', [ReportController::class, 'productPerformance'])->name('reports.product-performance');

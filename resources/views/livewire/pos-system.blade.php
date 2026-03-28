@@ -160,7 +160,7 @@ class="flex h-full bg-[#F9FAFB] overflow-hidden font-sans relative text-[11px]"
         </div>
 
         <!-- Scrollable Item List -->
-        <div class="flex-1 overflow-y-auto px-4 py-3 custom-scrollbar space-y-2">
+        <div class="flex-1 overflow-y-auto px-4 py-3 space-y-2 min-h-[16vh]">
             @forelse($cart as $index => $item)
                 <div class="flex items-center gap-3 group animate-fadeIn bg-slate-50 rounded-xl px-3 py-2.5 border border-slate-100">
                     <div class="flex-1 min-w-0">
@@ -188,23 +188,31 @@ class="flex h-full bg-[#F9FAFB] overflow-hidden font-sans relative text-[11px]"
         <!-- Checkout Section -->
         <div class="px-4 py-4 bg-slate-50 border-t border-slate-100 rounded-t-[2rem] shadow-[0_-10px_30px_rgba(0,0,0,0.03)] selection:bg-brand-primary selection:text-white">
             <!-- Contextual Fields -->
-            <div class="grid grid-cols-2 gap-2.5 mb-4">
+            <div class="grid grid-cols-2 gap-2.5 mb-2">
                 <div class="col-span-1 space-y-1">
-                    <label class="text-[7px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">Customer</label>
+                    <label class="text-[7px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">Customer Name</label>
                     <input wire:model="customerName" type="text" placeholder="Walking Customer" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-[10px] focus:ring-2 focus:ring-brand-primary/20 outline-none transition-all placeholder:text-slate-300 font-bold">
                 </div>
                 <div class="col-span-1 space-y-1">
-                    <label class="text-[7px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">Type</label>
+                    <label class="text-[7px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">Customer Phone</label>
+                    <input wire:model="customerPhone" type="text" placeholder="017xxxxxxxx" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-[10px] focus:ring-2 focus:ring-brand-primary/20 outline-none transition-all placeholder:text-slate-300 font-bold">
+                </div>
+                <div class="col-span-1 space-y-1">
+                    <label class="text-[7px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">Order Type</label>
                     <select wire:model="orderType" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-[10px] focus:ring-2 focus:ring-brand-primary/20 outline-none transition-all font-bold appearance-none cursor-pointer">
                         <option value="dine_in">WALK-IN</option>
                         <option value="takeaway">TAKEAWAY</option>
                         <option value="delivery">DELIVERY</option>
                     </select>
                 </div>
+                <div class="col-span-1 space-y-1">
+                    <label class="text-[7px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">Table / Guest</label>
+                    <input wire:model="tableNumber" type="text" placeholder="Table No" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-[10px] focus:ring-2 focus:ring-brand-primary/20 outline-none transition-all placeholder:text-slate-300 font-bold">
+                </div>
             </div>
 
             <!-- Manual Order Discount -->
-            <div class="space-y-2 mb-4">
+            <div class="space-y-2 mb-2">
                 <div class="flex items-center justify-between px-1">
                     <span class="text-[8px] font-black text-slate-600 uppercase tracking-widest flex items-center gap-1.5">
                         <svg class="w-3 h-3 text-brand-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" /></svg>
@@ -237,15 +245,15 @@ class="flex h-full bg-[#F9FAFB] overflow-hidden font-sans relative text-[11px]"
 
                 <div class="grid grid-cols-3 gap-2">
                     <button @click="$wire.paymentMethod = 'cash'" :class="$wire.paymentMethod == 'cash' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-500/20' : 'bg-white text-slate-400 border border-slate-200'" class="py-2.5 rounded-xl flex flex-col items-center gap-1 transition-all">
-                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                        <svg class="w-2 h-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
                         <span class="text-[6px] font-black uppercase tracking-widest">Cash</span>
                     </button>
                     <button @click="$wire.paymentMethod = 'mobile_pay'" :class="$wire.paymentMethod == 'mobile_pay' ? 'bg-sky-500 text-white shadow-lg shadow-sky-500/20' : 'bg-white text-slate-400 border border-slate-200'" class="py-2.5 rounded-xl flex flex-col items-center gap-1 transition-all">
-                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
                         <span class="text-[6px] font-black uppercase tracking-widest">bKash</span>
                     </button>
                     <button @click="$wire.paymentMethod = 'card'" :class="$wire.paymentMethod == 'card' ? 'bg-cyan-500 text-white shadow-lg shadow-cyan-500/20' : 'bg-white text-slate-400 border border-slate-200'" class="py-2.5 rounded-xl flex flex-col items-center gap-1 transition-all">
-                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
+                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
                         <span class="text-[6px] font-black uppercase tracking-widest">Card</span>
                     </button>
                 </div>
@@ -313,6 +321,7 @@ class="flex h-full bg-[#F9FAFB] overflow-hidden font-sans relative text-[11px]"
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
+    <x-notifications />
 </div>
 
 @script
@@ -326,88 +335,5 @@ class="flex h-full bg-[#F9FAFB] overflow-hidden font-sans relative text-[11px]"
             window.printPosReceipt(receipt);
         }
     });
-
-    window.printPosReceipt = function (r) {
-        if (!r) return;
-
-        const payLabel = { cash: 'Cash', card: 'Card', mobile_pay: 'bKash/MFS' }[r.payment_method] || r.payment_method;
-        const typeLabel = { dine_in: 'Dine-In', takeaway: 'Takeaway', delivery: 'Delivery' }[r.order_type] || r.order_type;
-
-        const itemsHtml = r.items.map(i =>
-            '<tr>' +
-            '<td style="padding:2px 0;word-break:break-word">' + i.name + '</td>' +
-            '<td style="text-align:center;padding:2px 4px">' + i.qty + '</td>' +
-            '<td style="text-align:right;padding:2px 0">' + Number(i.price).toFixed(0) + '</td>' +
-            '<td style="text-align:right;padding:2px 0">' + Number(i.subtotal).toFixed(0) + '</td>' +
-            '</tr>'
-        ).join('');
-
-        const discountRow = r.discount > 0
-            ? '<tr><td colspan="3" style="text-align:right;padding:2px 0">Discount' +
-              (r.discount_type === 'percentage' ? ' (' + r.discount_value + '%)' : '') +
-              '</td><td style="text-align:right;padding:2px 0">-' + Number(r.discount).toFixed(0) + '</td></tr>'
-            : '';
-
-        const tableRow = (r.order_type === 'dine_in' && r.table_number)
-            ? '<div>Table: <b>' + r.table_number + '</b></div>' : '';
-        const refRow = r.reference_no ? '<div>Ref: ' + r.reference_no + '</div>' : '';
-        const addressRow = r.restaurant_address ? '<div>' + r.restaurant_address + '</div>' : '';
-        const phoneRow = r.restaurant_phone ? '<div>' + r.restaurant_phone + '</div>' : '';
-
-        const html =
-            '<!DOCTYPE html><html><head><meta charset="UTF-8">' +
-            '<title>Receipt - ' + r.order_number + '</title>' +
-            '<style>' +
-            '* { margin:0;padding:0;box-sizing:border-box; }' +
-            'body { font-family:"Courier New",Courier,monospace;font-size:11px;width:80mm;margin:0 auto;color:#000; }' +
-            '.center { text-align:center; } .bold { font-weight:bold; } .big { font-size:15px; }' +
-            '.divider { border-top:1px dashed #000;margin:5px 0; }' +
-            'table { width:100%;border-collapse:collapse; }' +
-            'th { font-size:10px;border-bottom:1px dashed #000;padding-bottom:3px; }' +
-            '.total-row td { border-top:1px dashed #000;padding-top:4px;font-weight:bold;font-size:13px; }' +
-            '.footer { margin-top:8px;text-align:center;font-size:10px; }' +
-            '@media print { @page { size: 80mm auto; margin: 4mm; } body { width:78mm; } }' +
-            '</style></head><body>' +
-            '<div class="center"><div class="bold big">' + r.restaurant_name + '</div>' + addressRow + phoneRow + '</div>' +
-            '<div class="divider"></div>' +
-            '<div class="center bold" style="font-size:13px">** RECEIPT **</div>' +
-            '<div class="divider"></div>' +
-            '<div>Order: <b>' + r.order_number + '</b></div>' +
-            '<div>Date: ' + r.datetime + '</div>' +
-            '<div>Cashier: ' + r.cashier + '</div>' +
-            '<div>Type: <b>' + typeLabel + '</b></div>' +
-            tableRow +
-            '<div>Customer: ' + r.customer_name + '</div>' +
-            '<div>Payment: <b>' + payLabel + '</b></div>' +
-            refRow +
-            '<div class="divider"></div>' +
-            '<table><thead><tr>' +
-            '<th style="text-align:left">Item</th>' +
-            '<th style="text-align:center">Qty</th>' +
-            '<th style="text-align:right">Price</th>' +
-            '<th style="text-align:right">Total</th>' +
-            '</tr></thead><tbody>' + itemsHtml + '</tbody>' +
-            '<tfoot>' +
-            '<tr><td colspan="3" style="text-align:right;padding-top:4px">Subtotal</td>' +
-            '<td style="text-align:right;padding-top:4px">' + Number(r.subtotal).toFixed(0) + '</td></tr>' +
-            discountRow +
-            '<tr class="total-row"><td colspan="3" style="text-align:right">TOTAL</td>' +
-            '<td style="text-align:right">৳' + Number(r.total).toFixed(0) + '</td></tr>' +
-            '</tfoot></table>' +
-            '<div class="divider"></div>' +
-            '<div class="footer"><div>Thank you for dining with us!</div>' +
-            '<div style="margin-top:4px;font-size:9px">Powered by ' + r.restaurant_name + ' POS</div>' +
-            '</div></body></html>';
-
-        const win = window.open('', '_blank', 'width=340,height=600,toolbar=0,scrollbars=1,status=0');
-        if (!win) {
-            alert('Pop-up blocked. Please allow pop-ups for this site to print receipts.');
-            return;
-        }
-        win.document.write(html);
-        win.document.close();
-        win.focus();
-        setTimeout(() => { win.print(); }, 400);
-    };
 </script>
 @endscript

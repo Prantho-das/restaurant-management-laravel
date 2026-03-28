@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\Category;
+use App\Models\Customer;
 use App\Models\MenuItem;
 use App\Models\Order;
 use App\Models\OrderItem;
@@ -27,6 +28,8 @@ class PosSystem extends Component
     public $tableNumber = '';
 
     public $customerName = '';
+
+    public $customerPhone = '';
 
     public $guestCount = 1;
 
@@ -98,7 +101,7 @@ class PosSystem extends Component
         $currentQty = ($cartItemKey !== false) ? $this->cart[$cartItemKey]['quantity'] : 0;
 
         if ($currentQty + 1 > $availableStock) {
-            $this->dispatch('notify', ['type' => 'error', 'message' => "Insufficient stock for {$item->name}"]);
+            $this->dispatch('notify', type: 'error', message: "Insufficient stock for {$item->name}");
 
             return;
         }
@@ -114,7 +117,7 @@ class PosSystem extends Component
             ];
         }
 
-        $this->dispatch('notify', ['type' => 'success', 'message' => "{$item->name} added to order!"]);
+        $this->dispatch('notify', type: 'success', message: "{$item->name} added to order!");
     }
 
     public function removeFromCart($index)
@@ -139,7 +142,7 @@ class PosSystem extends Component
         $newQty = $this->cart[$index]['quantity'] + $delta;
 
         if ($newQty > $availableStock) {
-            $this->dispatch('notify', ['type' => 'warning', 'message' => "Stock limit reached for {$this->cart[$index]['name']}"]);
+            $this->dispatch('notify', type: 'warning', message: "Stock limit reached for {$this->cart[$index]['name']}");
 
             return;
         }
@@ -185,6 +188,13 @@ class PosSystem extends Component
         DB::transaction(function () use (&$receiptData) {
             $orderNumber = 'ORD-'.strtoupper(uniqid());
 
+            if ($this->customerPhone) {
+                Customer::updateOrCreate(
+                    ['phone' => $this->customerPhone],
+                    ['name' => $this->customerName ?: 'Walking Customer']
+                );
+            }
+
             $order = Order::create([
                 'order_number' => $orderNumber,
                 'status' => 'pending',
@@ -196,6 +206,7 @@ class PosSystem extends Component
                 'payment_method' => $this->paymentMethod,
                 'table_number' => $this->orderType === 'dine_in' ? $this->tableNumber : null,
                 'customer_name' => $this->customerName,
+                'customer_phone' => $this->customerPhone,
                 'guest_count' => $this->guestCount,
                 'notes' => $this->notes,
                 'reference_no' => $this->paymentMethod !== 'cash' ? $this->referenceNo : null,
@@ -211,42 +222,25 @@ class PosSystem extends Component
                 ]);
             }
 
-            $receiptData = [
-                'order_number' => $orderNumber,
-                'datetime' => now()->format('d M Y, h:i A'),
-                'customer_name' => $this->customerName ?: 'Walking Customer',
-                'order_type' => $this->orderType,
-                'payment_method' => $this->paymentMethod,
-                'table_number' => $this->tableNumber,
-                'reference_no' => $this->referenceNo,
-                'cashier' => auth()->user()?->name ?? 'Staff',
-                'items' => collect($this->cart)->map(fn ($i) => [
-                    'name' => $i['name'],
-                    'qty' => $i['quantity'],
-                    'price' => $i['price'],
-                    'subtotal' => $i['price'] * $i['quantity'],
-                ])->values()->toArray(),
-                'subtotal' => $this->subtotal,
-                'discount' => $this->discountAmount,
-                'discount_type' => $this->discountType,
-                'discount_value' => $this->discountValue,
-                'total' => $this->total,
-                'restaurant_name' => Setting::getValue('site_name', Setting::getValue('site_title', config('app.name'))),
-                'restaurant_address' => Setting::getValue('footer_address', ''),
-                'restaurant_phone' => Setting::getValue('footer_phone', ''),
-                'auto_print' => (bool) Setting::getValue('pos_auto_print_receipt', false),
-            ];
+            $receiptData = $order->load(['items.menuItem', 'user'])->toReceiptArray();
+            $receiptData['auto_print'] = (bool) Setting::getValue('pos_auto_print_receipt', false);
         });
 
         $this->cart = [];
         $this->tableNumber = '';
         $this->customerName = '';
+        $this->customerPhone = '';
         $this->notes = '';
         $this->referenceNo = '';
         $this->discountValue = 0;
 
+        // Reset computed property caches
+        unset($this->subtotal);
+        unset($this->discountAmount);
+        unset($this->total);
+
         $this->dispatch('order-placed');
-        $this->dispatch('notify', ['type' => 'success', 'message' => 'Order processed successfully!']);
+        $this->dispatch('notify', type: 'success', message: 'Order processed successfully!');
 
         if ($receiptData) {
             $this->dispatch('print-receipt', receipt: $receiptData);
