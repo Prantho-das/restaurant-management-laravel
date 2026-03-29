@@ -25,10 +25,10 @@ class MenuItemsTable
                 TextColumn::make('slug')
                     ->searchable(),
                 TextColumn::make('base_price')
-                    ->money()
+                    ->money('BDT')
                     ->sortable(),
                 TextColumn::make('discount_price')
-                    ->money()
+                    ->money('BDT')
                     ->sortable(),
                 TextColumn::make('tax_rate')
                     ->numeric()
