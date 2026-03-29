@@ -34,6 +34,11 @@ class ManageSettings extends Page implements HasForms
     /** Setting keys that are stored as boolean flags. */
     protected array $booleanSettings = [
         'pos_auto_print_receipt',
+        // Payment gateway toggles
+        'payment_bkash_enabled',
+        'payment_bkash_sandbox',
+        'payment_sslcommerze_enabled',
+        'payment_sslcommerze_sandbox',
     ];
 
     public function mount(): void
@@ -129,6 +134,78 @@ class ManageSettings extends Page implements HasForms
                             ->onColor('success')
                             ->offColor('danger'),
                     ]),
+
+                Section::make('Payment Gateways')
+                    ->icon('heroicon-o-credit-card')
+                    ->description('Configure online payment methods for the POS.')
+                    ->schema([
+                        // bKash Section
+                        Toggle::make('payment_bkash_enabled')
+                            ->label('Enable bKash')
+                            ->helperText('Allow customers to pay with bKash')
+                            ->onColor('success')
+                            ->offColor('danger')
+                            ->columnSpanFull(),
+
+                        Toggle::make('payment_bkash_sandbox')
+                            ->label('bKash Sandbox Mode')
+                            ->helperText('Use bKash sandbox for testing. Disable for production.')
+                            ->onColor('warning')
+                            ->offColor('gray')
+                            ->visible(fn ($get) => $get('payment_bkash_enabled')),
+
+                        TextInput::make('payment_bkash_store_username')
+                            ->label('Store Username')
+                            ->placeholder('Enter bKash store username')
+                            ->helperText('From bKash developer portal')
+                            ->password()
+                            ->revealable()
+                            ->visible(fn ($get) => $get('payment_bkash_enabled')),
+
+                        TextInput::make('payment_bkash_store_password')
+                            ->label('Store Password')
+                            ->placeholder('Enter bKash store password')
+                            ->password()
+                            ->revealable()
+                            ->visible(fn ($get) => $get('payment_bkash_enabled')),
+
+                        TextInput::make('payment_bkash_app_key')
+                            ->label('App Key')
+                            ->placeholder('Enter bKash app key')
+                            ->helperText('From bKash developer portal')
+                            ->password()
+                            ->revealable()
+                            ->visible(fn ($get) => $get('payment_bkash_enabled')),
+
+                        // SSLCommerze Section
+                        Toggle::make('payment_sslcommerze_enabled')
+                            ->label('Enable SSLCommerze')
+                            ->helperText('Allow customers to pay via SSLCommerze')
+                            ->onColor('success')
+                            ->offColor('danger')
+                            ->columnSpanFull(),
+
+                        Toggle::make('payment_sslcommerze_sandbox')
+                            ->label('SSLCommerze Sandbox Mode')
+                            ->helperText('Use SSLCommerze sandbox for testing. Disable for production.')
+                            ->onColor('warning')
+                            ->offColor('gray')
+                            ->visible(fn ($get) => $get('payment_sslcommerze_enabled')),
+
+                        TextInput::make('payment_sslcommerze_store_id')
+                            ->label('Store ID')
+                            ->placeholder('Enter SSLCommerze store ID')
+                            ->helperText('From SSLCommerze dashboard')
+                            ->visible(fn ($get) => $get('payment_sslcommerze_enabled')),
+
+                        TextInput::make('payment_sslcommerze_store_password')
+                            ->label('Store Password')
+                            ->placeholder('Enter SSLCommerze store password')
+                            ->password()
+                            ->revealable()
+                            ->visible(fn ($get) => $get('payment_sslcommerze_enabled')),
+
+                    ])->columns(2),
             ])
             ->statePath('data');
     }

@@ -1,44 +1,124 @@
-
-<div x-data="{ 
-    offline: false,
-    syncing: false,
-    db: null,
-    lastReceipt: null,
-    init() {
-        this.db = new Dexie('POS_Offline_DB');
-        this.db.version(2).stores({
-            orders: '++id, cart, total, timestamp, details, synced'
-        });
-    },
-    async saveOfflineOrder(cart, total, details) {
-        await this.db.orders.add({
-            cart: JSON.parse(JSON.stringify(cart)),
-            total: total,
-            details: details,
-            timestamp: new Date().toISOString(),
-            synced: 0
-        });
-    },
-    async syncOrders() {
-        const unsyncedOrders = await this.db.orders.where('synced').equals(0).toArray();
-        if (unsyncedOrders.length === 0) return;
-        this.syncing = true;
-        for (const order of unsyncedOrders) {
-            try {
-                await $wire.processOfflineOrder(order.cart, order.total, order.details);
-                await this.db.orders.update(order.id, { synced: 1 });
-            } catch (e) {
-                console.error('Failed to sync order', e);
+<script>
+    function posSystemData() {
+        return {
+            isOnline: navigator.onLine,
+            syncing: false,
+            db: null,
+            lastReceipt: null,
+            init() {
+                this.db = new Dexie('POS_Offline_DB');
+                this.db.version(2).stores({
+                    orders: '++id, cart, total, timestamp, details, synced'
+                });
+                window.addEventListener('online', () => {
+                    this.isOnline = true;
+                    this.syncOrders();
+                });
+                window.addEventListener('offline', () => {
+                    this.isOnline = false;
+                });
+                if (this.isOnline) {
+                    this.syncOrders();
+                }
+            },
+            async saveOfflineOrder(cart, total, details) {
+                await this.db.orders.add({
+                    cart: JSON.parse(JSON.stringify(cart)),
+                    total: total,
+                    details: details,
+                    timestamp: new Date().toISOString(),
+                    synced: 0
+                });
+                console.log('Order saved locally (offline mode)');
+            },
+            async syncOrders() {
+                const unsyncedOrders = await this.db.orders.where('synced').equals(0).toArray();
+                if (unsyncedOrders.length === 0) return;
+                this.syncing = true;
+                const results = { success: 0, failed: 0 };
+                for (const order of unsyncedOrders) {
+                    try {
+                        const response = await fetch('/api/offline/queue', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                            },
+                            body: JSON.stringify({
+                                order_number: order.details.order_number || 'ORD-OFF-' + Math.random().toString(36).substr(2, 9).toUpperCase(),
+                                subtotal_amount: order.total,
+                                total_amount: order.total,
+                                order_type: order.details.order_type || 'takeaway',
+                                payment_method: order.details.payment_method || 'cash',
+                                table_number: order.details.table_number || null,
+                                customer_name: order.details.customer_name || null,
+                                customer_phone: order.details.customer_phone || null,
+                                guest_count: order.details.guest_count || 1,
+                                notes: (order.details.notes || '') + ' (Synced from offline)',
+                                reference_no: order.details.reference_no || null,
+                                items: order.cart
+                            })
+                        });
+                        const data = await response.json();
+                        if (data.success) {
+                            await this.db.orders.update(order.id, { synced: 1 });
+                            results.success++;
+                            console.log('Order synced successfully:', data.data.order_number);
+                        } else {
+                            results.failed++;
+                            console.error('Failed to sync order:', data.message);
+                        }
+                    } catch (e) {
+                        results.failed++;
+                        console.error('Network error syncing order:', e);
+                    }
+                }
+                this.syncing = false;
+                if (results.success > 0) {
+                    if (typeof $wire !== 'undefined') {
+                        $wire.dispatch('notify', { type: 'success', message: `${results.success} order(s) synced successfully!` });
+                    }
+                }
+                if (results.failed > 0) {
+                    if (typeof $wire !== 'undefined') {
+                        $wire.dispatch('notify', { type: 'error', message: `${results.failed} order(s) failed to sync. Will retry later.` });
+                    }
+                }
+                if (this.isOnline && results.success > 0) {
+                    fetch('/api/offline/sync', {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            console.log('Offline sync queue processed:', data.data);
+                        }
+                    })
+                    .catch(e => console.error('Failed to process sync queue:', e));
+                }
+                if (typeof $wire !== 'undefined' && $wire.checkOfflineStatus) {
+                    $wire.checkOfflineStatus();
+                }
             }
-        }
-        this.syncing = false;
+        };
     }
-}"
-x-on:order-placed.window="syncOrders()"
+</script>
+
+<div x-data="posSystemData()"
+x-on:order-placed.window="if (!isOnline) { await saveOfflineOrder($wire.cart, $wire.total, { order_number: $event.detail?.order_number, order_type: $wire.orderType, payment_method: $wire.paymentMethod, table_number: $wire.tableNumber, customer_name: $wire.customerName, customer_phone: $wire.customerPhone, guest_count: $wire.guestCount, notes: $wire.notes, reference_no: $wire.referenceNo }); } else { syncOrders(); }"
 x-on:pos-receipt-ready.window="lastReceipt = $event.detail"
 class="flex h-full bg-[#F9FAFB] overflow-hidden font-sans relative text-[11px]"
 :class="{ 'overflow-hidden': $wire.showCart }">
-    
+
+    <!-- Offline Sync Status Indicator -->
+    <div class="fixed top-4 right-4 z-50">
+        @livewire('offline-sync-status')
+    </div>
+
     <!-- Mobile Cart Toggle -->
     <button @click="$wire.showCart = true" class="lg:hidden fixed bottom-6 right-6 z-50 w-16 h-16 bg-brand-primary text-white rounded-full shadow-2xl flex items-center justify-center animate-bounce">
         <div class="relative">
@@ -48,7 +128,7 @@ class="flex h-full bg-[#F9FAFB] overflow-hidden font-sans relative text-[11px]"
             </template>
         </div>
     </button>
-    
+
     <!-- Main Content -->
     <main class="flex-1 flex flex-col min-w-0">
         <!-- Modern Search & Status Header -->
@@ -57,7 +137,7 @@ class="flex h-full bg-[#F9FAFB] overflow-hidden font-sans relative text-[11px]"
                 <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none text-slate-400 group-focus-within:text-brand-primary transition-colors">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                 </div>
-                <input wire:model.live.debounce.300ms="search" type="text" placeholder="Search menu items..." 
+                <input wire:model.live.debounce.300ms="search" type="text" placeholder="Search menu items..."
                     class="w-full bg-slate-50 border border-slate-200 rounded-xl py-2 pl-10 pr-4 text-[10px] focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary outline-none transition-all">
             </div>
 
@@ -75,12 +155,12 @@ class="flex h-full bg-[#F9FAFB] overflow-hidden font-sans relative text-[11px]"
 
         <!-- Modern Category Chips -->
         <div class="bg-white px-3 md:px-5 py-2 border-b border-slate-100 flex items-center gap-2 overflow-x-auto scrollbar-hide">
-            <button wire:click="selectCategory(null)" 
+            <button wire:click="selectCategory(null)"
                 class="px-4 py-1.5 rounded-xl text-[9px] font-bold uppercase tracking-wider transition-all flex-shrink-0 {{ !$selectedCategoryId ? 'bg-brand-primary text-white shadow-lg' : 'bg-slate-50 text-slate-500 hover:bg-slate-100' }}">
                 All Items
             </button>
             @foreach($categories as $category)
-                <button wire:click="selectCategory({{ $category->id }})" 
+                <button wire:click="selectCategory({{ $category->id }})"
                     class="px-4 py-1.5 rounded-xl text-[9px] font-bold uppercase tracking-wider transition-all flex-shrink-0 {{ $selectedCategoryId == $category->id ? 'bg-brand-primary text-white shadow-lg' : 'bg-slate-50 text-slate-500 hover:bg-slate-100' }}">
                     {{ $category->name }}
                 </button>
@@ -91,13 +171,13 @@ class="flex h-full bg-[#F9FAFB] overflow-hidden font-sans relative text-[11px]"
         <div class="flex-1 overflow-y-auto p-4 custom-scrollbar">
             <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 px-1 md:px-0">
                 @foreach($items as $item)
-                    <div 
+                    <div
                         wire:click="addToCart({{ $item->id }})"
                         class="group bg-white rounded-2xl p-3 shadow-sm border border-slate-200 transition-all hover:shadow-lg hover:border-brand-primary/20 flex flex-col h-full relative cursor-pointer active:scale-[0.98]">
                         <div class="relative aspect-[4/3] rounded-xl overflow-hidden mb-3 bg-slate-50">
-                            <img src="{{ $item->image ?? '/images/placeholders/kacchi_biryani_1774629083139.png' }}" 
+                            <img src="{{ $item->image ?? '/images/placeholders/kacchi_biryani_1774629083139.png' }}"
                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
-                            
+
                             <!-- Price Float -->
                             <div class="absolute top-2 right-2">
                                 <span class="bg-white/90 backdrop-blur-md px-2 py-0.5 rounded-lg text-[10px] font-black text-brand-primary shadow-lg border border-brand-primary/10">
@@ -115,7 +195,7 @@ class="flex h-full bg-[#F9FAFB] overflow-hidden font-sans relative text-[11px]"
                         <div class="flex-1 px-0.5">
                             <h3 class="text-[10px] font-black text-slate-800 uppercase tracking-tight mb-0.5 group-hover:text-brand-primary transition-colors line-clamp-1">{{ $item->name }}</h3>
                             <p class="text-[8px] text-slate-400 font-bold mb-1.5 italic">{{ $item->category->name }}</p>
-                            
+
                             <div class="mt-auto flex items-center justify-between gap-2">
                                 @if($item->available_stock > 0 && $item->available_stock < 5)
                                     <span class="text-rose-500 text-[7px] font-black uppercase tracking-tighter">Only {{ $item->available_stock }} Left</span>
@@ -134,7 +214,7 @@ class="flex h-full bg-[#F9FAFB] overflow-hidden font-sans relative text-[11px]"
     </main>
 
     <!-- Detailed Sidebar: Current Order -->
-    <aside 
+    <aside
         class="fixed inset-y-0 right-0 w-full md:w-[380px] bg-white border-l border-slate-100 flex flex-col shadow-2xl z-50 transform transition-transform duration-500 ease-in-out lg:relative lg:translate-x-0"
         :class="{ 'translate-x-0': $wire.showCart, 'translate-x-full': !$wire.showCart }"
         @click.away="$wire.showCart = false">
@@ -243,23 +323,31 @@ class="flex h-full bg-[#F9FAFB] overflow-hidden font-sans relative text-[11px]"
                     </div>
                 </div>
 
-                <div class="grid grid-cols-3 gap-2">
-                    <button @click="$wire.paymentMethod = 'cash'" :class="$wire.paymentMethod == 'cash' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-500/20' : 'bg-white text-slate-400 border border-slate-200'" class="py-2.5 rounded-xl flex flex-col items-center gap-1 transition-all">
-                        <svg class="w-2 h-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
-                        <span class="text-[6px] font-black uppercase tracking-widest">Cash</span>
+                <div class="grid gap-2" style="grid-template-columns: repeat({{ count($this->enabledPaymentMethods) }}, minmax(0, 1fr));">
+                    <button @click="$wire.paymentMethod = 'cash'" :class="$wire.paymentMethod == 'cash' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-500/20' : 'bg-white text-slate-400 border border-slate-200 hover:bg-slate-50'" class="py-3 rounded-xl flex flex-col items-center gap-1 transition-all duration-200">
+                        <svg class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                        <span class="text-[7px] font-black uppercase tracking-widest">Cash</span>
                     </button>
-                    <button @click="$wire.paymentMethod = 'mobile_pay'" :class="$wire.paymentMethod == 'mobile_pay' ? 'bg-sky-500 text-white shadow-lg shadow-sky-500/20' : 'bg-white text-slate-400 border border-slate-200'" class="py-2.5 rounded-xl flex flex-col items-center gap-1 transition-all">
+                    @if(\App\Models\Setting::getValue('payment_bkash_enabled', '0') === '1')
+                    <button @click="$wire.paymentMethod = 'bkash'" :class="$wire.paymentMethod == 'bkash' ? 'bg-sky-500 text-white shadow-lg shadow-sky-500/20' : 'bg-white text-slate-400 border border-slate-200 hover:bg-slate-50'" class="py-3 rounded-xl flex flex-col items-center gap-1 transition-all duration-200" x-show="isOnline" title="Requires internet connection">
                         <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
-                        <span class="text-[6px] font-black uppercase tracking-widest">bKash</span>
+                        <span class="text-[7px] font-black uppercase tracking-widest">bKash</span>
                     </button>
-                    <button @click="$wire.paymentMethod = 'card'" :class="$wire.paymentMethod == 'card' ? 'bg-cyan-500 text-white shadow-lg shadow-cyan-500/20' : 'bg-white text-slate-400 border border-slate-200'" class="py-2.5 rounded-xl flex flex-col items-center gap-1 transition-all">
+                    @endif
+                    <button @click="$wire.paymentMethod = 'card'" :class="$wire.paymentMethod == 'card' ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/20' : 'bg-white text-slate-400 border border-slate-200 hover:bg-slate-50'" class="py-3 rounded-xl flex flex-col items-center gap-1 transition-all duration-200">
                         <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
-                        <span class="text-[6px] font-black uppercase tracking-widest">Card</span>
+                        <span class="text-[7px] font-black uppercase tracking-widest">Card</span>
                     </button>
+                    @if(\App\Models\Setting::getValue('payment_sslcommerze_enabled', '0') === '1')
+                    <button @click="$wire.paymentMethod = 'sslcommerze'" :class="$wire.paymentMethod == 'sslcommerze' ? 'bg-cyan-400 text-white shadow-lg shadow-cyan-400/20' : 'bg-white text-slate-400 border border-slate-200 hover:bg-slate-50'" class="py-3 rounded-xl flex flex-col items-center gap-1 transition-all duration-200" x-show="isOnline" title="Requires internet connection">
+                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
+                        <span class="text-[7px] font-black uppercase tracking-widest">SSLCommerze</span>
+                    </button>
+                    @endif
                 </div>
 
-                <!-- Reference No / Transaction ID - shown after payment options for non-cash -->
-                <template x-if="$wire.paymentMethod !== 'cash'">
+                <!-- Reference No / Transaction ID - shown for card payments only -->
+                <template x-if="$wire.paymentMethod === 'card'">
                     <div class="space-y-1 animate-fadeIn">
                         <label class="text-[7px] font-black text-rose-500 uppercase tracking-[0.2em] px-1 flex items-center gap-1.5">
                             <span class="w-1.5 h-1.5 bg-rose-500 rounded-full"></span>
@@ -270,23 +358,22 @@ class="flex h-full bg-[#F9FAFB] overflow-hidden font-sans relative text-[11px]"
                 </template>
             </div>
 
-
             <div class="flex gap-2">
-                <button 
-                    @click="if(offline) { 
-                        await saveOfflineOrder($wire.cart, $wire.total, { 
-                            order_type: $wire.orderType, 
-                            payment_method: $wire.paymentMethod, 
-                            table_number: $wire.tableNumber, 
-                            customer_name: $wire.customerName, 
-                            reference_no: $wire.referenceNo, 
-                            notes: $wire.notes 
-                        }); 
+                <button
+                    @click="if(offline) {
+                        await saveOfflineOrder($wire.cart, $wire.total, {
+                            order_type: $wire.orderType,
+                            payment_method: $wire.paymentMethod,
+                            table_number: $wire.tableNumber,
+                            customer_name: $wire.customerName,
+                            reference_no: $wire.referenceNo,
+                            notes: $wire.notes
+                        });
                         $wire.clearCart();
                         window.dispatchEvent(new CustomEvent('notify', { detail: { type: 'success', message: 'Offline Order Saved! It will sync once online.' } }));
 
-                    } else { 
-                        $wire.placeOrder() 
+                    } else {
+                        $wire.placeOrder()
                     }"
                     {{ empty($cart) ? 'disabled' : '' }}
                     class="flex-1 py-3.5 bg-brand-primary text-white text-[10px] font-black uppercase tracking-[0.3em] rounded-xl shadow-2xl shadow-brand-primary/40 hover:bg-brand-primary-dark transition-all disabled:opacity-20 flex items-center justify-center gap-2.5 group active:scale-[0.98]">
@@ -295,7 +382,7 @@ class="flex h-full bg-[#F9FAFB] overflow-hidden font-sans relative text-[11px]"
                 </button>
 
                 {{-- Manual Print button - only shown when a receipt is available --}}
-                <button 
+                <button
                     @click="window.printPosReceipt(lastReceipt)"
                     x-show="lastReceipt !== null"
                     x-cloak
@@ -322,18 +409,18 @@ class="flex h-full bg-[#F9FAFB] overflow-hidden font-sans relative text-[11px]"
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
     <x-notifications />
+
+    @script
+    <script>
+        // Listen for print-receipt event dispatched by PosSystem::placeOrder()
+        $wire.on('print-receipt', ({ receipt }) => {
+            // Update Alpine lastReceipt state via a bridge window event
+            window.dispatchEvent(new CustomEvent('pos-receipt-ready', { detail: receipt }));
+
+            if (receipt.auto_print) {
+                window.printPosReceipt(receipt);
+            }
+        });
+    </script>
+    @endscript
 </div>
-
-@script
-<script>
-    // Listen for print-receipt event dispatched by PosSystem::placeOrder()
-    $wire.on('print-receipt', ({ receipt }) => {
-        // Update Alpine lastReceipt state via a bridge window event
-        window.dispatchEvent(new CustomEvent('pos-receipt-ready', { detail: receipt }));
-
-        if (receipt.auto_print) {
-            window.printPosReceipt(receipt);
-        }
-    });
-</script>
-@endscript

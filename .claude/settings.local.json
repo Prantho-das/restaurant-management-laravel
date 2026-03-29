@@ -1,6 +1,21 @@
 {
+  "permissions": {
+    "allow": [
+      "mcp__laravel-boost__application-info",
+      "mcp__laravel-boost__database-schema",
+      "Bash(php artisan:*)",
+      "Bash(vendor/bin/pint --dirty --format agent)",
+      "Bash(php -l app/Services/BkashService.php)",
+      "Bash(php -l app/Services/SslcommerzeService.php)",
+      "Bash(php -l app/Http/Controllers/PaymentController.php)",
+      "Bash(php:*)",
+      "Bash(for f:*)",
+      "Bash(do php:*)",
+      "Bash(done)"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
     "laravel-boost"
-  ],
-  "enableAllProjectMcpServers": true
+  ]
 }

@@ -8,6 +8,8 @@ use App\Models\MenuItem;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Setting;
+use App\Services\BkashService;
+use App\Services\SslcommerzeService;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
@@ -23,7 +25,7 @@ class PosSystem extends Component
     // New Order Details
     public $orderType = 'dine_in'; // dine_in, takeaway, delivery
 
-    public $paymentMethod = 'cash'; // cash, card, mobile_pay
+    public $paymentMethod = 'cash'; // cash, card, bkash, sslcommerze
 
     public $tableNumber = '';
 
@@ -43,6 +45,33 @@ class PosSystem extends Component
     public $discountValue = 0;
 
     public $discountType = 'fixed'; // fixed, percentage
+
+    // Payment method configurations
+    public array $paymentMethodConfigs = [
+        'cash' => [
+            'icon' => '<svg class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg>',
+            'color' => 'emerald',
+            'label' => 'Cash',
+        ],
+        'card' => [
+            'icon' => '<svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>',
+            'color' => 'rose',
+            'label' => 'Card',
+        ],
+        'bkash' => [
+            'icon' => '<svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>',
+            'color' => 'sky',
+            'label' => 'bKash',
+        ],
+        'sslcommerze' => [
+            'icon' => '<svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>',
+            'color' => 'cyan',
+            'label' => 'SSLCommerze',
+        ],
+    ];
+
+    // Online payment gateways that require internet
+    public array $onlinePaymentMethods = ['bkash', 'sslcommerze'];
 
     public function with(): array
     {
@@ -155,6 +184,25 @@ class PosSystem extends Component
     }
 
     #[Computed]
+    public function enabledPaymentMethods(): array
+    {
+        $methods = [
+            'cash' => 'Cash',
+            'card' => 'Card',
+        ];
+
+        if (Setting::getValue('payment_bkash_enabled', '0') === '1' && (new BkashService)->isEnabled()) {
+            $methods['bkash'] = 'bKash';
+        }
+
+        if (Setting::getValue('payment_sslcommerze_enabled', '0') === '1' && (new SslcommerzeService)->isEnabled()) {
+            $methods['sslcommerze'] = 'SSLCommerze';
+        }
+
+        return $methods;
+    }
+
+    #[Computed]
     public function subtotal()
     {
         return collect($this->cart)->sum(fn ($item) => (float) ($item['price'] * $item['quantity']));
@@ -177,17 +225,41 @@ class PosSystem extends Component
         return max(0, $this->subtotal - $this->discountAmount);
     }
 
-    public function placeOrder()
+    /**
+     * Create order as completed (cash/card payments).
+     */
+    protected function createAndCompleteOrder(): array
     {
         if (empty($this->cart)) {
-            return;
+            return ['success' => false, 'message' => 'Cart is empty'];
         }
 
+        $orderNumber = 'ORD-'.strtoupper(uniqid());
+
+        $orderData = [
+            'order_number' => $orderNumber,
+            'status' => 'completed',
+            'payment_status' => 'paid',
+            'subtotal_amount' => $this->subtotal,
+            'discount_amount' => $this->discountAmount,
+            'discount_type' => $this->discountType,
+            'total_amount' => $this->total,
+            'order_type' => $this->orderType,
+            'payment_method' => $this->paymentMethod,
+            'table_number' => $this->orderType === 'dine_in' ? $this->tableNumber : null,
+            'customer_name' => $this->customerName,
+            'customer_phone' => $this->customerPhone,
+            'guest_count' => $this->guestCount,
+            'notes' => $this->notes,
+            'reference_no' => $this->paymentMethod === 'card' ? $this->referenceNo : null,
+            'user_id' => auth()->id(),
+        ];
+
+        $items = $this->cart;
         $receiptData = null;
+        $orderId = null;
 
-        DB::transaction(function () use (&$receiptData) {
-            $orderNumber = 'ORD-'.strtoupper(uniqid());
-
+        DB::transaction(function () use (&$receiptData, $orderData, $items, &$orderId) {
             if ($this->customerPhone) {
                 Customer::updateOrCreate(
                     ['phone' => $this->customerPhone],
@@ -195,25 +267,10 @@ class PosSystem extends Component
                 );
             }
 
-            $order = Order::create([
-                'order_number' => $orderNumber,
-                'status' => 'pending',
-                'subtotal_amount' => $this->subtotal,
-                'discount_amount' => $this->discountAmount,
-                'discount_type' => $this->discountType,
-                'total_amount' => $this->total,
-                'order_type' => $this->orderType,
-                'payment_method' => $this->paymentMethod,
-                'table_number' => $this->orderType === 'dine_in' ? $this->tableNumber : null,
-                'customer_name' => $this->customerName,
-                'customer_phone' => $this->customerPhone,
-                'guest_count' => $this->guestCount,
-                'notes' => $this->notes,
-                'reference_no' => $this->paymentMethod !== 'cash' ? $this->referenceNo : null,
-                'user_id' => auth()->id(),
-            ]);
+            $order = Order::create($orderData);
+            $orderId = $order->id;
 
-            foreach ($this->cart as $item) {
+            foreach ($items as $item) {
                 OrderItem::create([
                     'order_id' => $order->id,
                     'menu_item_id' => $item['id'],
@@ -226,50 +283,59 @@ class PosSystem extends Component
             $receiptData['auto_print'] = (bool) Setting::getValue('pos_auto_print_receipt', false);
         });
 
-        $this->cart = [];
-        $this->tableNumber = '';
-        $this->customerName = '';
-        $this->customerPhone = '';
-        $this->notes = '';
-        $this->referenceNo = '';
-        $this->discountValue = 0;
+        return [
+            'success' => true,
+            'order' => Order::find($orderId),
+            'receipt' => $receiptData,
+        ];
+    }
 
-        // Reset computed property caches
-        unset($this->subtotal);
-        unset($this->discountAmount);
-        unset($this->total);
+    /**
+     * Create pending order for online payment (bKash, SSLCommerze).
+     */
+    protected function createPendingOrder(): ?Order
+    {
+        if (empty($this->cart)) {
+            $this->dispatch('notify', type: 'error', message: 'Cart is empty');
 
-        $this->dispatch('order-placed');
-        $this->dispatch('notify', type: 'success', message: 'Order processed successfully!');
-
-        if ($receiptData) {
-            $this->dispatch('print-receipt', receipt: $receiptData);
+            return null;
         }
-    }
 
-    public function clearCart()
-    {
-        $this->cart = [];
-    }
+        $orderNumber = 'ORD-'.strtoupper(uniqid());
 
-    public function processOfflineOrder($cart, $total, $details = [])
-    {
-        DB::transaction(function () use ($cart, $total, $details) {
-            $order = Order::create([
-                'order_number' => $details['order_number'] ?? ('ORD-OFF-'.strtoupper(uniqid())),
-                'status' => 'pending',
-                'subtotal_amount' => $total,
-                'total_amount' => $total,
-                'order_type' => $details['order_type'] ?? 'takeaway',
-                'payment_method' => $details['payment_method'] ?? 'cash',
-                'table_number' => $details['table_number'] ?? null,
-                'customer_name' => $details['customer_name'] ?? null,
-                'reference_no' => $details['reference_no'] ?? null,
-                'notes' => ($details['notes'] ?? '').' (Synced from Offline POS)',
-                'user_id' => auth()->id(),
-            ]);
+        $orderData = [
+            'order_number' => $orderNumber,
+            'status' => 'pending',
+            'payment_status' => 'pending',
+            'subtotal_amount' => $this->subtotal,
+            'discount_amount' => $this->discountAmount,
+            'discount_type' => $this->discountType,
+            'total_amount' => $this->total,
+            'order_type' => $this->orderType,
+            'payment_method' => $this->paymentMethod,
+            'table_number' => $this->orderType === 'dine_in' ? $this->tableNumber : null,
+            'customer_name' => $this->customerName,
+            'customer_phone' => $this->customerPhone,
+            'guest_count' => $this->guestCount,
+            'notes' => $this->notes,
+            'user_id' => auth()->id(),
+        ];
 
-            foreach ($cart as $item) {
+        $items = $this->cart;
+        $orderId = null;
+
+        DB::transaction(function () use ($orderData, $items, &$orderId) {
+            if ($this->customerPhone) {
+                Customer::updateOrCreate(
+                    ['phone' => $this->customerPhone],
+                    ['name' => $this->customerName ?: 'Walking Customer']
+                );
+            }
+
+            $order = Order::create($orderData);
+            $orderId = $order->id;
+
+            foreach ($items as $item) {
                 OrderItem::create([
                     'order_id' => $order->id,
                     'menu_item_id' => $item['id'],
@@ -278,6 +344,68 @@ class PosSystem extends Component
                 ]);
             }
         });
+
+        return Order::find($orderId);
+    }
+
+    /**
+     * Place order - handles both direct (cash/card) and redirect (online) flows.
+     */
+    public function placeOrder(): mixed
+    {
+        // Cash or Card: immediate completion
+        if (in_array($this->paymentMethod, ['cash', 'card'])) {
+            $result = $this->createAndCompleteOrder();
+
+            if (! $result['success']) {
+                $this->dispatch('notify', type: 'error', message: $result['message']);
+
+                return null;
+            }
+
+            $order = $result['order'];
+            $receiptData = $result['receipt'];
+
+            $this->clearCart();
+            $this->reset(['tableNumber', 'customerName', 'customerPhone', 'notes', 'referenceNo', 'discountValue']);
+
+            // Reset computed property caches
+            unset($this->subtotal);
+            unset($this->discountAmount);
+            unset($this->total);
+
+            $this->dispatch('order-placed', orderNumber: $order->order_number);
+            $this->dispatch('notify', type: 'success', message: 'Order processed successfully!');
+
+            if ($receiptData) {
+                $this->dispatch('print-receipt', receipt: $receiptData);
+            }
+
+            return null;
+        }
+
+        // Online payment gateways: create pending order then redirect
+        if (in_array($this->paymentMethod, ['bkash', 'sslcommerze'])) {
+            $order = $this->createPendingOrder();
+
+            if (! $order) {
+                $this->dispatch('notify', type: 'error', message: 'Failed to create order');
+
+                return null;
+            }
+
+            // Return redirect to payment gateway
+            return redirect()->route("payment.{$this->paymentMethod}.initiate", $order);
+        }
+
+        $this->dispatch('notify', type: 'error', message: 'Invalid payment method');
+
+        return null;
+    }
+
+    public function clearCart()
+    {
+        $this->cart = [];
     }
 
     public function render()

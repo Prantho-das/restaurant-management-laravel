@@ -6,7 +6,7 @@
     });
 
     window.printPosReceipt = function (r) {
-        const payLabel = { cash: "Cash", card: "Card", mobile_pay: "bKash/MFS" }[r.payment_method] || r.payment_method;
+        const payLabel = { cash: "Cash", card: "Card", mobile_pay: "bKash/MFS", bkash: "bKash", sslcommerze: "SSLCommerze" }[r.payment_method] || r.payment_method;
         const typeLabel = { dine_in: "Dine-In", takeaway: "Takeaway", delivery: "Delivery" }[r.order_type] || r.order_type;
 
         const itemsHtml = r.items.map(i =>

@@ -2,11 +2,11 @@
 
 namespace App\Filament\Resources\Orders\Tables;
 
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
-use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -66,14 +66,16 @@ class OrdersTable
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         'cash' => 'success',
-                        'mobile_pay' => 'info',
                         'card' => 'warning',
+                        'bkash' => 'info',
+                        'sslcommerze' => 'primary',
                         default => 'gray',
                     })
                     ->formatStateUsing(fn (string $state): string => match ($state) {
                         'cash' => 'Cash',
-                        'mobile_pay' => 'bKash',
                         'card' => 'Card',
+                        'bkash' => 'bKash',
+                        'sslcommerze' => 'SSLCommerze',
                         default => ucfirst($state),
                     }),
                 TextColumn::make('items_count')
@@ -135,8 +137,9 @@ class OrdersTable
                     ->label('Payment Method')
                     ->options([
                         'cash' => 'Cash',
-                        'mobile_pay' => 'bKash',
                         'card' => 'Card',
+                        'bkash' => 'bKash',
+                        'sslcommerze' => 'SSLCommerze',
                     ]),
             ])
             ->recordActions([

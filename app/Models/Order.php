@@ -37,6 +37,10 @@ class Order extends Model
         'notes',
         'reference_no',
         'user_id',
+        'payment_status',
+        'transaction_id',
+        'gateway_response',
+        'paid_at',
     ];
 
     /**
@@ -49,7 +53,50 @@ class Order extends Model
             'discount_amount' => 'decimal:2',
             'total_amount' => 'decimal:2',
             'guest_count' => 'integer',
+            'paid_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Check if order is paid.
+     */
+    public function isPaid(): bool
+    {
+        return $this->payment_status === 'paid' || $this->status === 'completed';
+    }
+
+    /**
+     * Mark order as paid.
+     */
+    public function markAsPaid(string $transactionId, ?string $gatewayResponse = null): bool
+    {
+        return $this->update([
+            'status' => 'completed',
+            'payment_status' => 'paid',
+            'transaction_id' => $transactionId,
+            'gateway_response' => $gatewayResponse,
+            'paid_at' => now(),
+        ]);
+    }
+
+    /**
+     * Mark order as payment failed.
+     */
+    public function markAsFailed(?string $gatewayResponse = null): bool
+    {
+        return $this->update([
+            'status' => 'failed',
+            'payment_status' => 'failed',
+            'gateway_response' => $gatewayResponse,
+        ]);
+    }
+
+    /**
+     * Check if payment was made via online gateway.
+     */
+    public function isOnlinePayment(): bool
+    {
+        return in_array($this->payment_method, ['bkash', 'sslcommerze']);
     }
 
     public function items(): HasMany

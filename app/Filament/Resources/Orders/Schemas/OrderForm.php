@@ -44,8 +44,9 @@ class OrderForm
                         Select::make('payment_method')
                             ->options([
                                 'cash' => 'Cash',
-                                'mobile_pay' => 'bKash',
                                 'card' => 'Card',
+                                'bkash' => 'bKash',
+                                'sslcommerze' => 'SSLCommerze',
                             ])
                             ->required()
                             ->default('cash'),
