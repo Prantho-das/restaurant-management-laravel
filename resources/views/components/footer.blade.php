@@ -19,10 +19,10 @@
             <div class="md:col-span-1">
                 <h4 class="text-brand-gold uppercase text-[11px] font-black tracking-[0.3em] mb-10">Experience</h4>
                 <ul class="flex flex-col gap-5 text-sm font-medium">
-                    <li><a href="/" class="hover:text-brand-gold transition-colors">Fine Dining</a></li>
-                    <li><a href="/menu" class="hover:text-brand-gold transition-colors">Signature Menu</a></li>
-                    <li><a href="/reservation" class="hover:text-brand-gold transition-colors">Private Booking</a></li>
-                    <li><a href="/order" class="hover:text-brand-gold transition-colors">Order Online</a></li>
+                    <li><a href="/" wire:navigate class="hover:text-brand-gold transition-colors">Fine Dining</a></li>
+                    <li><a href="/menu" wire:navigate class="hover:text-brand-gold transition-colors">Signature Menu</a></li>
+                    <li><a href="/reservation" wire:navigate class="hover:text-brand-gold transition-colors">Private Booking</a></li>
+                    <li><a href="/order" wire:navigate class="hover:text-brand-gold transition-colors">Order Online</a></li>
                 </ul>
             </div>
 

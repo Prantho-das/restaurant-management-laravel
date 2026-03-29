@@ -15,35 +15,32 @@ class OfflineSyncStatus extends Component
 
     public string $lastSyncError = '';
 
-    protected ?OfflineSyncService $offlineSyncService = null;
-
-    public function mount(?OfflineSyncService $offlineSyncService = null)
-    {
-        $this->offlineSyncService = $offlineSyncService ?? app(OfflineSyncService::class);
-        $this->refreshStatus();
-    }
-
     public function refreshStatus()
     {
-        if ($this->offlineSyncService) {
-            $this->pendingCount = $this->offlineSyncService->getPendingCount();
-        } else {
+        try {
+            $offlineSyncService = app(OfflineSyncService::class);
+            $this->pendingCount = $offlineSyncService->getPendingCount();
+        } catch (\Throwable $e) {
             $this->pendingCount = 0;
+            $this->lastSyncError = $e->getMessage();
         }
+
         $this->isOnline = $this->pendingCount === 0;
         $this->syncStatus = $this->isOnline ? 'synced' : 'offline';
     }
 
     public function manualSync()
     {
-        if (! $this->offlineSyncService) {
+        try {
+            $offlineSyncService = app(OfflineSyncService::class);
+        } catch (\Throwable $e) {
             $this->dispatch('notify', type: 'error', message: 'Sync service not available');
 
             return;
         }
 
         try {
-            $results = $this->offlineSyncService->processQueue();
+            $results = $offlineSyncService->processQueue();
             $this->refreshStatus();
 
             if ($results['success'] > 0) {

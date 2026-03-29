@@ -17,8 +17,8 @@
                     {{ $cms->hero_description ?? 'Experience the timeless flavors of Bangladesh.' }}
                 </p>
                 <div class="flex flex-wrap gap-6">
-                    <a href="#menu" class="btn-brand">Explore Menu</a>
-                    <a href="#reservation" class="btn-brand-outline">Book a Table</a>
+                    <a href="#menu" wire:navigate class="btn-brand">Explore Menu</a>
+                    <a href="#reservation" wire:navigate class="btn-brand-outline">Book a Table</a>
                 </div>
             </div>
 
@@ -84,7 +84,7 @@
             <livewire:frontend.featured-menu />
 
             <div class="mt-20 text-center animate-fade-in-up">
-                <a href="/menu" class="btn-royal px-12 py-5 text-sm font-black tracking-[0.3em] uppercase inline-flex items-center gap-4">
+                <a href="/menu" wire:navigate class="btn-royal px-12 py-5 text-sm font-black tracking-[0.3em] uppercase inline-flex items-center gap-4">
                     Discover Entire Menu
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />

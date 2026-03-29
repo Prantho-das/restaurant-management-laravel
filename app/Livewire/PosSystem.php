@@ -73,35 +73,35 @@ class PosSystem extends Component
     // Online payment gateways that require internet
     public array $onlinePaymentMethods = ['bkash', 'sslcommerze'];
 
-    public function with(): array
+    protected function getCategories()
     {
-        $categories = Category::orderBy('priority_order')->get();
+        return Category::orderBy('priority_order')->get();
+    }
 
-        $query = MenuItem::query()
+    protected function getItems()
+    {
+        return MenuItem::query()
             ->with(['category', 'recipes.ingredient'])
             ->where('is_active', true)
             ->when($this->selectedCategoryId, fn ($q) => $q->where('category_id', $this->selectedCategoryId))
-            ->when($this->search, fn ($q) => $q->where('name', 'like', "%{$this->search}%"));
-
-        $items = $query->get()->map(function ($item) {
-            // Calculate stock based on ingredients
-            $stock = 999; // Default infinity if no recipes
-            if ($item->recipes->isNotEmpty()) {
-                foreach ($item->recipes as $recipe) {
-                    $ingredientStock = $recipe->ingredient->current_stock;
-                    $possibleServings = floor($ingredientStock / max(0.001, $recipe->quantity));
-                    $stock = min($stock, $possibleServings);
+            ->when($this->search, fn ($q) => $q->where('name', 'like', "%{$this->search}%"))
+            ->get()
+            ->map(function ($item) {
+                // Calculate stock based on ingredients
+                $stock = 999; // Default infinity if no recipes
+                if ($item->recipes->isNotEmpty()) {
+                    foreach ($item->recipes as $recipe) {
+                        if ($recipe->ingredient) {
+                            $ingredientStock = $recipe->ingredient->current_stock;
+                            $possibleServings = floor($ingredientStock / max(0.001, $recipe->quantity));
+                            $stock = min($stock, $possibleServings);
+                        }
+                    }
                 }
-            }
-            $item->available_stock = (int) $stock;
+                $item->available_stock = (int) $stock;
 
-            return $item;
-        });
-
-        return [
-            'categories' => $categories,
-            'items' => $items,
-        ];
+                return $item;
+            });
     }
 
     public function selectCategory($id)
@@ -186,20 +186,39 @@ class PosSystem extends Component
     #[Computed]
     public function enabledPaymentMethods(): array
     {
-        $methods = [
-            'cash' => 'Cash',
-            'card' => 'Card',
-        ];
+        try {
+            $methods = [
+                'cash' => 'Cash',
+                'card' => 'Card',
+            ];
 
-        if (Setting::getValue('payment_bkash_enabled', '0') === '1' && (new BkashService)->isEnabled()) {
-            $methods['bkash'] = 'bKash';
+            if (Setting::getValue('payment_bkash_enabled', '0') === '1') {
+                try {
+                    if (app(BkashService::class)->isEnabled()) {
+                        $methods['bkash'] = 'bKash';
+                    }
+                } catch (\Throwable $e) {
+                    // Log or ignore - bKash not available
+                }
+            }
+
+            if (Setting::getValue('payment_sslcommerze_enabled', '0') === '1') {
+                try {
+                    if (app(SslcommerzeService::class)->isEnabled()) {
+                        $methods['sslcommerze'] = 'SSLCommerze';
+                    }
+                } catch (\Throwable $e) {
+                    // Log or ignore - SSLCommerze not available
+                }
+            }
+
+            return $methods;
+        } catch (\Throwable $e) {
+            return [
+                'cash' => 'Cash',
+                'card' => 'Card',
+            ];
         }
-
-        if (Setting::getValue('payment_sslcommerze_enabled', '0') === '1' && (new SslcommerzeService)->isEnabled()) {
-            $methods['sslcommerze'] = 'SSLCommerze';
-        }
-
-        return $methods;
     }
 
     #[Computed]
@@ -251,7 +270,7 @@ class PosSystem extends Component
             'customer_phone' => $this->customerPhone,
             'guest_count' => $this->guestCount,
             'notes' => $this->notes,
-            'reference_no' => $this->paymentMethod === 'card' ? $this->referenceNo : null,
+            'reference_no' => $this->paymentMethod !== 'cash' ? $this->referenceNo : null,
             'user_id' => auth()->id(),
         ];
 
@@ -349,56 +368,29 @@ class PosSystem extends Component
     }
 
     /**
-     * Place order - handles both direct (cash/card) and redirect (online) flows.
+     * Place order - handles both direct (cash/card) and manual (bkash/sslcommerze) flows for the POS operator.
      */
     public function placeOrder(): mixed
     {
-        // Cash or Card: immediate completion
-        if (in_array($this->paymentMethod, ['cash', 'card'])) {
-            $result = $this->createAndCompleteOrder();
+        $result = $this->createAndCompleteOrder();
 
-            if (! $result['success']) {
-                $this->dispatch('notify', type: 'error', message: $result['message']);
-
-                return null;
-            }
-
-            $order = $result['order'];
-            $receiptData = $result['receipt'];
-
-            $this->clearCart();
-            $this->reset(['tableNumber', 'customerName', 'customerPhone', 'notes', 'referenceNo', 'discountValue']);
-
-            // Reset computed property caches
-            unset($this->subtotal);
-            unset($this->discountAmount);
-            unset($this->total);
-
-            $this->dispatch('order-placed', orderNumber: $order->order_number);
-            $this->dispatch('notify', type: 'success', message: 'Order processed successfully!');
-
-            if ($receiptData) {
-                $this->dispatch('print-receipt', receipt: $receiptData);
-            }
+        if (! $result['success']) {
+            $this->dispatch('notify', type: 'error', message: $result['message']);
 
             return null;
         }
 
-        // Online payment gateways: create pending order then redirect
-        if (in_array($this->paymentMethod, ['bkash', 'sslcommerze'])) {
-            $order = $this->createPendingOrder();
+        $order = $result['order'];
+        $receiptData = $result['receipt'];
 
-            if (! $order) {
-                $this->dispatch('notify', type: 'error', message: 'Failed to create order');
+        $this->clearCart();
+        $this->reset(['tableNumber', 'customerName', 'customerPhone', 'notes', 'referenceNo', 'discountValue', 'discountType', 'orderType', 'paymentMethod', 'guestCount']);
 
-                return null;
-            }
+        $this->dispatch('order-placed', orderNumber: $order->order_number);
 
-            // Return redirect to payment gateway
-            return redirect()->route("payment.{$this->paymentMethod}.initiate", $order);
+        if ($receiptData) {
+            $this->dispatch('print-receipt', receipt: $receiptData);
         }
-
-        $this->dispatch('notify', type: 'error', message: 'Invalid payment method');
 
         return null;
     }
@@ -410,6 +402,10 @@ class PosSystem extends Component
 
     public function render()
     {
-        return view('livewire.pos-system', $this->with());
+        return view('livewire.pos-system', [
+            'categories' => $this->getCategories(),
+            'items' => $this->getItems(),
+            'enabledPaymentMethods' => $this->enabledPaymentMethods,
+        ]);
     }
 }

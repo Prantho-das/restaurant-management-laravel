@@ -41,7 +41,7 @@
     <!-- Floating Cart Bar -->
     @if(count($cart) > 0)
         <div class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 animate-fade-in-up">
-            <a href="/order"
+            <a href="/order" wire:navigate
                 class="flex items-center gap-4 bg-brand-primary text-white px-8 py-4 rounded-2xl shadow-2xl shadow-brand-primary/30 hover:bg-brand-primary-dark transition-all active:scale-[0.98]">
                 <div class="flex items-center gap-3">
                     <div class="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center">

@@ -6,6 +6,8 @@ use App\Models\Category;
 use App\Models\MenuItem;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Services\BkashService;
+use App\Services\SslcommerzeService;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
@@ -37,9 +39,39 @@ class CustomerOrder extends Component
 
     public $confirmedTotal = 0;
 
+    public $confirmedOrderItems = [];
+
     public function mount()
     {
         $this->cart = session('cart', []);
+
+        $paymentStatus = request()->query('payment');
+        if ($paymentStatus === 'success') {
+            $orderId = session('confirmed_order_id');
+            if ($orderId) {
+                $order = Order::with('items.menuItem')->find($orderId);
+                if ($order && $order->status === 'completed') {
+                    $this->confirmedOrderNumber = $order->order_number;
+                    $this->confirmedTotal = $order->total_amount;
+                    $this->confirmedOrderItems = $order->items->map(function ($item) {
+                        return [
+                            'id' => $item->menu_item_id,
+                            'name' => $item->menuItem->name ?? 'Item',
+                            'price' => $item->price,
+                            'quantity' => $item->quantity,
+                        ];
+                    })->toArray();
+                    $this->orderPlaced = true;
+                    $this->cart = [];
+                    $this->syncCartToSession();
+                    session()->forget(['confirmed_order_id', 'payment_origin']);
+
+                    return;
+                }
+            }
+        } elseif ($paymentStatus === 'failed') {
+            session()->forget('payment_origin');
+        }
 
         $addItemId = request()->query('add');
         if ($addItemId) {
@@ -143,19 +175,19 @@ class CustomerOrder extends Component
             'customerName' => 'required|min:2',
             'customerPhone' => 'required|min:6',
             'deliveryAddress' => 'required|min:5',
-            'referenceNo' => $this->paymentMethod !== 'cash' ? 'required' : 'nullable',
         ], [
             'customerName.required' => 'Please enter your name.',
             'customerPhone.required' => 'Please enter your phone number.',
             'deliveryAddress.required' => 'Delivery address is required.',
-            'referenceNo.required' => 'Transaction reference is required for online payments.',
         ]);
 
         if (empty($this->cart)) {
             return;
         }
 
-        DB::transaction(function () {
+        $order = null;
+
+        DB::transaction(function () use (&$order) {
             $order = Order::create([
                 'order_number' => 'ORD-'.strtoupper(uniqid()),
                 'status' => 'pending',
@@ -171,7 +203,7 @@ class CustomerOrder extends Component
                     "Delivery Address: {$this->deliveryAddress}",
                     $this->notes,
                 ])->filter()->implode("\n"),
-                'reference_no' => $this->paymentMethod !== 'cash' ? $this->referenceNo : null,
+                'reference_no' => null,
             ]);
 
             foreach ($this->cart as $item) {
@@ -185,8 +217,46 @@ class CustomerOrder extends Component
 
             $this->confirmedOrderNumber = $order->order_number;
             $this->confirmedTotal = $order->total_amount;
+            $this->confirmedOrderItems = $this->cart;
         });
 
+        if (! $order) {
+            $this->dispatch('notify', ['type' => 'error', 'message' => 'Failed to create order. Please try again.']);
+
+            return;
+        }
+
+        // Redirect to gateway if not cash
+        if ($this->paymentMethod === 'mobile_pay') {
+            session(['payment_origin' => 'frontend', 'confirmed_order_id' => $order->id]);
+            $bkashService = app(BkashService::class);
+            $result = $bkashService->createPayment($order);
+
+            if ($result && isset($result['checkout_url'])) {
+                $order->update(['reference_no' => $result['payment_id']]);
+                session(['bkash_payment_id' => $result['payment_id']]);
+
+                return redirect()->to($result['checkout_url']);
+            }
+
+            $this->dispatch('notify', ['type' => 'error', 'message' => 'Failed to connect to bKash.']);
+
+            return;
+        } elseif ($this->paymentMethod === 'card') {
+            session(['payment_origin' => 'frontend', 'confirmed_order_id' => $order->id]);
+            $sslcommerzeService = app(SslcommerzeService::class);
+            $checkoutUrl = $sslcommerzeService->createCheckoutUrl($order);
+
+            if ($checkoutUrl) {
+                return redirect()->to($checkoutUrl);
+            }
+
+            $this->dispatch('notify', ['type' => 'error', 'message' => 'Failed to connect to SSLCommerz.']);
+
+            return;
+        }
+
+        // Cash flow logic
         $this->cart = [];
         $this->syncCartToSession();
         $this->orderPlaced = true;
@@ -194,7 +264,7 @@ class CustomerOrder extends Component
 
     public function startNewOrder()
     {
-        $this->reset(['customerName', 'customerPhone', 'deliveryAddress', 'paymentMethod', 'referenceNo', 'notes', 'confirmedOrderNumber', 'confirmedTotal', 'orderPlaced', 'search', 'selectedCategoryId']);
+        $this->reset(['customerName', 'customerPhone', 'deliveryAddress', 'paymentMethod', 'referenceNo', 'notes', 'confirmedOrderNumber', 'confirmedTotal', 'confirmedOrderItems', 'orderPlaced', 'search', 'selectedCategoryId']);
         $this->cart = [];
         $this->syncCartToSession();
     }

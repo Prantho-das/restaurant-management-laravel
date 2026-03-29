@@ -173,13 +173,11 @@
                                     </div>
                                 </div>
 
-                                {{-- Reference No --}}
+                                {{-- Gateway Info --}}
                                 @if($paymentMethod !== 'cash')
-                                    <div>
-                                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Transaction ID <span class="text-brand-red">*</span></label>
-                                        <input wire:model="referenceNo" type="text" placeholder="e.g. TRX-123456"
-                                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary outline-none transition-all">
-                                        @error('referenceNo') <span class="text-brand-red text-[10px] mt-0.5 block">{{ $message }}</span> @enderror
+                                    <div class="px-3.5 py-3 rounded-xl bg-slate-50 border border-slate-100 flex items-start gap-2.5">
+                                        <svg class="w-4 h-4 text-slate-400 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                                        <p class="text-[10px] text-slate-500 leading-tight">You will be securely redirected to the <strong class="text-brand-primary">{{ $paymentMethod === 'mobile_pay' ? 'bKash' : 'SSLCommerz' }}</strong> gateway.</p>
                                     </div>
                                 @endif
 
@@ -322,11 +320,9 @@
                         </div>
                     </div>
                     @if($paymentMethod !== 'cash')
-                        <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Transaction ID <span class="text-brand-red">*</span></label>
-                            <input wire:model="referenceNo" type="text" placeholder="e.g. TRX-123456"
-                                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary outline-none transition-all">
-                            @error('referenceNo') <span class="text-brand-red text-xs mt-1 block">{{ $message }}</span> @enderror
+                        <div class="px-4 py-3 rounded-xl bg-slate-50 border border-slate-100 flex items-start gap-3">
+                            <svg class="w-5 h-5 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                            <p class="text-xs text-slate-500 leading-snug">You will be securely redirected to the <strong class="text-brand-primary">{{ $paymentMethod === 'mobile_pay' ? 'bKash' : 'SSLCommerz' }}</strong> gateway.</p>
                         </div>
                     @endif
                     <div>
@@ -389,6 +385,25 @@
                     </div>
                 </div>
 
+                @if(!empty($confirmedOrderItems))
+                    <div class="bg-slate-50 rounded-2xl p-6 mb-8 text-left">
+                        <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200 pb-3 mb-4">Ordered Items</h3>
+                        <div class="space-y-4">
+                            @foreach($confirmedOrderItems as $item)
+                                <div class="flex justify-between items-center">
+                                    <div class="flex items-center gap-3" wire:key="confirmed-item-{{ $item['id'] }}">
+                                        <div class="w-6 h-6 rounded bg-slate-200 flex items-center justify-center text-[10px] font-bold text-slate-600">
+                                            {{ $item['quantity'] }}x
+                                        </div>
+                                        <span class="text-sm font-medium text-slate-800">{{ $item['name'] }}</span>
+                                    </div>
+                                    <span class="text-sm font-bold text-slate-900">৳{{ number_format($item['price'] * $item['quantity']) }}</span>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+
                 <p class="text-xs text-slate-400 mb-6">Please save your order number for reference. You will receive confirmation shortly.</p>
 
                 <div class="flex flex-col sm:flex-row gap-3">
@@ -396,7 +411,7 @@
                         class="flex-1 py-3 bg-brand-primary text-white text-xs font-bold uppercase tracking-widest rounded-xl hover:bg-brand-primary-dark transition-all shadow-lg shadow-brand-primary/20">
                         Order More
                     </button>
-                    <a href="/"
+                    <a href="/" wire:navigate
                         class="flex-1 py-3 bg-slate-100 text-slate-700 text-xs font-bold uppercase tracking-widest rounded-xl hover:bg-slate-200 transition-all text-center">
                         Back to Home
                     </a>

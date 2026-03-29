@@ -9,7 +9,7 @@
      
     <div class="container-wide flex justify-between items-center">
         <!-- Logo -->
-        <a href="/" class="flex items-center gap-3">
+        <a href="/" wire:navigate class="flex items-center gap-3">
             @if($logo = App\Models\Setting::getValue('site_logo'))
                 <img src="{{ Storage::url($logo) }}" alt="{{ App\Models\Setting::getValue('site_title', 'Royal Dine') }}" class="h-12 w-auto object-contain">
             @else
@@ -23,14 +23,14 @@
         <!-- Desktop Navigation -->
         <div class="hidden md:flex items-center gap-12">
             <div class="flex items-center gap-10">
-                <a href="/" class="text-xs font-bold uppercase tracking-widest hover:text-brand-gold transition-colors">Home</a>
-                <a href="/#menu" class="text-xs font-bold uppercase tracking-widest hover:text-brand-gold transition-colors">Menu</a>
-                <a href="/#reservation" class="text-xs font-bold uppercase tracking-widest hover:text-brand-gold transition-colors">Book a Table</a>
+                <a href="/" wire:navigate class="text-xs font-bold uppercase tracking-widest hover:text-brand-gold transition-colors">Home</a>
+                <a href="/#menu" wire:navigate class="text-xs font-bold uppercase tracking-widest hover:text-brand-gold transition-colors">Menu</a>
+                <a href="/#reservation" wire:navigate class="text-xs font-bold uppercase tracking-widest hover:text-brand-gold transition-colors">Book a Table</a>
             </div>
             
             <div class="h-8 w-px bg-brand-gold/20 mx-2"></div>
             
-            <a href="/order" class="btn-brand text-xs tracking-widest uppercase relative">
+            <a href="/order" wire:navigate class="btn-brand text-xs tracking-widest uppercase relative">
                 Order Online
                 <span x-show="cartCount > 0"
                       x-text="cartCount"
@@ -58,10 +58,10 @@
         <button @click="open = false" class="absolute top-8 right-8 text-brand-emerald">
             <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M6 18L18 6M6 6l12 12"></path></svg>
         </button>
-        <a @click="open = false" href="/" class="font-serif italic text-5xl hover:text-brand-gold transition-colors">Home</a>
-        <a @click="open = false" href="/#menu" class="font-serif italic text-5xl hover:text-brand-gold transition-colors">Our Menu</a>
-        <a @click="open = false" href="/#reservation" class="font-serif italic text-5xl hover:text-brand-gold transition-colors">Book a Table</a>
-        <a @click="open = false" href="/order" class="btn-brand text-xl px-12 py-5 relative">
+        <a @click="open = false" href="/" wire:navigate class="font-serif italic text-5xl hover:text-brand-gold transition-colors">Home</a>
+        <a @click="open = false" href="/#menu" wire:navigate class="font-serif italic text-5xl hover:text-brand-gold transition-colors">Our Menu</a>
+        <a @click="open = false" href="/#reservation" wire:navigate class="font-serif italic text-5xl hover:text-brand-gold transition-colors">Book a Table</a>
+        <a @click="open = false" href="/order" wire:navigate class="btn-brand text-xl px-12 py-5 relative">
             Order Online
             <span x-show="cartCount > 0"
                   x-text="cartCount"

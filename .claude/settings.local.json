@@ -11,7 +11,15 @@
       "Bash(php:*)",
       "Bash(for f:*)",
       "Bash(do php:*)",
-      "Bash(done)"
+      "Bash(done)",
+      "mcp__laravel-boost__browser-logs",
+      "mcp__laravel-boost__last-error",
+      "Bash(npm list:*)",
+      "mcp__laravel-boost__read-log-entries",
+      "Bash(ls -t storage/logs/*.log)",
+      "Bash(xargs tail:*)",
+      "Bash(curl -s http://127.0.0.1:8000/admin/pos)",
+      "Bash(curl -I http://127.0.0.1:8000/admin/pos)"
     ]
   },
   "enableAllProjectMcpServers": true,

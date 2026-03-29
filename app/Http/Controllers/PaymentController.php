@@ -58,7 +58,9 @@ class PaymentController extends Controller
         $paymentId = $request->query('paymentID') ?? session('bkash_payment_id');
 
         if (! $paymentId) {
-            return redirect()->route('pos')->with('error', 'No payment ID found.');
+            $redirectUrl = session('payment_origin') === 'frontend' ? route('order', ['payment' => 'failed']) : route('pos');
+
+            return redirect($redirectUrl)->with('error', 'No payment ID found.');
         }
 
         // Find order by payment ID reference
@@ -67,7 +69,9 @@ class PaymentController extends Controller
             ->first();
 
         if (! $order) {
-            return redirect()->route('pos')->with('error', 'Order not found.');
+            $redirectUrl = session('payment_origin') === 'frontend' ? route('order', ['payment' => 'failed']) : route('pos');
+
+            return redirect($redirectUrl)->with('error', 'Order not found.');
         }
 
         // Verify payment with bKash
@@ -84,7 +88,9 @@ class PaymentController extends Controller
 
             Log::info('bKash payment successful', ['order' => $order->order_number]);
 
-            return redirect()->route('pos')->with('success', 'Payment successful! Order completed.');
+            $redirectUrl = session('payment_origin') === 'frontend' ? route('order', ['payment' => 'success']) : route('pos');
+
+            return redirect($redirectUrl)->with('success', 'Payment successful! Order completed.');
         } else {
             $order->update([
                 'status' => 'failed',
@@ -94,7 +100,9 @@ class PaymentController extends Controller
 
             Log::warning('bKash payment failed', ['order' => $order->order_number]);
 
-            return redirect()->route('pos')->with('error', 'Payment failed. Please try again.');
+            $redirectUrl = session('payment_origin') === 'frontend' ? route('order', ['payment' => 'failed']) : route('pos');
+
+            return redirect($redirectUrl)->with('error', 'Payment failed. Please try again.');
         }
     }
 
@@ -164,7 +172,9 @@ class PaymentController extends Controller
 
             Log::info('SSLCommerze payment successful', ['order' => $order->order_number]);
 
-            return redirect()->route('pos')->with('success', 'Payment successful! Order completed.');
+            $redirectUrl = session('payment_origin') === 'frontend' ? route('order', ['payment' => 'success']) : route('pos');
+
+            return redirect($redirectUrl)->with('success', 'Payment successful! Order completed.');
         }
 
         $statusMessage = match ($validation['status']) {
@@ -181,7 +191,9 @@ class PaymentController extends Controller
             ]);
         }
 
-        return redirect()->route('pos')->with('error', $statusMessage);
+        $redirectUrl = session('payment_origin') === 'frontend' ? route('order', ['payment' => 'failed']) : route('pos');
+
+        return redirect($redirectUrl)->with('error', $statusMessage);
     }
 
     /**
@@ -205,7 +217,9 @@ class PaymentController extends Controller
 
         Log::warning('SSLCommerze payment failed', ['data' => $data]);
 
-        return redirect()->route('pos')->with('error', 'Payment failed or was cancelled.');
+        $redirectUrl = session('payment_origin') === 'frontend' ? route('order', ['payment' => 'failed']) : route('pos');
+
+        return redirect($redirectUrl)->with('error', 'Payment failed or was cancelled.');
     }
 
     /**
