@@ -229,16 +229,21 @@
 
     {{-- Mobile Floating Cart / Checkout Button --}}
     @if(count($cart) > 0)
-        <div class="lg:hidden fixed bottom-6 left-4 right-4 z-50 animate-fade-in-up">
+        <div class="lg:hidden fixed bottom-24 left-4 right-4 z-50 animate-fade-in-up">
             <button @click="showMobileCheckout = true"
-                class="w-full py-4 bg-brand-primary text-white rounded-2xl shadow-2xl shadow-brand-primary/30 flex items-center justify-between px-6 active:scale-[0.98] transition-transform">
-                <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
+                class="w-full py-5 bg-brand-emerald text-white rounded-2xl shadow-premium border border-white/10 flex items-center justify-between px-6 active:scale-95 transition-all">
+                <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 bg-brand-gold rounded-xl flex items-center justify-center shadow-lg shadow-brand-gold/20">
+                        <svg class="w-6 h-6 text-brand-emerald" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
                     </div>
-                    <span class="text-sm font-bold">Checkout ({{ $this->cartCount }})</span>
+                    <div class="text-left">
+                        <span class="text-xs font-black uppercase tracking-widest text-brand-gold block leading-none mb-1">View Checkout</span>
+                        <span class="text-sm font-bold text-white leading-none">{{ $this->cartCount }} item(s) selected</span>
+                    </div>
                 </div>
-                <span class="text-sm font-bold">৳{{ number_format($this->subtotal) }}</span>
+                <div class="flex flex-col items-end">
+                    <span class="text-lg font-black text-white leading-none">৳{{ number_format($this->subtotal) }}</span>
+                </div>
             </button>
         </div>
     @endif
@@ -250,9 +255,17 @@
             class="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl max-h-[90vh] flex flex-col">
 
             {{-- Mobile Header --}}
-            <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between shrink-0">
-                <h3 class="text-sm font-bold text-slate-900">Checkout ({{ $this->cartCount }} items)</h3>
-                <button @click="showMobileCheckout = false" class="text-slate-400">
+            <div class="px-6 py-5 border-b border-brand-gold/10 flex items-center justify-between shrink-0 bg-brand-emerald text-white rounded-t-3xl">
+                <div>
+                    <h3 class="text-lg font-bold tracking-tight">Checkout</h3>
+                    <div class="flex items-center gap-2 mt-0.5">
+                        <span class="text-[10px] font-black uppercase tracking-[0.2em] text-brand-gold">Step 1 of 2</span>
+                        <div class="w-12 h-1 bg-white/20 rounded-full overflow-hidden">
+                            <div class="w-1/2 h-full bg-brand-gold"></div>
+                        </div>
+                    </div>
+                </div>
+                <button @click="showMobileCheckout = false" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white active:scale-90 transition-transform">
                     <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
             </div>

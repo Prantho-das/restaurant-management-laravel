@@ -3,28 +3,21 @@
 use App\Http\Controllers\Api\OfflineSyncController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ReportController;
+use App\Livewire\Frontend\Home;
+use App\Livewire\Frontend\Menu;
+use App\Livewire\Frontend\ReservationForm;
+use App\Livewire\Frontend\CustomerOrder;
 use App\Livewire\TableMenu;
 use App\Models\Setting;
 use App\Services\MetaService;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    $settings = Setting::where('group', 'landing_page')->pluck('value', 'key');
+// --- Frontend Routes ---
+Route::get('/', Home::class)->name('home');
+Route::get('/menu', Menu::class)->name('menu');
+Route::get('/reservation', ReservationForm::class)->name('reservation');
+Route::get('/order', CustomerOrder::class)->name('order');
 
-    // Convert lp_ prefixed keys to match view variable expectations
-    $cms = (object) $settings->mapWithKeys(function ($value, $key) {
-        return [str_replace('lp_', '', $key) => $value];
-    })->all();
-
-    // Server-side Meta CAPI Tracking
-    app(MetaService::class)->sendEvent('PageView');
-
-    return view('welcome', compact('cms'));
-})->name('home');
-
-Route::view('/menu', 'menu')->name('menu');
-Route::view('/reservation', 'reservation')->name('reservation');
-Route::view('/order', 'order')->name('order');
 
 // QR Menu route points to Livewire component
 Route::get('/table/{table:slug}', TableMenu::class)->name('table.menu');

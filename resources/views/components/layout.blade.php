@@ -41,6 +41,8 @@
         {{ $slot }}
     </main>
 
+    <x-mobile-bottom-nav />
+
     <x-footer />
 
     <!-- Service Worker Registration -->
