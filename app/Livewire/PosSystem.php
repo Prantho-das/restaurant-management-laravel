@@ -8,8 +8,8 @@ use App\Models\MenuItem;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Setting;
-use App\Services\BkashService;
-use App\Services\SslcommerzeService;
+use App\Models\Table;
+use App\Services\InventoryService;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
@@ -76,6 +76,11 @@ class PosSystem extends Component
     protected function getCategories()
     {
         return Category::orderBy('priority_order')->get();
+    }
+
+    protected function getTables()
+    {
+        return Table::orderBy('name')->get();
     }
 
     protected function getItems()
@@ -186,39 +191,11 @@ class PosSystem extends Component
     #[Computed]
     public function enabledPaymentMethods(): array
     {
-        try {
-            $methods = [
-                'cash' => 'Cash',
-                'card' => 'Card',
-            ];
-
-            if (Setting::getValue('payment_bkash_enabled', '0') === '1') {
-                try {
-                    if (app(BkashService::class)->isEnabled()) {
-                        $methods['bkash'] = 'bKash';
-                    }
-                } catch (\Throwable $e) {
-                    // Log or ignore - bKash not available
-                }
-            }
-
-            if (Setting::getValue('payment_sslcommerze_enabled', '0') === '1') {
-                try {
-                    if (app(SslcommerzeService::class)->isEnabled()) {
-                        $methods['sslcommerze'] = 'SSLCommerze';
-                    }
-                } catch (\Throwable $e) {
-                    // Log or ignore - SSLCommerze not available
-                }
-            }
-
-            return $methods;
-        } catch (\Throwable $e) {
-            return [
-                'cash' => 'Cash',
-                'card' => 'Card',
-            ];
-        }
+        return [
+            'cash' => 'Cash',
+            'card' => 'Card',
+            'bkash' => 'bKash',
+        ];
     }
 
     #[Computed]
@@ -265,7 +242,7 @@ class PosSystem extends Component
             'total_amount' => $this->total,
             'order_type' => $this->orderType,
             'payment_method' => $this->paymentMethod,
-            'table_number' => $this->orderType === 'dine_in' ? $this->tableNumber : null,
+            'table_number' => $this->tableNumber ?: null,
             'customer_name' => $this->customerName,
             'customer_phone' => $this->customerPhone,
             'guest_count' => $this->guestCount,
@@ -297,6 +274,9 @@ class PosSystem extends Component
                     'price' => $item['price'],
                 ]);
             }
+
+            // Deduct stock explicitly since OrderObserver won't catch status transition for directly completed orders
+            app(InventoryService::class)->deductStockForOrder($order->load('items.menuItem.recipes.ingredient'));
 
             $receiptData = $order->load(['items.menuItem', 'user'])->toReceiptArray();
             $receiptData['auto_print'] = (bool) Setting::getValue('pos_auto_print_receipt', false);
@@ -332,7 +312,7 @@ class PosSystem extends Component
             'total_amount' => $this->total,
             'order_type' => $this->orderType,
             'payment_method' => $this->paymentMethod,
-            'table_number' => $this->orderType === 'dine_in' ? $this->tableNumber : null,
+            'table_number' => $this->tableNumber ?: null,
             'customer_name' => $this->customerName,
             'customer_phone' => $this->customerPhone,
             'guest_count' => $this->guestCount,
@@ -406,6 +386,7 @@ class PosSystem extends Component
             'categories' => $this->getCategories(),
             'items' => $this->getItems(),
             'enabledPaymentMethods' => $this->enabledPaymentMethods,
+            'tables' => $this->getTables(),
         ]);
     }
 }

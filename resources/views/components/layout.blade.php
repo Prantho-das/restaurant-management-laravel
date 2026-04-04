@@ -2,7 +2,7 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     @php
-        $siteTitle = App\Models\Setting::getValue('site_title', 'Royal Dine - Premium Heritage Cuisine');
+        $siteTitle = App\Models\Setting::getValue('site_title', 'Royal Dine') . ' - ' . App\Models\Setting::getValue('site_subtitle', 'Premium Heritage Cuisine');
         $siteDescription = App\Models\Setting::getValue('site_description');
         $siteKeywords = App\Models\Setting::getValue('site_keywords');
         $siteFavicon = App\Models\Setting::getValue('site_favicon');

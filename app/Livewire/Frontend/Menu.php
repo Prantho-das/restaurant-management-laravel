@@ -4,10 +4,12 @@ namespace App\Livewire\Frontend;
 
 use App\Models\Category;
 use App\Models\MenuItem;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 
 class Menu extends Component
 {
+    #[Url]
     public $selectedCategoryId = null;
 
     public $cart = [];

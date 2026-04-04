@@ -23,7 +23,9 @@ class ManageBrandingAndSeo extends Page implements HasForms
 
     protected string $view = 'filament.pages.manage-branding-and-seo';
 
-    protected static string|UnitEnum|null $navigationGroup = 'CMS & Marketing';
+    protected static string|UnitEnum|null $navigationGroup = 'Settings';
+
+    protected static ?int $navigationSort = 2;
 
     protected static ?string $title = 'Branding & SEO';
 
@@ -52,6 +54,10 @@ class ManageBrandingAndSeo extends Page implements HasForms
                             ->label('Website Title')
                             ->placeholder('Royal Dine - Premium Heritage Cuisine')
                             ->required(),
+                        TextInput::make('site_subtitle')
+                            ->label('Website Subtitle')
+                            ->placeholder('Heritage Cuisine')
+                            ->helperText('This tagline appears next to or below your logo/title.'),
                         TextInput::make('site_keywords')
                             ->label('Keywords')
                             ->placeholder('restaurant, heritage, cuisine, fine dining'),

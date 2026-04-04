@@ -12,6 +12,33 @@ use Filament\Schemas\Schema;
 
 class OrderForm
 {
+    public static function updateTotals(callable $get, callable $set): void
+    {
+        $items = $get('items') ?? [];
+        $subtotal = 0;
+
+        foreach ($items as $item) {
+            $price = (float) ($item['price'] ?? 0);
+            $quantity = (int) ($item['quantity'] ?? 1);
+            $subtotal += $price * $quantity;
+        }
+
+        $set('subtotal_amount', $subtotal);
+
+        $discountType = $get('discount_type');
+        $discountAmount = (float) ($get('discount_amount') ?? 0);
+
+        $total = $subtotal;
+
+        if ($discountType === 'fixed') {
+            $total -= $discountAmount;
+        } elseif ($discountType === 'percentage') {
+            $total -= ($subtotal * ($discountAmount / 100));
+        }
+
+        $set('total_amount', max(0, $total));
+    }
+
     public static function configure(Schema $schema): Schema
     {
         return $schema
@@ -72,6 +99,8 @@ class OrderForm
                     ->schema([
                         Repeater::make('items')
                             ->relationship('items')
+                            ->live()
+                            ->afterStateUpdated(fn (callable $get, callable $set) => self::updateTotals($get, $set))
                             ->schema([
                                 Select::make('menu_item_id')
                                     ->label('Menu Item')
@@ -80,23 +109,29 @@ class OrderForm
                                     ->searchable()
                                     ->preload()
                                     ->live()
-                                    ->afterStateUpdated(function ($state, callable $set) {
+                                    ->afterStateUpdated(function ($state, callable $get, callable $set) {
                                         if ($state) {
                                             $menuItem = MenuItem::find($state);
                                             if ($menuItem) {
                                                 $set('price', $menuItem->final_price);
                                             }
                                         }
+                                        self::updateTotals($get, $set);
                                     }),
                                 TextInput::make('quantity')
                                     ->required()
                                     ->numeric()
                                     ->default(1)
-                                    ->minValue(1),
+                                    ->minValue(1)
+                                    ->live()
+                                    ->afterStateUpdated(fn (callable $get, callable $set) => self::updateTotals($get, $set)),
                                 TextInput::make('price')
                                     ->required()
                                     ->numeric()
-                                    ->prefix('৳'),
+                                    ->prefix('৳')
+                                    ->readOnly()
+                                    ->dehydrated()
+                                    ->afterStateUpdated(fn (callable $get, callable $set) => self::updateTotals($get, $set)),
                             ])
                             ->columns(3)
                             ->itemLabel(fn (array $state): ?string => MenuItem::find($state['menu_item_id'] ?? null)?->name ?? null)
@@ -110,24 +145,30 @@ class OrderForm
                             ->required()
                             ->numeric()
                             ->prefix('৳')
-                            ->default(0),
+                            ->default(0)
+                            ->readOnly(),
                         Select::make('discount_type')
                             ->options([
                                 'fixed' => 'Fixed (৳)',
                                 'percentage' => 'Percentage (%)',
                             ])
-                            ->default('fixed'),
+                            ->default('fixed')
+                            ->live()
+                            ->afterStateUpdated(fn (callable $get, callable $set) => self::updateTotals($get, $set)),
                         TextInput::make('discount_amount')
                             ->label('Discount')
                             ->numeric()
                             ->prefix('৳')
-                            ->default(0),
+                            ->default(0)
+                            ->live()
+                            ->afterStateUpdated(fn (callable $get, callable $set) => self::updateTotals($get, $set)),
                         TextInput::make('total_amount')
                             ->label('Total')
                             ->required()
                             ->numeric()
                             ->prefix('৳')
-                            ->default(0),
+                            ->default(0)
+                            ->readOnly(),
                     ])
                     ->columns(2),
                 Section::make('Notes')

@@ -8,4 +8,9 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateInventoryLog extends CreateRecord
 {
     protected static string $resource = InventoryLogResource::class;
+
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
 }

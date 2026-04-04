@@ -18,21 +18,24 @@ class WastagesTable
             ->columns([
                 TextColumn::make('date')
                     ->date('d M Y')
-                    ->sortable(),
+                    ->sortable()
+                    ->icon('heroicon-o-calendar')
+                    ->iconColor('primary'),
                 TextColumn::make('ingredient.name')
-                    ->label('Ingredient')
+                    ->label('Wasted Item')
                     ->searchable()
-                    ->placeholder('—'),
-                TextColumn::make('menuItem.name')
-                    ->label('Menu Item')
-                    ->searchable()
-                    ->placeholder('—'),
+                    ->getStateUsing(function ($record) {
+                        return $record->ingredient?->name ?? $record->menuItem?->name ?? '—';
+                    })
+                    ->description(function ($record) {
+                        return $record->ingredient_id ? 'Ingredient' : ($record->menu_item_id ? 'Menu Item' : 'Unknown');
+                    }),
                 TextColumn::make('quantity')
                     ->numeric(decimalPlaces: 3)
-                    ->sortable(),
-                TextColumn::make('unit')
-                    ->badge()
-                    ->color('gray'),
+                    ->sortable()
+                    ->formatStateUsing(fn ($state, $record) => $state.' '.$record->unit)
+                    ->color('warning')
+                    ->badge(),
                 TextColumn::make('reason')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
@@ -51,6 +54,14 @@ class WastagesTable
                         'quality_issue' => 'Quality Issue',
                         default => ucfirst($state),
                     })
+                    ->icon(fn (string $state): string => match ($state) {
+                        'expired' => 'heroicon-o-clock',
+                        'damaged' => 'heroicon-o-x-circle',
+                        'spillage' => 'heroicon-o-beaker',
+                        'preparation_error' => 'heroicon-o-wrench',
+                        'quality_issue' => 'heroicon-o-hand-thumb-down',
+                        default => 'heroicon-o-question-mark-circle',
+                    })
                     ->sortable(),
                 TextColumn::make('estimated_cost')
                     ->label('Est. Cost')
@@ -61,6 +72,10 @@ class WastagesTable
                     ->color('danger'),
                 TextColumn::make('user.name')
                     ->label('Recorded By')
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('notes')
+                    ->label('Notes')
+                    ->limit(30)
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
                     ->dateTime()
@@ -76,7 +91,8 @@ class WastagesTable
                         'preparation_error' => 'Preparation Error',
                         'quality_issue' => 'Quality Issue',
                         'other' => 'Other',
-                    ]),
+                    ])
+                    ->native(false),
             ])
             ->recordActions([
                 EditAction::make(),

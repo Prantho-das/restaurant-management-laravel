@@ -23,7 +23,7 @@ class PayrollsTable
                 TextColumn::make('year')
                     ->sortable(),
                 TextColumn::make('net_paid')
-                    ->money('USD')
+                    ->money('BDT')
                     ->sortable(),
                 TextColumn::make('payment_date')
                     ->date()

@@ -24,7 +24,9 @@ class ManageLandingPage extends Page implements HasForms
 
     protected string $view = 'filament.pages.manage-landing-page';
 
-    protected static string|UnitEnum|null $navigationGroup = 'CMS & Marketing';
+    protected static string|UnitEnum|null $navigationGroup = 'Settings';
+
+    protected static ?int $navigationSort = 3;
 
     protected static ?string $title = 'Landing Page';
 

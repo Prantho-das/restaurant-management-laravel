@@ -16,6 +16,10 @@
     => 'Financial health: Sales vs Expenses.'],
     ['name' => 'Staff Performance', 'slug' => 'staff-performance', 'icon' => 'heroicon-o-users', 'color' => 'gray',
     'desc' => 'Sales and order metrics per employee.'],
+    ['name' => 'Purchases Report', 'slug' => 'purchases', 'icon' => 'heroicon-o-shopping-cart', 'color' => 'info',
+    'desc' => 'Inventory procurement and supplier costs.'],
+    ['name' => 'Stock Adjustments', 'slug' => 'stock-adjustments', 'icon' => 'heroicon-o-adjustments-horizontal', 'color' => 'warning',
+    'desc' => 'Manual stock corrections and audit trail.'],
     ];
     @endphp
 

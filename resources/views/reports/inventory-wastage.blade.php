@@ -51,7 +51,7 @@
                 @foreach($logs as $log)
                     <tr>
                         <td>{{ \Carbon\Carbon::parse($log->date)->format('M d, Y') }}</td>
-                        <td>{{ $log->ingredient->name }}</td>
+                        <td>{{ $log->ingredient?->name ?? 'Unknown/Deleted Ingredient' }}</td>
                         <td>{{ $log->quantity }} {{ $log->unit }}</td>
                         <td>{{ $log->reason }}</td>
                         <td class="text-right">৳{{ number_format($log->estimated_cost, 2) }}</td>

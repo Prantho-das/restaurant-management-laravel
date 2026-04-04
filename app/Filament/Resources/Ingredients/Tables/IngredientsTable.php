@@ -6,6 +6,7 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 
 class IngredientsTable
@@ -16,6 +17,14 @@ class IngredientsTable
             ->columns([
                 TextColumn::make('name')
                     ->searchable(),
+                TextColumn::make('category')
+                    ->sortable()
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'Food' => 'info',
+                        'Supply' => 'warning',
+                        default => 'gray',
+                    }),
                 TextColumn::make('unit')
                     ->searchable(),
                 TextColumn::make('current_stock')
@@ -37,7 +46,11 @@ class IngredientsTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                SelectFilter::make('category')
+                    ->options([
+                        'Food' => 'Food',
+                        'Supply' => 'Supply',
+                    ]),
             ])
             ->recordActions([
                 EditAction::make(),

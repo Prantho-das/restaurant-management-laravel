@@ -5,19 +5,22 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ReportController;
 use App\Livewire\Frontend\Home;
 use App\Livewire\Frontend\Menu;
-use App\Livewire\Frontend\ReservationForm;
-use App\Livewire\Frontend\CustomerOrder;
 use App\Livewire\TableMenu;
-use App\Models\Setting;
-use App\Services\MetaService;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
+Route::get('/optimize-clear', function () {
+    Artisan::call('storage:link');
+
+    Artisan::call('optimize:clear');
+
+    return 'Application optimized and cache cleared!';
+});
 // --- Frontend Routes ---
 Route::get('/', Home::class)->name('home');
-Route::get('/menu', Menu::class)->name('menu');
-Route::get('/reservation', ReservationForm::class)->name('reservation');
-Route::get('/order', CustomerOrder::class)->name('order');
-
+Route::view('/menu', 'menu')->name('menu');
+Route::view('/reservation', 'reservation')->name('reservation');
+Route::view('/order', 'order')->name('order');
 
 // QR Menu route points to Livewire component
 Route::get('/table/{table:slug}', TableMenu::class)->name('table.menu');
@@ -29,6 +32,8 @@ Route::middleware(['auth'])->prefix('admin/reports')->group(function () {
     Route::get('/inventory-wastage', [ReportController::class, 'inventoryWastage'])->name('reports.inventory-wastage');
     Route::get('/profit-loss', [ReportController::class, 'profitLoss'])->name('reports.profit-loss');
     Route::get('/staff-performance', [ReportController::class, 'staffPerformance'])->name('reports.staff-performance');
+    Route::get('/purchases', [ReportController::class, 'purchasesReport'])->name('reports.purchases');
+    Route::get('/stock-adjustments', [ReportController::class, 'stockAdjustmentsReport'])->name('reports.stock-adjustments');
 });
 
 // Offline Sync API Routes

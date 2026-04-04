@@ -6,6 +6,8 @@ use App\Models\Expense;
 use App\Models\Ingredient;
 use App\Models\Order;
 use App\Models\Payroll;
+use App\Models\Purchase;
+use App\Models\StockAdjustment;
 use App\Models\User;
 use App\Models\Wastage;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -131,5 +133,42 @@ class ReportController extends Controller
         $pdf = Pdf::loadView('reports.staff-performance', compact('staffData', 'startDate', 'endDate'));
 
         return $pdf->download("staff-performance-{$startDate}-to-{$endDate}.pdf");
+    }
+
+    public function purchasesReport(Request $request)
+    {
+        $startDate = $request->get('start_date', now()->startOfMonth());
+        $endDate = $request->get('end_date', now()->endOfMonth());
+
+        $purchases = Purchase::with(['supplier', 'user'])
+            ->whereBetween('purchase_date', [$startDate, $endDate])
+            ->where('status', 'received')
+            ->get();
+
+        $summary = [
+            'total_amount' => $purchases->sum('total_amount'),
+            'total_purchases' => $purchases->count(),
+            'start_date' => $startDate,
+            'end_date' => $endDate,
+        ];
+
+        $pdf = Pdf::loadView('reports.purchases', compact('purchases', 'summary', 'startDate', 'endDate'));
+
+        return $pdf->download("purchases-report-{$startDate}-to-{$endDate}.pdf");
+    }
+
+    public function stockAdjustmentsReport(Request $request)
+    {
+        $startDate = $request->get('start_date', now()->startOfMonth());
+        $endDate = $request->get('end_date', now()->endOfMonth());
+
+        $adjustments = StockAdjustment::with(['user', 'items.ingredient'])
+            ->whereBetween('adjustment_date', [$startDate, $endDate])
+            ->where('status', 'completed')
+            ->get();
+
+        $pdf = Pdf::loadView('reports.stock-adjustments', compact('adjustments', 'startDate', 'endDate'));
+
+        return $pdf->download("stock-adjustments-report-{$startDate}-to-{$endDate}.pdf");
     }
 }

@@ -25,15 +25,16 @@ class MenuItemsTable
                 TextColumn::make('slug')
                     ->searchable(),
                 TextColumn::make('base_price')
-                    ->money("BDT")
+                    ->money('BDT')
                     ->sortable(),
                 TextColumn::make('discount_price')
-                ->money("BDT")
+                    ->money('BDT')
                     ->sortable(),
                 TextColumn::make('tax_rate')
                     ->numeric()
                     ->sortable(),
-                ImageColumn::make('image'),
+                ImageColumn::make('image')
+                    ->defaultImageUrl(asset('placeholder.png')),
                 IconColumn::make('is_active')
                     ->boolean(),
                 TextColumn::make('sku')

@@ -37,6 +37,7 @@ class AdminPanelProvider extends PanelProvider
             ->brandLogo(fn () => view('components.filament-logo'))
             ->favicon(fn () => Setting::getValue('site_favicon') ? Storage::url(Setting::getValue('site_favicon')) : asset('favicon.ico'))
             ->globalSearch(false)
+            ->breadcrumbs(false)
             ->maxContentWidth(Width::Full)
             ->sidebarWidth('16rem')
             ->sidebarCollapsibleOnDesktop()

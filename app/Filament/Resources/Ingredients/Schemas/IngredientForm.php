@@ -15,6 +15,13 @@ class IngredientForm
                 TextInput::make('name')
                     ->required()
                     ->unique(ignoreRecord: true),
+                Select::make('category')
+                    ->options([
+                        'Food' => 'FoodIngredient',
+                        'Supply' => 'Non-Food Supply',
+                    ])
+                    ->default('Food')
+                    ->required(),
                 Select::make('unit')
                     ->options([
                         'kg' => 'Kilogram (kg)',

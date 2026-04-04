@@ -22,7 +22,8 @@ class CategoriesTable
                     ->searchable(),
                 TextColumn::make('slug')
                     ->searchable(),
-                ImageColumn::make('image'),
+                ImageColumn::make('image')
+                    ->defaultImageUrl(asset('placeholder.png')),
                 TextColumn::make('priority_order')
                     ->numeric()
                     ->sortable(),

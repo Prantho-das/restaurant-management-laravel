@@ -52,7 +52,11 @@ class ReservationForm extends Component
 
         $this->isSuccess = true;
         $this->reset(['name', 'phone', 'notes']);
-        // Keep date, guests, arrangement as they were for convenience, or reset all
+
+        $this->dispatch('notify',
+            message: 'Reservation Requested Successfully',
+            type: 'success'
+        );
     }
 
     public function render()

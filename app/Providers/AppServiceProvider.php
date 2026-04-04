@@ -3,7 +3,11 @@
 namespace App\Providers;
 
 use App\Models\Order;
+use App\Models\Purchase;
+use App\Models\Wastage;
 use App\Observers\OrderObserver;
+use App\Observers\PurchaseObserver;
+use App\Observers\WastageObserver;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
@@ -28,6 +32,8 @@ class AppServiceProvider extends ServiceProvider
         $this->configureDefaults();
 
         Order::observe(OrderObserver::class);
+        Purchase::observe(PurchaseObserver::class);
+        Wastage::observe(WastageObserver::class);
     }
 
     /**

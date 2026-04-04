@@ -19,7 +19,7 @@ class MenuItem extends Model
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['base_price', 'discount_price', 'tax_rate'])
+            ->logFillable()
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs();
     }
