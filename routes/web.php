@@ -6,6 +6,7 @@ use App\Http\Controllers\ReportController;
 use App\Livewire\Frontend\Home;
 use App\Livewire\Frontend\Menu;
 use App\Livewire\TableMenu;
+use App\Models\Page;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
@@ -62,3 +63,10 @@ Route::prefix('payment')->name('payment.')->group(function () {
     // SSLCommerze IPN - public endpoint for server-to-server notifications
     Route::post('sslcommerze/ipn', [PaymentController::class, 'sslcommerzeIpn'])->name('sslcommerze.ipn');
 });
+
+// Custom Pages (Catch-all)
+Route::get('/{slug}', function ($slug) {
+    $page = Page::where('slug', $slug)->where('is_active', true)->firstOrFail();
+
+    return view('pages.show', compact('page'));
+})->name('page.show');

@@ -7,6 +7,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Str;
 
 class CategoryForm
 {
@@ -17,9 +18,12 @@ class CategoryForm
                 Select::make('parent_id')
                     ->relationship('parent', 'name'),
                 TextInput::make('name')
-                    ->required(),
+                    ->required()
+                    ->live()
+                    ->afterStateUpdated(fn (string $operation, $state, $set) => $operation === 'create' ? $set('slug', Str::slug($state)) : null),
                 TextInput::make('slug')
-                    ->required(),
+                    ->required()
+                    ->unique(ignoreRecord: true),
                 FileUpload::make('image')
                     ->image(),
                 TextInput::make('priority_order')

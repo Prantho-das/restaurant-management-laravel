@@ -78,12 +78,44 @@ class ManageLandingPage extends Page implements HasForms
                             ->columnSpanFull(),
                     ])->columns(2),
 
+                Section::make('Mission & Vision')
+                    ->description('Communicate your brand\'s purpose and future goals.')
+                    ->schema([
+                        Section::make('Our Mission')
+                            ->schema([
+                                TextInput::make('lp_mission_title')
+                                    ->label('Mission Title'),
+                                TextInput::make('lp_mission_subtitle')
+                                    ->label('Mission Subtitle'),
+                                Textarea::make('lp_mission_description')
+                                    ->label('Mission Description')
+                                    ->columnSpanFull(),
+                                FileUpload::make('lp_mission_image')
+                                    ->label('Mission Image')
+                                    ->image()
+                                    ->directory('landing-page'),
+                            ])->columns(2),
+                        Section::make('Our Vision')
+                            ->schema([
+                                TextInput::make('lp_vision_title')
+                                    ->label('Vision Title'),
+                                TextInput::make('lp_vision_subtitle')
+                                    ->label('Vision Subtitle'),
+                                Textarea::make('lp_vision_description')
+                                    ->label('Vision Description')
+                                    ->columnSpanFull(),
+                                FileUpload::make('lp_vision_image')
+                                    ->label('Vision Image')
+                                    ->image()
+                                    ->directory('landing-page'),
+                            ])->columns(2),
+                    ]),
+
                 Section::make('Visual Story Section')
                     ->schema([
                         TextInput::make('lp_visual_story_title'),
                         TextInput::make('lp_visual_story_subtitle'),
                     ])->columns(2),
-
                 Section::make('Status')
                     ->schema([
                         Toggle::make('lp_is_active')

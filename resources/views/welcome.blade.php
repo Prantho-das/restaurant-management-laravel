@@ -79,6 +79,50 @@
         </div>
     </section>
 
+    <!-- Mission & Vision Section -->
+    <section class="section-padding bg-white relative overflow-hidden">
+        <div class="container-wide relative z-10">
+            <div class="grid lg:grid-cols-2 gap-16 lg:gap-24 items-center">
+                <!-- Mission -->
+                <div class="group">
+                    <div class="relative mb-12 overflow-hidden rounded-3xl aspect-[16/9] shadow-luxury">
+                        <img src="{{ !empty($cms->mission_image) ? Storage::url($cms->mission_image) : asset('placeholder.png') }}" 
+                             alt="Our Mission" 
+                             class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                        <div class="absolute inset-0 bg-gradient-to-t from-brand-emerald/40 to-transparent"></div>
+                        <div class="absolute bottom-8 left-8">
+                            <span class="text-white font-bold tracking-[0.3em] uppercase text-[10px] block mb-2">{{ $cms->mission_subtitle ?? 'The Heart of Hospitality' }}</span>
+                            <h3 class="text-white text-3xl font-serif italic">{{ $cms->mission_title ?? 'Our Mission' }}</h3>
+                        </div>
+                    </div>
+                    <p class="text-brand-emerald/70 text-lg leading-relaxed italic border-l-4 border-brand-gold pl-8 py-2">
+                        "{{ $cms->mission_description ?? 'To preserve and promote the authentic heritage of Bangladeshi cuisine while providing a royal dining experience.' }}"
+                    </p>
+                </div>
+
+                <!-- Vision -->
+                <div class="group lg:mt-24">
+                    <div class="relative mb-12 overflow-hidden rounded-3xl aspect-[16/9] shadow-luxury">
+                        <img src="{{ !empty($cms->vision_image) ? Storage::url($cms->vision_image) : asset('placeholder.png') }}" 
+                             alt="Our Vision" 
+                             class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                        <div class="absolute inset-0 bg-gradient-to-t from-brand-gold/40 to-transparent"></div>
+                        <div class="absolute bottom-8 left-8">
+                            <span class="text-white font-bold tracking-[0.3em] uppercase text-[10px] block mb-2">{{ $cms->vision_subtitle ?? 'The Future of Tradition' }}</span>
+                            <h3 class="text-white text-3xl font-serif italic">{{ $cms->vision_title ?? 'Our Vision' }}</h3>
+                        </div>
+                    </div>
+                    <p class="text-brand-emerald/70 text-lg leading-relaxed italic border-l-4 border-brand-emerald pl-8 py-2">
+                        "{{ $cms->vision_description ?? 'To become the global ambassador of Bangladeshi culinary arts, setting the gold standard for heritage dining.' }}"
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Decorative background elements -->
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[60%] bg-brand-gold/5 rounded-full blur-[120px] -z-0"></div>
+    </section>
+
     <!-- Signature Menu Section -->
     <section id="menu" class="section-padding bg-parchment relative">
         <div class="absolute top-20 left-0 w-[30%] h-[40%] bg-brand-emerald/5 rounded-full blur-3xl"></div>

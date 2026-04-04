@@ -202,7 +202,7 @@
                         <svg class="w-3.5 h-3.5 text-brand-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
                         </svg>
-                        {{ count($items) }} Items
+                        {{ $items->count() }} / {{ $totalItems }} Items
                     </div>
                 </div>
             </div>
@@ -290,6 +290,25 @@
                         </div>
                     @endforeach
                 </div>
+
+                {{-- Load More --}}
+                @if($hasMoreItems)
+                    <div class="col-span-full pt-2 pb-1 flex justify-center">
+                        <button
+                            wire:click="loadMore"
+                            wire:loading.attr="disabled"
+                            wire:target="loadMore"
+                            class="flex items-center gap-2 px-6 py-2.5 rounded-xl border-2 text-[9px] font-black uppercase tracking-widest transition-all duration-200 active:scale-[0.97] disabled:opacity-50 disabled:cursor-wait"
+                            style="border-color: #808000; color: #808000;"
+                            onmouseover="this.style.background='#808000'; this.style.color='white';"
+                            onmouseout="this.style.background='transparent'; this.style.color='#808000';">
+                            <svg wire:loading.remove wire:target="loadMore" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+                            <svg wire:loading wire:target="loadMore" class="animate-spin w-3.5 h-3.5" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                            <span wire:loading.remove wire:target="loadMore">Load More — {{ $totalItems - $items->count() }} more</span>
+                            <span wire:loading wire:target="loadMore">Loading…</span>
+                        </button>
+                    </div>
+                @endif
 
                 <!-- Empty State -->
                 @if($items->isEmpty())
@@ -474,38 +493,79 @@
                     </div>
                 </div>
 
-                <!-- Payment Methods -->
-                <div class="grid gap-2"
-                    style="grid-template-columns: repeat({{ count($enabledPaymentMethods ?? []) }}, minmax(0, 1fr));">
-                    @foreach($enabledPaymentMethods as $methodKey => $methodLabel)
-                        @php
-                            $config = $paymentMethodConfigs[$methodKey] ?? null;
-                            if (!$config) continue;
-                            $isOnline = in_array($methodKey, $onlinePaymentMethods);
-                            $color = $config['color'];
-                        @endphp
-                        <button wire:click="$set('paymentMethod', '{{ $methodKey }}')" :class="{
-                                    'ring-2 ring-offset-1 ring-{{ $color }}-500 bg-white text-slate-500 shadow-lg': $wire.paymentMethod === '{{ $methodKey }}',
-                                    'bg-white text-slate-500 border border-slate-200 hover:border-{{ $color }}-300 hover:bg-{{ $color }}-50': $wire.paymentMethod !== '{{ $methodKey }}'
-                                }"
-                            class="py-2.5 rounded-xl flex flex-col items-center gap-1 transition-all duration-200 relative">
-                            {!! $config['icon'] !!}
-                            <span class="text-[7px] font-black uppercase tracking-widest">{{ $methodLabel }}</span>
-                        </button>
-                    @endforeach
+                <!-- Split Payment Toggle -->
+                <div class="flex items-center justify-between bg-slate-50 p-2 rounded-xl border border-slate-200">
+                    <span class="text-[9px] font-black text-slate-600 uppercase tracking-wider flex items-center gap-2">
+                         <svg class="w-3.5 h-3.5 text-brand-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        Split Payment
+                    </span>
+                    <button wire:click="$toggle('isSplitPayment')" 
+                        class="relative inline-flex h-5 w-10 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none {{ $isSplitPayment ? 'bg-brand-primary' : 'bg-slate-300' }}">
+                        <span class="pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out {{ $isSplitPayment ? 'translate-x-5' : 'translate-x-0' }}"></span>
+                    </button>
                 </div>
 
-                <!-- Reference No / Transaction ID -->
-                <template x-if="$wire.paymentMethod !== 'cash'">
-                    <div class="space-y-1 animate-fadeIn">
-                        <label class="pos-field-label text-rose-500 flex items-center gap-1.5">
-                            <span class="w-1.5 h-1.5 bg-rose-500 rounded-full inline-block"></span>
-                            Reference / Transaction ID (Required)
-                        </label>
-                        <input wire:model="referenceNo" type="text" placeholder="e.g. TRX-123456"
-                            class="pos-field-input border-rose-200 focus:border-rose-400 focus:ring-rose-500/20">
+                <!-- Split Payment Rows -->
+                @if($isSplitPayment)
+                    <div class="space-y-2 max-h-[180px] overflow-y-auto pr-1 animate-fadeIn">
+                        @foreach($paymentSplits as $index => $split)
+                            <div class="bg-white border border-slate-200 rounded-xl p-2 space-y-2 relative group shadow-sm">
+                                <div class="flex items-center gap-2">
+                                    <select wire:model="paymentSplits.{{ $index }}.method" class="pos-field-select !py-1 text-[9px] flex-1">
+                                        @foreach($paymentMethodConfigs as $key => $config)
+                                            <option value="{{ $key }}">{{ $config['label'] }}</option>
+                                        @endforeach
+                                    </select>
+                                    <input wire:model="paymentSplits.{{ $index }}.amount" type="number" step="0.01" placeholder="Amount"
+                                        class="pos-field-input !py-1 text-[9px] w-24 text-right font-black">
+                                    <button wire:click="removePaymentSplit({{ $index }})" class="p-1 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors">
+                                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                    </button>
+                                </div>
+                                <input wire:model="paymentSplits.{{ $index }}.reference_no" type="text" placeholder="Ref No (Optional)"
+                                    class="pos-field-input !py-1 text-[8px] italic">
+                            </div>
+                        @endforeach
+                        <button wire:click="addPaymentSplit" class="w-full py-1.5 border-2 border-dashed border-slate-300 rounded-xl text-[8px] font-black text-slate-500 uppercase tracking-widest hover:border-brand-primary hover:text-brand-primary transition-all flex items-center justify-center gap-2">
+                            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+                            Add Payment Method
+                        </button>
                     </div>
-                </template>
+                @else
+                    <!-- Payment Methods -->
+                    <div class="grid grid-cols-3 lg:grid-cols-3 gap-2">
+                        @foreach($enabledPaymentMethods as $methodKey => $methodLabel)
+                            @php
+                                $config = $paymentMethodConfigs[$methodKey] ?? null;
+                                if (!$config) continue;
+                                $isOnline = in_array($methodKey, $onlinePaymentMethods);
+                                $color = $config['color'];
+                            @endphp
+                            <button wire:click="$set('paymentMethod', '{{ $methodKey }}')" :class="{
+                                        'ring-2 ring-offset-1 ring-{{ $color }}-500 bg-white text-slate-500 shadow-lg': $wire.paymentMethod === '{{ $methodKey }}',
+                                        'bg-white text-slate-500 border border-slate-200 hover:border-{{ $color }}-300 hover:bg-{{ $color }}-50': $wire.paymentMethod !== '{{ $methodKey }}'
+                                    }"
+                                class="py-2.5 rounded-xl flex flex-col items-center gap-1 transition-all duration-200 relative">
+                                {!! $config['icon'] !!}
+                                <span class="text-[7px] font-black uppercase tracking-widest">{{ $methodLabel }}</span>
+                            </button>
+                        @endforeach
+                    </div>
+
+                    <!-- Reference No / Transaction ID -->
+                    <template x-if="$wire.paymentMethod !== 'cash'">
+                        <div class="space-y-1 animate-fadeIn">
+                            <label class="pos-field-label text-rose-500 flex items-center gap-1.5">
+                                <span class="w-1.5 h-1.5 bg-rose-500 rounded-full inline-block"></span>
+                                Reference / Transaction ID (Required)
+                            </label>
+                            <input wire:model="referenceNo" type="text" placeholder="e.g. TRX-123456"
+                                class="pos-field-input border-rose-200 focus:border-rose-400 focus:ring-rose-500/20">
+                        </div>
+                    </template>
+                @endif
 
                 <!-- Action Buttons -->
                 <div class="flex gap-2 pt-1">

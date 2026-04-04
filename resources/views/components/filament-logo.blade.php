@@ -4,7 +4,7 @@
 @endphp
 
 @if($logo)
-    <img src="{{ $logo ? Storage::url($logo) : asset('placeholder.png') }}" alt="{{ $siteName }}" class="h-10 w-auto object-contain">
+    <img src="{{ $logo ? Storage::url($logo) : asset('placeholder.png') }}" alt="{{ $siteName }}" class="h-12 w-auto object-contain">
 @else
     <div class="flex items-center gap-2">
         <div class="w-8 h-8 rounded bg-primary-600 flex items-center justify-center text-white font-serif italic text-xl font-bold">

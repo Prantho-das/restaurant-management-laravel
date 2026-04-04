@@ -10,21 +10,37 @@ use Livewire\Component;
 class Menu extends Component
 {
     #[Url]
-    public $selectedCategoryId = null;
+    public ?int $selectedCategoryId = null;
 
-    public $cart = [];
+    #[Url]
+    public string $search = '';
 
-    public function mount()
+    public int $perPage = 12;
+
+    public array $cart = [];
+
+    public function mount(): void
     {
         $this->cart = session('cart', []);
     }
 
-    public function selectCategory($id = null)
+    public function selectCategory(?int $id = null): void
     {
         $this->selectedCategoryId = $id;
+        $this->perPage = 12;
     }
 
-    public function addToCart($itemId)
+    public function updatedSearch(): void
+    {
+        $this->perPage = 12;
+    }
+
+    public function loadMore(): void
+    {
+        $this->perPage += 12;
+    }
+
+    public function addToCart(int $itemId): void
     {
         $item = MenuItem::find($itemId);
         if (! $item) {
@@ -50,23 +66,30 @@ class Menu extends Component
         $this->dispatch('notify', ['type' => 'success', 'message' => "{$item->name} added to cart!"]);
     }
 
-    public function getCartCountProperty()
+    public function getCartCountProperty(): int
     {
         return collect($this->cart)->sum('quantity');
     }
 
-    public function getSubtotalProperty()
+    public function getSubtotalProperty(): float
     {
         return collect($this->cart)->sum(fn ($item) => $item['price'] * $item['quantity']);
     }
 
     public function with(): array
     {
+        $query = MenuItem::where('is_active', true)
+            ->when($this->selectedCategoryId, fn ($q) => $q->where('category_id', $this->selectedCategoryId))
+            ->when($this->search, fn ($q) => $q->where('name', 'like', '%'.$this->search.'%'));
+
+        $total = $query->count();
+        $menuItems = $query->take($this->perPage)->get();
+
         return [
             'categories' => Category::where('is_active', true)->orderBy('priority_order')->get(),
-            'menuItems' => MenuItem::where('is_active', true)
-                ->when($this->selectedCategoryId, fn ($q) => $q->where('category_id', $this->selectedCategoryId))
-                ->get(),
+            'menuItems' => $menuItems,
+            'totalCount' => $total,
+            'hasMoreItems' => $total > $this->perPage,
         ];
     }
 

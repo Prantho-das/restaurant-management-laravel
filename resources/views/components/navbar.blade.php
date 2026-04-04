@@ -27,7 +27,7 @@
         <!-- Logo -->
         <a href="/" wire:navigate class="flex items-center gap-3 group relative z-25">
             @if($logo = App\Models\Setting::getValue('site_logo'))
-                <img src="{{ Storage::url($logo) }}" alt="{{ App\Models\Setting::getValue('site_title', 'Royal Dine') }}" class="h-10 md:h-12 w-auto object-contain transition-transform duration-300 group-hover:scale-105">
+                <img src="{{ Storage::url($logo) }}" alt="{{ App\Models\Setting::getValue('site_title', 'Royal Dine') }}" class="h-14 md:h-20 w-auto object-contain transition-transform duration-300 group-hover:scale-105">
             @else
                 <div class="flex flex-col">
                     <span class="text-brand-emerald font-serif italic text-xl md:text-2xl font-black tracking-tight leading-none uppercase group-hover:text-brand-emerald-light transition-colors">{{ App\Models\Setting::getValue('site_title', 'Royal Dine') }}</span>

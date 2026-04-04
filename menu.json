@@ -1,0 +1,306 @@
+{
+  "restaurant_menu": {
+    "breakfast_items": [
+      {
+        "item_en": "Thin Naan / Paratha",
+        "item_bn": "পাতলা নান / পরোটা",
+        "price_tk": 20,
+        "image_url": "https://images.unsplash.com/photo-1626132646545-0d929949646b?q=80&w=500&auto=format&fit=crop"
+      },
+      {
+        "item_en": "Vegetables / Moog Daal / Boot Dall",
+        "item_bn": "সবজি / মুগডাল / বুটের ডাল",
+        "price_tk": 30,
+        "image_url": "https://images.unsplash.com/photo-1585937421612-70a008356fbe?q=80&w=500&auto=format&fit=crop"
+      },
+      {
+        "item_en": "Halua",
+        "item_bn": "হালুয়া",
+        "price_tk": 60,
+        "image_url": "https://images.unsplash.com/photo-1589113331515-9988a8d7973d?q=80&w=500&auto=format&fit=crop"
+      },
+      {
+        "item_en": "Goat Brain (Half/Full)",
+        "item_bn": "খাসির মগজ (হাফ/ফুল)",
+        "price_tk": "120/240",
+        "image_url": "https://images.unsplash.com/photo-1606491956391-70868b5d0f47?q=80&w=500&auto=format&fit=crop"
+      },
+      {
+        "item_en": "Chicken Soup / Goat Paya / Goat Liver (Half)",
+        "item_bn": "চিকেন স্যুপ / খাসির পায়া / খাসির কলিজা (হাফ)",
+        "price_tk": 150,
+        "image_url": "https://images.unsplash.com/photo-1547592166-23ac45744acd?q=80&w=500&auto=format&fit=crop"
+      },
+      {
+        "item_en": "Goat Liver (Full)",
+        "item_bn": "খাসির কলিজা (ফুল)",
+        "price_tk": 300,
+        "image_url": "https://images.unsplash.com/photo-1628275057476-800110a6b7b9?q=80&w=500&auto=format&fit=crop"
+      },
+      {
+        "item_en": "Gila Liver",
+        "item_bn": "গিলা কলিজা",
+        "price_tk": 100,
+        "image_url": "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?q=80&w=500&auto=format&fit=crop"
+      },
+      {
+        "item_en": "Cow Nehari",
+        "item_bn": "গরুর নেহারী",
+        "price_tk": 200,
+        "image_url": "https://images.unsplash.com/photo-1544333346-60842ec97103?q=80&w=500&auto=format&fit=crop"
+      },
+      {
+        "item_en": "Chicken Stri Fry",
+        "item_bn": "মুরগীর ঝাল ফ্রাই",
+        "price_tk": 160,
+        "image_url": "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?q=80&w=500&auto=format&fit=crop"
+      },
+      {
+        "item_en": "Beef Roast",
+        "item_bn": "গরু ভুনা",
+        "price_tk": 260,
+        "image_url": "https://images.unsplash.com/photo-1603360946369-dc9bb6258143?q=80&w=500&auto=format&fit=crop"
+      }
+    ],
+    "kebab_and_naan_items": [
+      {
+        "item_en": "Butter Naan / Laccha Paratha",
+        "item_bn": "বাটার নান / লাচ্ছা পরোটা",
+        "price_tk": 40,
+        "image_url": "https://images.unsplash.com/photo-1601050690597-df056fb1d745?q=80&w=500&auto=format&fit=crop"
+      },
+      {
+        "item_en": "Special Naan / Garlic Naan / Chili Garlic Naan",
+        "item_bn": "স্পেশাল নান / গার্লিক নান / চিলি গার্লিক নান",
+        "price_tk": 70,
+        "image_url": "https://images.unsplash.com/photo-1573145418182-4166299b66f2?q=80&w=500&auto=format&fit=crop"
+      },
+      {
+        "item_en": "Kashmiri Naan",
+        "item_bn": "কাশ্মিরি নান",
+        "price_tk": 120,
+        "image_url": "https://images.unsplash.com/photo-1633945274405-b6c8069047b0?q=80&w=500&auto=format&fit=crop"
+      },
+      {
+        "item_en": "Shahi Paratha / Rumali Ruti",
+        "item_bn": "শাহী পরোটা / রুমালি রুটি",
+        "price_tk": 30,
+        "image_url": "https://images.unsplash.com/photo-1589676773103-ec58967f708c?q=80&w=500&auto=format&fit=crop"
+      },
+      {
+        "item_en": "Beef Shik Kebab",
+        "item_bn": "বিফ শিক কাবাব",
+        "price_tk": 200,
+        "image_url": "https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?q=80&w=500&auto=format&fit=crop"
+      },
+      {
+        "item_en": "Chicken Grill Pickle (Quater/Half/Full)",
+        "item_bn": "চিকেন গ্রীল আচারী (কোয়াটার/হাফ/ফুল)",
+        "price_tk": "130/260/500",
+        "image_url": "https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?q=80&w=500&auto=format&fit=crop"
+      },
+      {
+        "item_en": "Chicken Chaap Masala",
+        "item_bn": "চিকেন চাপ মাসালা",
+        "price_tk": 160,
+        "image_url": "https://images.unsplash.com/photo-1626777552726-4a6b547b4de5?q=80&w=500&auto=format&fit=crop"
+      },
+      {
+        "item_en": "Chicken Tikka",
+        "item_bn": "চিকেন টিক্কা",
+        "price_tk": 250,
+        "image_url": "https://images.unsplash.com/photo-1567188040759-fb8a883dc6d8?q=80&w=500&auto=format&fit=crop"
+      },
+      {
+        "item_en": "Chicken Juicy Kebab / Chicken Hariyali",
+        "item_bn": "চিকেন জুসি কাবাব / চিকেন হারিয়ালী",
+        "price_tk": 180,
+        "image_url": "https://images.unsplash.com/photo-1628294895950-9805252327bc?q=80&w=500&auto=format&fit=crop"
+      },
+      {
+        "item_en": "Chicken Silk Kebab",
+        "item_bn": "চিকেন রেশমী কাবাব",
+        "price_tk": 200,
+        "image_url": "https://images.unsplash.com/photo-1610057099443-fde8c4d50f91?q=80&w=500&auto=format&fit=crop"
+      },
+      {
+        "item_en": "Chicken Afghan",
+        "item_bn": "চিকেন আফগানী",
+        "price_tk": 180,
+        "image_url": "https://images.unsplash.com/photo-1532635211-8ec15f2ce05c?q=80&w=500&auto=format&fit=crop"
+      },
+      {
+        "item_en": "Chicken Botti Kebab",
+        "item_bn": "চিকেন বটি কাবাব",
+        "price_tk": 200,
+        "image_url": "https://images.unsplash.com/photo-1603073163308-9654c3fb70b5?q=80&w=500&auto=format&fit=crop"
+      },
+      {
+        "item_en": "Chicken Bar-B-Q / Chicken Malai Tandoori",
+        "item_bn": "চিকেন বারবি কিউ / চিকেন মালাই তান্দুরী",
+        "price_tk": 160,
+        "image_url": "https://images.unsplash.com/photo-1527477396000-e27163b481c2?q=80&w=500&auto=format&fit=crop"
+      },
+      {
+        "item_en": "Chicken Tandoori / Chicken Shawarma",
+        "item_bn": "চিকেন তান্দুরী / চিকেন শর্মা",
+        "price_tk": 150,
+        "image_url": "https://images.unsplash.com/photo-1561651823-34feb02250e4?q=80&w=500&auto=format&fit=crop"
+      }
+    ],
+    "lunch_and_dinner_items": {
+      "general": [
+        {
+          "item_en": "White Rice/Mixed Vegetable/Bitter Gourd/Dherosh Vaji",
+          "item_bn": "সাদা ভাত/মিশানো সবজি/করলা/ঢেঁড়শ ভাজি",
+          "price_tk": 40,
+          "image_url": "https://images.unsplash.com/photo-1512058560366-cd2427ff596b?q=80&w=500"
+        },
+        {
+          "item_en": "Vegetable / Thin Daal",
+          "item_bn": "শাক / পাতলা ডাল",
+          "price_tk": 30,
+          "image_url": "https://images.unsplash.com/photo-1546833999-b9f581a1996d?q=80&w=500"
+        },
+        {
+          "item_en": "Shrimp, Bitter Gourd",
+          "item_bn": "চিংড়ি করলা",
+          "price_tk": 100,
+          "image_url": "https://images.unsplash.com/photo-1559739511-3314150c4730?q=80&w=500"
+        },
+        {
+          "item_en": "Laita Shutki",
+          "item_bn": "লইট্টা ফ্রাই",
+          "price_tk": 250,
+          "image_url": "https://images.unsplash.com/photo-1580651214613-f429260840b3?q=80&w=500"
+        },
+        {
+          "item_en": "Kachki Fish Charchari",
+          "item_bn": "কাঁচকি মাছ চড়চড়ি",
+          "price_tk": 140,
+          "image_url": "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?q=80&w=500"
+        },
+        {
+          "item_en": "Rui Fish Roasted",
+          "item_bn": "রুই মাছ ভুনা",
+          "price_tk": "250/300",
+          "image_url": "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?q=80&w=500"
+        },
+        {
+          "item_en": "Mutton Stew / Daal Mutton",
+          "item_bn": "খাসির মাংস রেজালা / ডাল খাসি",
+          "price_tk": 300,
+          "image_url": "https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=500"
+        },
+        {
+          "item_en": "Beef Red Roast",
+          "item_bn": "গরু লাল ভুনা",
+          "price_tk": 260,
+          "image_url": "https://images.unsplash.com/photo-1603360946369-dc9bb6258143?q=80&w=500"
+        },
+        {
+          "item_en": "Beef Black Roast",
+          "item_bn": "গরু কালা ভুনা",
+          "price_tk": 280,
+          "image_url": "https://images.unsplash.com/photo-1603360946369-dc9bb6258143?q=80&w=500"
+        },
+        {
+          "item_en": "Mutton Leg Roast",
+          "item_bn": "মাটন লেগ রোস্ট",
+          "price_tk": 400,
+          "image_url": "https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=500"
+        }
+      ],
+      "biryani": [
+        {
+          "item_en": "Chicken Polao",
+          "item_bn": "মোরগ পোলাও",
+          "price_tk": 220,
+          "image_url": "https://images.unsplash.com/photo-1633945274405-b6c8069047b0?q=80&w=500"
+        },
+        {
+          "item_en": "Roast Beef Hotch Poch / Roast Duck Meat",
+          "item_bn": "বিফ খিচুড়ী / হাঁসের মাংস ভুনা",
+          "price_tk": 250,
+          "image_url": "https://images.unsplash.com/photo-1512058560366-cd2427ff596b?q=80&w=500"
+        },
+        {
+          "item_en": "Mutton Kacchi / Mutton Hotchpoch",
+          "item_bn": "মাটন কাচ্চি / মাটন খিচুড়ী",
+          "price_tk": 300,
+          "image_url": "https://images.unsplash.com/photo-1563379091339-03b21bc4a4f8?q=80&w=500"
+        },
+        {
+          "item_en": "Tehari",
+          "item_bn": "তেহারী",
+          "price_tk": 180,
+          "image_url": "https://images.unsplash.com/photo-1589302168068-964664d93dc0?q=80&w=500"
+        }
+      ]
+    },
+    "misty_moukh_dessert_drinks": [
+      {
+        "item_en": "Kasturi Special Tea",
+        "item_bn": "কস্তুরী স্পেশাল চা",
+        "price_tk": 30,
+        "image_url": "https://images.unsplash.com/photo-1544787210-22d2dc479994?q=80&w=500"
+      },
+      {
+        "item_en": "Kasturi Special Coffee (Hot/Cold)",
+        "item_bn": "কস্তুরী স্পেশাল কফি (হট/কোল্ড)",
+        "price_tk": "120/150",
+        "image_url": "https://images.unsplash.com/photo-1541167760496-162955ed8a9f?q=80&w=500"
+      },
+      {
+        "item_en": "Kashmiri Faluda",
+        "item_bn": "কাশ্মিরি ফালুদা",
+        "price_tk": 180,
+        "image_url": "https://images.unsplash.com/photo-1582760993180-2a88941916aa?q=80&w=500"
+      },
+      {
+        "item_en": "Curd Lacchi",
+        "item_bn": "দই লাচ্ছি",
+        "price_tk": 120,
+        "image_url": "https://images.unsplash.com/photo-1571115177098-24ec42ed2bb4?q=80&w=500"
+      },
+      {
+        "item_en": "Borhani (1 Glass/500ml/1L)",
+        "item_bn": "বোরহানি ১ গ্লাস/৫০০ এমএল/১ লিটার",
+        "price_tk": "50/100/200",
+        "image_url": "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?q=80&w=500"
+      },
+      {
+        "item_en": "Jilapi (1 KG) Shahi/Reshmi",
+        "item_bn": "জিলপি ১ কেজি শাহী/রেশমী",
+        "price_tk": "350/500",
+        "image_url": "https://images.unsplash.com/photo-1589113331515-9988a8d7973d?q=80&w=500"
+      }
+    ],
+    "barbq_fish_weighted": [
+      {
+        "item_en": "Koral Fish Bar-B-Q",
+        "item_bn": "কোরাল ফিস বারবি কিউ",
+        "gsm": "600/800/1200/1600",
+        "image_url": "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?q=80&w=500"
+      },
+      {
+        "item_en": "Tilapia Fish Bar-B-Q",
+        "item_bn": "তেলাপিয়া ফিস বারবি কিউ",
+        "gsm": "300/400/500",
+        "image_url": "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?q=80&w=500"
+      },
+      {
+        "item_en": "Rupchada Fish Bar-B-Q",
+        "item_bn": "রুপচাঁদা ফিস বারবি কিউ",
+        "gsm": "400/500/600",
+        "image_url": "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?q=80&w=500"
+      },
+      {
+        "item_en": "Tuna Fish Bar-B-Q",
+        "item_bn": "টুনা ফিস বারবি কিউ",
+        "gsm": "400/500/600",
+        "image_url": "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?q=80&w=500"
+      }
+    ]
+  }
+}

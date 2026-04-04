@@ -11,6 +11,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Str;
 
 class MenuItemForm
 {
@@ -24,9 +25,12 @@ class MenuItemForm
                 Select::make('outlet_id')
                     ->relationship('outlet', 'name'),
                 TextInput::make('name')
-                    ->required(),
+                    ->required()
+                    ->live()
+                    ->afterStateUpdated(fn (string $operation, $state, $set) => $operation === 'create' ? $set('slug', Str::slug($state)) : null),
                 TextInput::make('slug')
-                    ->required(),
+                    ->required()
+                    ->unique(ignoreRecord: true),
                 Textarea::make('description')
                     ->columnSpanFull(),
                 TextInput::make('base_price')

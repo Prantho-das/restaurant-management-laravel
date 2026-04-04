@@ -4,6 +4,8 @@ namespace App\Filament\Pages;
 
 use App\Models\Setting;
 use BackedEnum;
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -43,6 +45,12 @@ class ManageSettings extends Page implements HasForms
         'payment_sslcommerze_sandbox',
     ];
 
+    /** Setting keys that are stored as JSON arrays. */
+    protected array $jsonSettings = [
+        'footer_social_links',
+        'footer_opening_hours',
+    ];
+
     public function mount(): void
     {
         $settings = Setting::where('group', 'general')->get()->pluck('value', 'key')->toArray();
@@ -51,6 +59,13 @@ class ManageSettings extends Page implements HasForms
         foreach ($this->booleanSettings as $key) {
             if (array_key_exists($key, $settings)) {
                 $settings[$key] = (bool) $settings[$key];
+            }
+        }
+
+        // Decode JSON settings so Repeaters can render them.
+        foreach ($this->jsonSettings as $key) {
+            if (array_key_exists($key, $settings)) {
+                $settings[$key] = json_decode($settings[$key], true) ?: [];
             }
         }
 
@@ -95,7 +110,7 @@ class ManageSettings extends Page implements HasForms
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('Contact & Hours')
+                Section::make('Contact Information')
                     ->schema([
                         TextInput::make('footer_address')
                             ->label('Address')
@@ -106,25 +121,51 @@ class ManageSettings extends Page implements HasForms
                             ->tel()
                             ->required()
                             ->placeholder('+880 1234 567890'),
-                        TextInput::make('footer_hours_mon_thu')
-                            ->label('Mon - Thu Hours')
-                            ->placeholder('12pm - 11pm'),
-                        TextInput::make('footer_hours_fri_sun')
-                            ->label('Fri - Sun Hours')
-                            ->placeholder('2pm - 12am'),
                     ])->columns(2),
 
-                Section::make('Social Media Links')
+                Section::make('Availability (Opening Hours)')
+                    ->description('Add multiple rows for different day ranges or seasons.')
                     ->schema([
-                        TextInput::make('social_instagram_url')
-                            ->label('Instagram URL')
-                            ->url()
-                            ->placeholder('https://instagram.com/royaldine'),
-                        TextInput::make('social_facebook_url')
-                            ->label('Facebook URL')
-                            ->url()
-                            ->placeholder('https://facebook.com/royaldine'),
-                    ])->columns(2),
+                        Repeater::make('footer_opening_hours')
+                            ->label('Opening Hours')
+                            ->schema([
+                                TextInput::make('days')
+                                    ->placeholder('e.g. Mon - Thu')
+                                    ->required(),
+                                TextInput::make('hours')
+                                    ->placeholder('e.g. 12pm - 11pm')
+                                    ->required(),
+                            ])
+                            ->columns(2)
+                            ->collapsible()
+                            ->itemLabel(fn ($state) => $state['days'] ?? 'New Time Slot'),
+                    ]),
+
+                Section::make('Social Media Presence')
+                    ->description('Add links to your social media profiles.')
+                    ->schema([
+                        Repeater::make('footer_social_links')
+                            ->label('Social Links')
+                            ->schema([
+                                Select::make('platform')
+                                    ->options([
+                                        'facebook' => 'Facebook',
+                                        'instagram' => 'Instagram',
+                                        'whatsapp' => 'WhatsApp',
+                                        'twitter' => 'Twitter/X',
+                                        'youtube' => 'YouTube',
+                                        'linkedin' => 'LinkedIn',
+                                    ])
+                                    ->required(),
+                                TextInput::make('url')
+                                    ->label('URL')
+                                    ->url()
+                                    ->required(),
+                            ])
+                            ->columns(2)
+                            ->collapsible()
+                            ->itemLabel(fn ($state) => ucfirst($state['platform'] ?? 'New Social Link')),
+                    ]),
 
                 Section::make('POS Settings')
                     ->icon('heroicon-o-calculator')
@@ -220,6 +261,11 @@ class ManageSettings extends Page implements HasForms
             // Normalize boolean toggle values to '1'/'0' strings for consistent DB storage.
             if (in_array($key, $this->booleanSettings, true)) {
                 $value = $value ? '1' : '0';
+            }
+
+            // Encode JSON settings for DB storage.
+            if (in_array($key, $this->jsonSettings, true)) {
+                $value = json_encode($value);
             }
 
             Setting::setValue($key, $value, 'general');
