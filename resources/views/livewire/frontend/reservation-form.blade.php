@@ -2,7 +2,7 @@
 
     <div class="col-span-1 md:col-span-1 flex flex-col gap-2">
         <label class="text-[10px] uppercase font-bold tracking-[0.3em] text-brand-gold">Your Name</label>
-        <input wire:model="name" type="text" placeholder="SHAHID KHAN" 
+        <input wire:model="name" type="text" placeholder="Your Name Here" 
             class="border-b-2 border-brand-gold/20 py-3 lg:py-4 text-sm font-bold placeholder:text-brand-emerald/20 focus:outline-none focus:border-brand-emerald transition-colors text-brand-emerald bg-transparent rounded-none">
         @error('name') <span class="text-brand-red text-[10px] font-bold uppercase tracking-widest">{{ $message }}</span> @enderror
     </div>

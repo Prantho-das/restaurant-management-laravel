@@ -35,6 +35,7 @@ class MenuItem extends Model
         'tax_rate',
         'image',
         'is_active',
+        'preparation_type',
         'sku',
     ];
 
@@ -63,5 +64,10 @@ class MenuItem extends Model
     public function getFinalPriceAttribute(): float
     {
         return (float) ($this->discount_price ?? $this->base_price);
+    }
+
+    public function isPremade(): bool
+    {
+        return $this->preparation_type === 'premade';
     }
 }

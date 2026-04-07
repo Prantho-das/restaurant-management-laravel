@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Auth;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
@@ -44,6 +45,11 @@ class FoodPreparation extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function items(): HasMany
+    {
+        return $this->hasMany(FoodPreparationItem::class);
+    }
+
     public function outlet(): BelongsTo
     {
         return $this->belongsTo(Outlet::class);
@@ -57,29 +63,6 @@ class FoodPreparation extends Model
                 // If menu item has an outlet, use it
                 if ($foodPreparation->menuItem && $foodPreparation->menuItem->outlet_id) {
                     $foodPreparation->outlet_id = $foodPreparation->menuItem->outlet_id;
-                }
-            }
-        });
-
-        static::created(function (FoodPreparation $foodPreparation) {
-            $foodPreparation->load('menuItem.recipes.ingredient');
-
-            if ($foodPreparation->menuItem && $foodPreparation->menuItem->recipes) {
-                foreach ($foodPreparation->menuItem->recipes as $recipe) {
-                    $ingredient = $recipe->ingredient;
-                    $totalDeduction = $recipe->quantity * $foodPreparation->quantity;
-
-                    // Deduct from ingredient stock
-                    $ingredient->decrement('current_stock', $totalDeduction);
-
-                    // Create inventory log
-                    InventoryLog::create([
-                        'ingredient_id' => $ingredient->id,
-                        'type' => 'Deduction',
-                        'quantity' => $totalDeduction,
-                        'note' => "Prepared {$foodPreparation->quantity} units of {$foodPreparation->menuItem->name}",
-                        'user_id' => $foodPreparation->user_id,
-                    ]);
                 }
             }
         });

@@ -9,18 +9,15 @@
         scrolled: false,
         cartCount: {{ $cartCount }},
         init() {
-            window.addEventListener('scroll', () => {
-                if (!this.open) {
-                    this.scrolled = window.pageYOffset > 50;
-                }
-            });
+            this.scrolled = window.scrollY > 20;
             this.$watch('open', val => {
                 document.body.style.overflow = val ? 'hidden' : '';
             });
         }
      }"
+     @scroll.window="scrolled = window.scrollY > 20"
      @cart-updated.window="cartCount = $event.detail.count"
-     :class="{ 'glass-light shadow-lg shadow-brand-emerald/10': scrolled && !open, 'bg-transparent': !scrolled && !open, 'glass-light shadow-lg shadow-brand-emerald/10': open }"
+     :class="scrolled || open ? 'bg-white shadow-lg shadow-brand-emerald/10' : 'bg-transparent'"
      class="fixed top-0 left-0 w-full z-50 py-4 md:py-6 transition-all duration-300">
 
     <div class="container-wide flex justify-between items-center">

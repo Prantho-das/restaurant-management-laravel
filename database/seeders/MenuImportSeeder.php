@@ -29,12 +29,14 @@ class MenuImportSeeder extends Seeder
         $data = json_decode(File::get($jsonFile), true);
         $menu = $data['restaurant_menu'] ?? [];
 
-        $outlet = Outlet::first();
-        if (! $outlet) {
-            $this->command->error('No outlet found. Please create an outlet first.');
-
-            return;
-        }
+        $outlet = Outlet::firstOrCreate(
+            ['name' => 'Main Branch'],
+            [
+                'address' => 'Main Branch',
+                'phone' => '',
+                'is_active' => true,
+            ]
+        );
 
         foreach ($menu as $categoryKey => $items) {
             $categoryName = Str::title(str_replace('_', ' ', $categoryKey));

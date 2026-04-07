@@ -159,16 +159,16 @@
 
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
                 <div class="col-span-2 row-span-2 rounded-2xl lg:rounded-3xl overflow-hidden shadow-card group">
-                    <img src="{{ asset('placeholder.png') }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+                    <img src="{{ !empty($cms->visual_story_image_1) ? Storage::url($cms->visual_story_image_1) : asset('placeholder.png') }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
                 </div>
                 <div class="rounded-2xl lg:rounded-3xl overflow-hidden shadow-card aspect-square group">
-                    <img src="{{ asset('placeholder.png') }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+                    <img src="{{ !empty($cms->visual_story_image_2) ? Storage::url($cms->visual_story_image_2) : asset('placeholder.png') }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
                 </div>
                 <div class="rounded-2xl lg:rounded-3xl overflow-hidden shadow-card aspect-square group">
-                    <img src="{{ asset('placeholder.png') }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+                    <img src="{{ !empty($cms->visual_story_image_3) ? Storage::url($cms->visual_story_image_3) : asset('placeholder.png') }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
                 </div>
                 <div class="col-span-2 rounded-2xl lg:rounded-3xl overflow-hidden shadow-card aspect-[2/1] group">
-                    <img src="{{ asset('placeholder.png') }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+                    <img src="{{ !empty($cms->visual_story_image_4) ? Storage::url($cms->visual_story_image_4) : asset('placeholder.png') }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
                 </div>
             </div>
         </div>

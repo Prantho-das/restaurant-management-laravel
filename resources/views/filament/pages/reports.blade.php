@@ -18,8 +18,14 @@
     'desc' => 'Sales and order metrics per employee.'],
     ['name' => 'Purchases Report', 'slug' => 'purchases', 'icon' => 'heroicon-o-shopping-cart', 'color' => 'info',
     'desc' => 'Inventory procurement and supplier costs.'],
+    ['name' => 'Expense Report', 'slug' => 'expenses', 'icon' => 'heroicon-o-currency-dollar', 'color' => 'danger',
+    'desc' => 'Detailed list of all operational expenses.'],
     ['name' => 'Stock Adjustments', 'slug' => 'stock-adjustments', 'icon' => 'heroicon-o-adjustments-horizontal', 'color' => 'warning',
     'desc' => 'Manual stock corrections and audit trail.'],
+    ['name' => 'Wastage Report', 'slug' => 'wastage', 'icon' => 'heroicon-o-trash', 'color' => 'danger',
+    'desc' => 'Registered wastage of ingredients and menu items.'],
+    ['name' => 'Cash Flow', 'slug' => 'cash-flow', 'icon' => 'heroicon-o-arrows-right-left', 'color' => 'success',
+    'desc' => 'Net cash flow and balance overview.'],
     ];
     @endphp
 

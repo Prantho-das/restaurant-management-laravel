@@ -19,11 +19,40 @@
                 db: null,
                 lastReceipt: null,
                 showSuccessModal: false,
+                isProcessing: false,
                 init() {
                     this.db = new Dexie('POS_Offline_DB');
                     this.db.version(2).stores({
                         orders: '++id, cart, total, timestamp, details, synced'
                     });
+                    
+                    // Keyboard Shortcuts
+                    window.addEventListener('keydown', (e) => {
+                        // Focus search on '/'
+                        if (e.key === '/' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+                            e.preventDefault();
+                            document.querySelector('.pos-search-input')?.focus();
+                        }
+                        
+                        // Close modal on 'Escape'
+                        if (e.key === 'Escape') {
+                            this.showSuccessModal = false;
+                        }
+                        
+                        // Confirm order on 'Enter' (if cart is not empty and modal is not open)
+                        if (e.key === 'Enter' && !this.showSuccessModal && !this.isProcessing) {
+                            const cartCount = @json(count($cart));
+                            if (cartCount > 0 && document.activeElement.tagName !== 'TEXTAREA' && document.activeElement.tagName !== 'INPUT') {
+                                e.preventDefault();
+                                this.placeOrderStandard();
+                            }
+                        }
+
+                        // Select Payment Methods with F1-F4
+                        if (e.key === 'F1') { e.preventDefault(); $wire.set('paymentMethod', 'cash'); }
+                        if (e.key === 'F2') { e.preventDefault(); $wire.set('paymentMethod', 'card'); }
+                    });
+
                     window.addEventListener('online', () => {
                         this.isOnline = true;
                         this.syncOrders();
@@ -117,6 +146,41 @@
                     if (typeof $wire !== 'undefined' && $wire.checkOfflineStatus) {
                         $wire.checkOfflineStatus();
                     }
+                },
+                async placeOrderStandard() {
+                    const cartCount = this.$wire.cart ? Object.keys(this.$wire.cart).length : 0;
+                    if (cartCount <= 0) return;
+
+                    this.isProcessing = true;
+                    if (!this.isOnline) {
+                        try {
+                            await this.saveOfflineOrder(this.$wire.cart, this.$wire.total, {
+                                order_type: this.$wire.orderType,
+                                payment_method: this.$wire.paymentMethod,
+                                table_number: this.$wire.tableNumber,
+                                customer_name: this.$wire.customerName,
+                                reference_no: this.$wire.referenceNo,
+                                notes: this.$wire.notes
+                            });
+                            this.$wire.cart = [];
+                            this.$wire.customerName = '';
+                            this.$wire.customerPhone = '';
+                            this.$wire.tableNumber = '';
+                            this.$wire.referenceNo = '';
+                            this.$wire.notes = '';
+                            this.$wire.discountValue = 0;
+                            
+                            window.dispatchEvent(new CustomEvent('notify', { detail: { type: 'success', message: 'Offline Order Saved! It will sync once online.' } }));
+                        } finally {
+                            this.isProcessing = false;
+                        }
+                    } else {
+                        try {
+                            await this.$wire.placeOrder();
+                        } finally {
+                            this.isProcessing = false;
+                        }
+                    }
                 }
             };
         }
@@ -124,10 +188,11 @@
 
     <div x-data="posSystemData()"
         x-on:order-placed.window="if (!isOnline) { await saveOfflineOrder($wire.cart, $wire.total, { order_number: $event.detail?.order_number, order_type: $wire.orderType, payment_method: $wire.paymentMethod, table_number: $wire.tableNumber, customer_name: $wire.customerName, customer_phone: $wire.customerPhone, guest_count: $wire.guestCount, notes: $wire.notes, reference_no: $wire.referenceNo }); } else { syncOrders(); }"
-        x-on:pos-receipt-ready.window="lastReceipt = $event.detail; showSuccessModal = true"
+        x-on:pos-receipt-ready.window="lastReceipt = $event.detail; showSuccessModal = !$event.detail.auto_print"
         style="display: none;"
         class="!flex flex h-full overflow-hidden font-sans relative pos-bg"
-        :class="{ 'overflow-hidden': $wire.showCart }">
+        :class="{ 'overflow-hidden': $wire.showCart }"
+>
 
         <!-- Offline Sync Status Indicator -->
         <div class="fixed top-4 right-4 z-50">
@@ -223,6 +288,42 @@
                     </button>
                 @endforeach
             </div>
+
+            <!-- ── Most Ordered / Fast Moving Items (Only shown on "All" category and no search) ── -->
+            @if(!$selectedCategoryId && !$search && $frequentItems->isNotEmpty())
+            <div class="px-4 md:px-6 pt-4 shrink-0">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-[10px] font-black text-slate-800 uppercase tracking-[0.15em] flex items-center gap-2">
+                        <svg class="w-4 h-4 text-brand-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                        Most Ordered
+                    </h3>
+                </div>
+                <div class="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
+                    @foreach($frequentItems as $item)
+                        <div wire:key="frequent-{{ $item->id }}" wire:click="addToCart({{ $item->id }})"
+                             class="flex-shrink-0 w-32 md:w-40 group cursor-pointer">
+                            <div class="relative aspect-square rounded-2xl overflow-hidden mb-2 shadow-sm group-hover:shadow-md transition-all duration-300">
+                                <img src="{{ $item->image ? Storage::url($item->image) : asset('placeholder.png') }}" 
+                                     class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                                <div class="absolute bottom-2 left-2">
+                                    <span class="text-[9px] font-black text-white">৳{{ number_format($item->final_price) }}</span>
+                                </div>
+                                @if($item->available_stock <= 0)
+                                    <div class="absolute inset-0 bg-slate-900/60 flex items-center justify-center">
+                                        <span class="text-[7px] text-white font-black uppercase">Sold Out</span>
+                                    </div>
+                                @endif
+                            </div>
+                            <h4 class="text-[9px] font-bold text-slate-700 truncate text-center group-hover:text-brand-primary uppercase tracking-tight">{{ $item->name }}</h4>
+                        </div>
+                    @endforeach
+                </div>
+                <div class="h-px bg-slate-100 mt-2"></div>
+            </div>
+            @endif
 
             <!-- ── Menu Grid ── -->
             <div class="flex-1 overflow-y-auto p-4 md:p-5 custom-scrollbar">
@@ -407,7 +508,7 @@
             </div>
 
             <!-- ── Checkout Panel ── -->
-            <div class="shrink-0 pos-checkout-panel px-4 pt-4 pb-5 space-y-3">
+            <div class="shrink overflow-y-auto lg:shrink-0 lg:overflow-visible pos-checkout-panel px-4 pt-4 pb-20 lg:pb-5 space-y-3 custom-scrollbar">
 
                 <!-- Divider with label -->
                 <div class="flex items-center gap-2 mb-1">
@@ -555,54 +656,37 @@
                     </div>
 
                     <!-- Reference No / Transaction ID -->
-                    <template x-if="$wire.paymentMethod !== 'cash'">
-                        <div class="space-y-1 animate-fadeIn">
-                            <label class="pos-field-label text-rose-500 flex items-center gap-1.5">
-                                <span class="w-1.5 h-1.5 bg-rose-500 rounded-full inline-block"></span>
-                                Reference / Transaction ID (Required)
-                            </label>
-                            <input wire:model="referenceNo" type="text" placeholder="e.g. TRX-123456"
-                                class="pos-field-input border-rose-200 focus:border-rose-400 focus:ring-rose-500/20">
-                        </div>
-                    </template>
+                    <div class="space-y-1 animate-fadeIn"
+                         x-show="$wire.paymentMethod !== 'cash'"
+                         x-cloak
+                         style="{{ $paymentMethod !== 'cash' ? '' : 'display:none' }}">
+                        <label class="pos-field-label text-rose-500 flex items-center gap-1.5">
+                            <span class="w-1.5 h-1.5 bg-rose-500 rounded-full inline-block"></span>
+                            Reference / Transaction ID (Required)
+                        </label>
+                        <input wire:model="referenceNo" type="text" placeholder="e.g. TRX-123456"
+                            class="pos-field-input border-rose-200 focus:border-rose-400 focus:ring-rose-500/20">
+                    </div>
                 @endif
 
                 <!-- Action Buttons -->
                 <div class="flex gap-2 pt-1">
-                    <button @click="if(!isOnline) {
-                        await saveOfflineOrder($wire.cart, $wire.total, {
-                            order_type: $wire.orderType,
-                            payment_method: $wire.paymentMethod,
-                            table_number: $wire.tableNumber,
-                            customer_name: $wire.customerName,
-                            reference_no: $wire.referenceNo,
-                            notes: $wire.notes
-                        });
-                        $wire.cart = [];
-                        $wire.customerName = '';
-                        $wire.customerPhone = '';
-                        $wire.tableNumber = '';
-                        $wire.notes = '';
-                        $wire.referenceNo = '';
-                        $wire.discountValue = 0;
-                        window.dispatchEvent(new CustomEvent('notify', { detail: { type: 'success', message: 'Offline Order Saved! It will sync once online.' } }));
-                    } else {
-                        $wire.placeOrder()
-                    }" {{ empty($cart) ? 'disabled' : '' }}
+                    <button @click="placeOrderStandard()" 
+                        {{ empty($cart) ? 'disabled' : '' }}
                         class="flex-1 py-3.5 text-white text-[10px] font-black uppercase tracking-[0.25em] rounded-xl transition-all duration-200 disabled:opacity-30 flex items-center justify-center gap-2.5 group active:scale-[0.98]"
                         style="{{ !empty($cart) ? 'background: linear-gradient(135deg, #808000 0%, #a4a400 100%); box-shadow: 0 6px 24px rgba(128,128,0,0.4);' : 'background: #94a3b8;' }}">
                         <svg class="w-4 h-4 group-hover:rotate-12 transition-transform duration-300" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        Confirm Order
+                        Place Order [Enter]
                     </button>
 
                     {{-- Manual Print button --}}
                     <button @click="window.printPosReceipt(lastReceipt)" x-show="lastReceipt !== null" x-cloak
                         title="Print Last Receipt"
-                        class="w-12 h-full py-3.5 bg-slate-700 text-white rounded-xl shadow-lg hover:bg-slate-800 transition-all duration-200 flex items-center justify-center active:scale-[0.98] shrink-0">
+                        class="w-12 py-3.5 bg-slate-700 text-white rounded-xl shadow-lg hover:bg-slate-800 transition-all duration-200 flex items-center justify-center active:scale-[0.98] shrink-0">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />

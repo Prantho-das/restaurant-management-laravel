@@ -20,8 +20,13 @@ class OrderObserver
      */
     public function updated(Order $order): void
     {
-        if ($order->isDirty('status') && $order->status === 'completed') {
-            app(InventoryService::class)->deductStockForOrder($order);
+        if ($order->isDirty('status')) {
+            if ($order->status === 'completed') {
+                app(InventoryService::class)->deductStockForOrder($order->loadMissing('items.menuItem.recipes.ingredient'));
+            } else {
+                // If it changes FROM completed to anything else, restore stock
+                app(InventoryService::class)->restoreStockForOrder($order->loadMissing('items.menuItem.recipes.ingredient'));
+            }
         }
     }
 
@@ -30,7 +35,7 @@ class OrderObserver
      */
     public function deleted(Order $order): void
     {
-        //
+        app(InventoryService::class)->restoreStockForOrder($order->loadMissing('items.menuItem.recipes.ingredient'));
     }
 
     /**
@@ -46,6 +51,6 @@ class OrderObserver
      */
     public function forceDeleted(Order $order): void
     {
-        //
+        app(InventoryService::class)->restoreStockForOrder($order->loadMissing('items.menuItem.recipes.ingredient'));
     }
 }

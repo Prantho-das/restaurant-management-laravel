@@ -31,18 +31,18 @@
             <!DOCTYPE html><html><head><meta charset="UTF-8"><title>Receipt - ${r.order_number}<\/title>
             <style>
                 * { margin:0;padding:0;box-sizing:border-box; }
-                body { font-family:"Courier New",Courier,monospace;font-size:11px;width:80mm;margin:0 auto;color:#000; }
-                .center { text-align:center; } .bold { font-weight:bold; } .big { font-size:15px; }
+                body { font-family:"Courier New",Courier,monospace;font-size:13px;width:80mm;margin:0 auto;color:#000; }
+                .center { text-align:center; } .bold { font-weight:bold; } .big { font-size:18px; }
                 .divider { border-top:1px dashed #000;margin:5px 0; }
                 table { width:100%;border-collapse:collapse; }
-                th { font-size:10px;border-bottom:1px dashed #000;padding-bottom:3px; }
-                .total-row td { border-top:1px dashed #000;padding-top:4px;font-weight:bold;font-size:13px; }
-                .footer { margin-top:8px;text-align:center;font-size:10px; }
+                th { font-size:12px;border-bottom:1px dashed #000;padding-bottom:3px; }
+                .total-row td { border-top:1px dashed #000;padding-top:4px;font-weight:bold;font-size:15px; }
+                .footer { margin-top:8px;text-align:center;font-size:12px; }
                 @media print { @page { size: 80mm auto; margin: 4mm; } body { width:78mm; } }
             <\/style><\/head><body>
             <div class="center"><div class="bold big">${r.restaurant_name}<\/div>${addressRow}${phoneRow}<\/div>
             <div class="divider"><\/div>
-            <div class="center bold" style="font-size:13px">** RECEIPT **<\/div>
+            <div class="center bold" style="font-size:16px">** RECEIPT **<\/div>
             <div class="divider"><\/div>
             <div>Order: <b>${r.order_number}<\/b><\/div>
             <div>Date: ${r.datetime}<\/div>
@@ -61,7 +61,7 @@
             <tr class="total-row"><td colspan="3" style="text-align:right">TOTAL<\/td><td style="text-align:right">৳${Number(r.total).toFixed(0)}<\/td><\/tr>
             <\/tfoot><\/table>
             <div class="divider"><\/div>
-            <div class="footer"><div>Thank you for dining with us!<\/div><div style="margin-top:4px;font-size:9px">Powered by ${r.restaurant_name} POS<\/div><\/div>
+            <div class="footer"><div>Thank you for dining with us!<\/div><div style="margin-top:4px;font-size:11px">Powered by ${r.restaurant_name} POS<\/div><\/div>
             <\/body><\/html>`;
 
         const win = window.open("", "_blank", "width=340,height=600,toolbar=0,scrollbars=1,status=0");

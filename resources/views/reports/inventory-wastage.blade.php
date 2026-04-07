@@ -14,9 +14,12 @@
                 <th>Current Stock</th>
                 <th>Alert Threshold</th>
                 <th>Status</th>
+                <th class="text-right">Est. Unit Cost</th>
+                <th class="text-right">Total Value</th>
             </tr>
         </thead>
         <tbody>
+            @php $totalInventoryValue = 0; @endphp
             @foreach($ingredients as $ingredient)
                 <tr>
                     <td>{{ $ingredient->name }}</td>
@@ -29,10 +32,21 @@
                             <span class="text-success">HEALTHY</span>
                         @endif
                     </td>
+                    <td class="text-right">৳{{ number_format($ingredient->estimated_cost, 2) }}</td>
+                    <td class="text-right">৳{{ number_format($ingredient->current_stock * $ingredient->estimated_cost, 2) }}</td>
                 </tr>
+                @php $totalInventoryValue += ($ingredient->current_stock * $ingredient->estimated_cost); @endphp
             @endforeach
         </tbody>
+        <tfoot>
+            <tr class="bg-gray-100 font-bold">
+                <td colspan="5" class="text-right">Total Inventory Value</td>
+                <td class="text-right">৳{{ number_format($totalInventoryValue, 2) }}</td>
+            </tr>
+        </tfoot>
     </table>
+
+    <div class="page-break"></div>
 
     <h3>Wastage Log</h3>
     <table>

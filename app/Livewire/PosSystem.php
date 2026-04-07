@@ -103,6 +103,7 @@ class PosSystem extends Component
 
     protected function getItems(): array
     {
+        // Use cache to prevent heavy stock calculations on every render if possible
         $query = MenuItem::query()
             ->with(['category', 'recipes.ingredient'])
             ->where('is_active', true)
@@ -110,22 +111,11 @@ class PosSystem extends Component
             ->when($this->search, fn ($q) => $q->where('name', 'like', "%{$this->search}%"));
 
         $total = $query->count();
+        $items = $query->take($this->perPage)->get();
 
-        $items = $query->take($this->perPage)->get()->map(function ($item) {
-            // Calculate stock based on ingredients
-            $stock = 999; // Default infinity if no recipes
-            if ($item->recipes->isNotEmpty()) {
-                foreach ($item->recipes as $recipe) {
-                    if ($recipe->ingredient) {
-                        $ingredientStock = $recipe->ingredient->current_stock;
-                        $possibleServings = floor($ingredientStock / max(0.001, $recipe->quantity));
-                        $stock = min($stock, $possibleServings);
-                    }
-                }
-            }
-            $item->available_stock = (int) $stock;
-
-            return $item;
+        // Calculate stock once for the visible items
+        $items->each(function ($item) {
+            $item->available_stock = $this->calculateItemStock($item);
         });
 
         return [
@@ -133,6 +123,43 @@ class PosSystem extends Component
             'totalItems' => $total,
             'hasMoreItems' => $total > $this->perPage,
         ];
+    }
+
+    protected function getFrequentItems()
+    {
+        return MenuItem::query()
+            ->with(['category', 'recipes.ingredient'])
+            ->where('is_active', true)
+            ->select('menu_items.*')
+            ->join('order_items', 'menu_items.id', '=', 'order_items.menu_item_id')
+            ->selectRaw('SUM(order_items.quantity) as total_sold')
+            ->groupBy('menu_items.id')
+            ->orderByDesc('total_sold')
+            ->take(8)
+            ->get()
+            ->map(function ($item) {
+                $item->available_stock = $this->calculateItemStock($item);
+
+                return $item;
+            });
+    }
+
+    protected function calculateItemStock($item): int
+    {
+        if ($item->recipes->isEmpty()) {
+            return 999;
+        }
+
+        $stock = 999;
+        foreach ($item->recipes as $recipe) {
+            if ($recipe->ingredient) {
+                $ingredientStock = (float) $recipe->ingredient->current_stock;
+                $possibleServings = floor($ingredientStock / max(0.001, (float) $recipe->quantity));
+                $stock = min($stock, $possibleServings);
+            }
+        }
+
+        return (int) $stock;
     }
 
     public function selectCategory($id): void
@@ -159,14 +186,7 @@ class PosSystem extends Component
             return;
         }
 
-        // Check stock before adding
-        $availableStock = 999;
-        if ($item->recipes->isNotEmpty()) {
-            foreach ($item->recipes as $recipe) {
-                $possibleServings = floor($recipe->ingredient->current_stock / max(0.001, $recipe->quantity));
-                $availableStock = min($availableStock, $possibleServings);
-            }
-        }
+        $availableStock = $this->calculateItemStock($item);
 
         $cartItemKey = array_search($itemId, array_column($this->cart, 'id'));
         $currentQty = ($cartItemKey !== false) ? $this->cart[$cartItemKey]['quantity'] : 0;
@@ -201,14 +221,7 @@ class PosSystem extends Component
     {
         $itemId = $this->cart[$index]['id'];
         $item = MenuItem::with('recipes.ingredient')->find($itemId);
-
-        $availableStock = 999;
-        if ($item && $item->recipes->isNotEmpty()) {
-            foreach ($item->recipes as $recipe) {
-                $possibleServings = floor($recipe->ingredient->current_stock / max(0.001, $recipe->quantity));
-                $availableStock = min($availableStock, $possibleServings);
-            }
-        }
+        $availableStock = $item ? $this->calculateItemStock($item) : 0;
 
         $newQty = $this->cart[$index]['quantity'] + $delta;
 
@@ -296,7 +309,7 @@ class PosSystem extends Component
 
         if ($this->isSplitPayment) {
             $splitTotal = collect($this->paymentSplits)->sum('amount');
-            if (abs($splitTotal - $this->total) > 0.01) {
+            if (round($splitTotal, 2) !== round((float) $this->total, 2)) {
                 return ['success' => false, 'message' => "Split total ({$splitTotal}) does not match order total ({$this->total})"];
             }
         }
@@ -476,6 +489,9 @@ class PosSystem extends Component
     public function clearCart()
     {
         $this->cart = [];
+        unset($this->subtotal);
+        unset($this->discountAmount);
+        unset($this->total);
     }
 
     public function render()
@@ -484,6 +500,7 @@ class PosSystem extends Component
 
         return view('livewire.pos-system', [
             'categories' => $this->getCategories(),
+            'frequentItems' => $this->getFrequentItems(),
             'items' => $itemData['items'],
             'totalItems' => $itemData['totalItems'],
             'hasMoreItems' => $itemData['hasMoreItems'],

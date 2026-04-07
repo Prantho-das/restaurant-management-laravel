@@ -78,11 +78,14 @@
             display: table-cell;
             width: 50%;
         }
+        .page-break {
+            page-break-before: always;
+        }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1>Royal Heritage Restaurant</h1>
+        <h1>{{ \App\Models\Setting::getValue('site_name', \App\Models\Setting::getValue('site_title', config('app.name'))) }}</h1>
         <p>@yield('report_name')</p>
         <p>Period: {{ \Carbon\Carbon::parse($startDate)->format('M d, Y') }} - {{ \Carbon\Carbon::parse($endDate)->format('M d, Y') }}</p>
     </div>

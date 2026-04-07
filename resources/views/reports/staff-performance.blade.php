@@ -17,9 +17,9 @@
         </thead>
         <tbody>
             @php $totalOrders = 0; $totalSales = 0; @endphp
-            @foreach($staffData as $index => $staff)
+            @foreach($staffData as $staff)
                 <tr>
-                    <td>{{ $index + 1 }}</td>
+                    <td>{{ $loop->iteration }}</td>
                     <td>{{ $staff->name }} ({{ $staff->email }})</td>
                     <td class="text-right">{{ number_format($staff->orders_count) }}</td>
                     <td class="text-right">৳{{ number_format($staff->orders_sum_total_amount, 2) }}</td>

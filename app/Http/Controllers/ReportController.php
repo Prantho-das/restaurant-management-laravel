@@ -69,7 +69,16 @@ class ReportController extends Controller
         $startDate = $request->get('start_date', now()->startOfMonth());
         $endDate = $request->get('end_date', now()->endOfMonth());
 
-        $ingredients = Ingredient::all();
+        $latestPurchases = DB::table('purchase_items')
+            ->select('ingredient_id', DB::raw('MAX(id) as max_id'))
+            ->groupBy('ingredient_id');
+
+        $ingredients = Ingredient::leftJoinSub($latestPurchases, 'latest_purchases', function ($join) {
+            $join->on('ingredients.id', '=', 'latest_purchases.ingredient_id');
+        })
+            ->leftJoin('purchase_items', 'purchase_items.id', '=', 'latest_purchases.max_id')
+            ->select('ingredients.*', DB::raw('COALESCE(purchase_items.unit_price, 0) as estimated_cost'))
+            ->get();
         $wastages = Wastage::with('ingredient')
             ->whereBetween('date', [$startDate, $endDate])
             ->get()
@@ -170,5 +179,103 @@ class ReportController extends Controller
         $pdf = Pdf::loadView('reports.stock-adjustments', compact('adjustments', 'startDate', 'endDate'));
 
         return $pdf->download("stock-adjustments-report-{$startDate}-to-{$endDate}.pdf");
+    }
+
+    public function expensesReport(Request $request)
+    {
+        $startDate = $request->get('start_date', now()->startOfMonth());
+        $endDate = $request->get('end_date', now()->endOfMonth());
+
+        $expenses = Expense::with(['user'])
+            ->whereBetween('date', [$startDate, $endDate])
+            ->orderBy('date', 'desc')
+            ->get();
+
+        $summary = [
+            'total_amount' => $expenses->sum('amount'),
+            'total_expenses' => $expenses->count(),
+            'start_date' => $startDate,
+            'end_date' => $endDate,
+        ];
+
+        $pdf = Pdf::loadView('reports.expenses', compact('expenses', 'summary', 'startDate', 'endDate'));
+
+        return $pdf->download("expenses-report-{$startDate}-to-{$endDate}.pdf");
+    }
+
+    public function wastageReport(Request $request)
+    {
+        $startDate = $request->get('start_date', now()->startOfMonth());
+        $endDate = $request->get('end_date', now()->endOfMonth());
+
+        $wastages = Wastage::with(['ingredient', 'menuItem', 'user'])
+            ->whereBetween('date', [$startDate, $endDate])
+            ->orderBy('date', 'desc')
+            ->get();
+
+        $pdf = Pdf::loadView('reports.wastage', compact('wastages', 'startDate', 'endDate'));
+
+        return $pdf->download("wastage-report-{$startDate}-to-{$endDate}.pdf");
+    }
+
+    public function cashFlow(Request $request)
+    {
+        $startDate = $request->get('start_date', now()->startOfMonth());
+        $endDate = $request->get('end_date', now()->endOfMonth());
+
+        // Opening Balance Calculation (everything before start_date)
+        $openingInflows = Order::where('created_at', '<', $startDate)
+            ->where('status', 'completed')
+            ->sum('total_amount');
+
+        $openingPurchases = Purchase::where('purchase_date', '<', $startDate)
+            ->where('status', 'received')
+            ->sum('total_amount');
+
+        $openingExpenses = Expense::where('date', '<', $startDate)
+            ->sum('amount');
+
+        $openingPayroll = Payroll::where('payment_date', '<', $startDate)
+            ->where('status', 'paid')
+            ->sum('net_paid');
+
+        $openingOutflows = $openingPurchases + $openingExpenses + $openingPayroll;
+        $openingBalance = $openingInflows - $openingOutflows;
+
+        // Current Period Inflows
+        $inflows = Order::whereBetween('created_at', [$startDate, $endDate])
+            ->where('status', 'completed')
+            ->sum('total_amount');
+
+        // Current Period Outflows
+        $purchases = Purchase::whereBetween('purchase_date', [$startDate, $endDate])
+            ->where('status', 'received')
+            ->sum('total_amount');
+
+        $expenses = Expense::whereBetween('date', [$startDate, $endDate])
+            ->sum('amount');
+
+        $payroll = Payroll::whereBetween('payment_date', [$startDate, $endDate])
+            ->where('status', 'paid')
+            ->sum('net_paid');
+
+        $outflows = $purchases + $expenses + $payroll;
+        $netCashFlow = $inflows - $outflows;
+        $closingBalance = $openingBalance + $netCashFlow;
+
+        $pdf = Pdf::loadView('reports.cash-flow', compact(
+            'openingBalance',
+            'inflows',
+            'purchases',
+            'expenses',
+            'payroll',
+            'outflows',
+            'netCashFlow',
+            'closingBalance',
+            'startDate',
+            'endDate'
+        ));
+
+        return $pdf->download("cash-flow-{$startDate}-to-{$endDate}.pdf");
     }
 }

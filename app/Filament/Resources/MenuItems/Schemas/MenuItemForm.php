@@ -47,11 +47,22 @@ class MenuItemForm
                 FileUpload::make('image')
                     ->image(),
                 Toggle::make('is_active')
-                    ->required(),
+                    ->required()
+                    ->default(true),
+                Select::make('preparation_type')
+                    ->options([
+                        'made-to-order' => 'Made-to-order (Cooked on demand)',
+                        'premade' => 'Pre-made (Batch Cooking)',
+                    ])
+                    ->default('made-to-order')
+                    ->required()
+                    ->live()
+                    ->helperText('Pre-made items deduct ingredients during "Food Preparation". Made-to-order items deduct ingredients during "Order completion".'),
                 TextInput::make('sku')
                     ->label('SKU'),
                 Section::make('Recipe')
                     ->description('Define the ingredients required for this menu item.')
+                    ->visible(fn ($get) => $get('preparation_type') === 'made-to-order')
                     ->schema([
                         Repeater::make('recipes')
                             ->relationship('recipes')

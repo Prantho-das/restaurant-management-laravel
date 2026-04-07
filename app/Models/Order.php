@@ -24,6 +24,7 @@ class Order extends Model
     protected $fillable = [
         'order_number',
         'status',
+        'is_stock_deducted',
         'subtotal_amount',
         'discount_amount',
         'discount_type',
@@ -49,6 +50,7 @@ class Order extends Model
     protected function casts(): array
     {
         return [
+            'is_stock_deducted' => 'boolean',
             'subtotal_amount' => 'decimal:2',
             'discount_amount' => 'decimal:2',
             'total_amount' => 'decimal:2',

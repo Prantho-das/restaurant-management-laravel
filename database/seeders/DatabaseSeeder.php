@@ -13,16 +13,8 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             UserPermissionSeeder::class,
-            CategorySeeder::class,
-            CustomerSeeder::class,
-            ExpenseSeeder::class,
-            IngredientSeeder::class,
-            MenuItemSeeder::class,
-            OutletSeeder::class,
             SettingSeeder::class,
-            SupplierSeeder::class,
-            WastageSeeder::class,
-            RestaurantSeeder::class,
+            MenuImportSeeder::class,
         ]);
     }
 }

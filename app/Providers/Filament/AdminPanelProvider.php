@@ -32,6 +32,7 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
+            ->profile()
             ->spa()
             ->brandName(fn () => Setting::getValue('site_name', config('app.name')))
             ->brandLogo(fn () => view('components.filament-logo'))
@@ -69,6 +70,9 @@ class AdminPanelProvider extends PanelProvider
             ->renderHook(
                 PanelsRenderHook::HEAD_END,
                 fn (): string => '<style>
+                    html {
+                        font-size: .875rem !important;
+                    }
                     .fi-header-heading {
                         display: none !important;
                     }

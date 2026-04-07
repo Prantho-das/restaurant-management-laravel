@@ -40,6 +40,17 @@ class MenuItemsTable
                 TextColumn::make('sku')
                     ->label('SKU')
                     ->searchable(),
+                TextColumn::make('preparation_type')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'made-to-order' => 'success',
+                        'premade' => 'warning',
+                    })
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'made-to-order' => 'Made-to-order',
+                        'premade' => 'Pre-made',
+                    })
+                    ->sortable(),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
