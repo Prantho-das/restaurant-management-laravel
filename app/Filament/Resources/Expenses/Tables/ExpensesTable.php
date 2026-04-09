@@ -5,9 +5,12 @@ namespace App\Filament\Resources\Expenses\Tables;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ExportAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use App\Filament\Resources\Expenses\Exports\ExpenseExporter;
 
 class ExpensesTable
 {
@@ -41,7 +44,8 @@ class ExpensesTable
                     ->prefix('৳')
                     ->sortable()
                     ->weight('bold')
-                    ->color('danger'),
+                    ->color('danger')
+                    ->summarize(Sum::make()->label('Total')),
                 TextColumn::make('payment_method')
                     ->label('Payment')
                     ->badge()
@@ -95,6 +99,7 @@ class ExpensesTable
                 EditAction::make(),
             ])
             ->toolbarActions([
+                ExportAction::make()->exporter(ExpenseExporter::class),
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),

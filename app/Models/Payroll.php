@@ -26,6 +26,7 @@ class Payroll extends Model
         'base_salary',
         'bonus_amount',
         'deduction_amount',
+        'advance_amount',
         'net_paid',
         'payment_method',
         'status',
@@ -37,6 +38,7 @@ class Payroll extends Model
         'base_salary' => 'decimal:2',
         'bonus_amount' => 'decimal:2',
         'deduction_amount' => 'decimal:2',
+        'advance_amount' => 'decimal:2',
         'net_paid' => 'decimal:2',
     ];
 

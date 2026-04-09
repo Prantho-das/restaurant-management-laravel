@@ -7,9 +7,12 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
+use Filament\Actions\ExportAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use App\Filament\Resources\Orders\Exports\OrderExporter;
 
 class OrdersTable
 {
@@ -101,7 +104,8 @@ class OrdersTable
                     ->prefix('৳')
                     ->sortable()
                     ->weight('bold')
-                    ->color('success'),
+                    ->color('success')
+                    ->summarize(Sum::make()->label('Total')),
                 TextColumn::make('reference_no')
                     ->label('Ref #')
                     ->searchable()
@@ -152,6 +156,7 @@ class OrdersTable
                 EditAction::make(),
             ])
             ->toolbarActions([
+                ExportAction::make()->exporter(OrderExporter::class),
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),

@@ -47,28 +47,35 @@ class PayrollForm
                 TextInput::make('base_salary')
                     ->required()
                     ->numeric()
-                    ->prefix('$')
+                    ->prefix('BDT ')
                     ->live()
                     ->afterStateUpdated(fn ($set, $get) => self::calculateNet($set, $get)),
                 TextInput::make('bonus_amount')
                     ->required()
                     ->numeric()
                     ->default(0)
-                    ->prefix('$')
+                    ->prefix('BDT ')
                     ->live()
                     ->afterStateUpdated(fn ($set, $get) => self::calculateNet($set, $get)),
                 TextInput::make('deduction_amount')
                     ->required()
                     ->numeric()
                     ->default(0)
-                    ->prefix('$')
+                    ->prefix('BDT ')
+                    ->live()
+                    ->afterStateUpdated(fn ($set, $get) => self::calculateNet($set, $get)),
+                TextInput::make('advance_amount')
+                    ->required()
+                    ->numeric()
+                    ->default(0)
+                    ->prefix('BDT ')
                     ->live()
                     ->afterStateUpdated(fn ($set, $get) => self::calculateNet($set, $get)),
                 TextInput::make('net_paid')
                     ->required()
                     ->numeric()
                     ->readonly()
-                    ->prefix('$'),
+                    ->prefix('BDT '),
                 Select::make('payment_method')
                     ->options([
                         'Cash' => 'Cash',
@@ -93,7 +100,8 @@ class PayrollForm
         $base = (float) $get('base_salary');
         $bonus = (float) $get('bonus_amount');
         $deduction = (float) $get('deduction_amount');
+        $advance = (float) $get('advance_amount');
 
-        $set('net_paid', number_format($base + $bonus - $deduction, 2, '.', ''));
+        $set('net_paid', number_format($base + $bonus - $deduction - $advance, 2, '.', ''));
     }
 }
