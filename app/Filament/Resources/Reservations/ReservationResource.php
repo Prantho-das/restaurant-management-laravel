@@ -39,6 +39,8 @@ class ReservationResource extends Resource
         return ReservationInfolist::configure($schema);
     }
 
+
+
     public static function table(Table $table): Table
     {
         return ReservationsTable::configure($table);

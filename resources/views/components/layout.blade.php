@@ -28,16 +28,18 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Outfit:wght@100..900&family=Hind+Siliguri:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400&display=swap" rel="stylesheet">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     
+    <x-marketing.gtm-head />
     <x-marketing.meta-pixel />
 </head>
 <body class="antialiased">
+    <x-marketing.gtm-body />
     <x-navbar />
 
-    <main class="min-h-screen">
+    <main class="min-h-screen pt-16 md:pt-20">
         {{ $slot }}
     </main>
 

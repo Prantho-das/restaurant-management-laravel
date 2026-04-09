@@ -8,6 +8,8 @@ use Filament\Actions\Exports\Models\Export;
 
 class OrderExporter extends Exporter
 {
+    protected static ?string $disk = 'public';
+
     public static function getColumns(): array
     {
         return [

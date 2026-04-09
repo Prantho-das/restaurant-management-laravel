@@ -1,30 +1,32 @@
 @import "tailwindcss";
 
 @theme {
-    --color-brand-primary: #808000;
-    --color-brand-primary-light: #a4a400;
-    --color-brand-primary-dark: #5c5c00;
-    --color-brand-accent: #c5a059;
-    --color-brand-red: #d32f2f;
-    --color-brand-emerald: #064e3b;
-    --color-brand-emerald-light: #065f46;
-    --color-brand-emerald-dark: #022c22;
-    --color-brand-gold: #b45309;
-    --color-brand-gold-light: #d97706;
+    --color-brand-primary: #c01c1c;
+    --color-brand-primary-light: #d92e2e;
+    --color-brand-primary-dark: #8b1515;
+    --color-brand-accent: #f97316;
+    --color-brand-accent-light: #fb923c;
+    --color-brand-accent-dark: #ea580c;
+    --color-brand-gold: #fbbf24;
+    --color-brand-gold-light: #fcd34d;
+    --color-brand-red: #dc2626;
+    --color-brand-bg-white: #ffffff;
+    --color-brand-bg-light: #fafafa;
+    --color-brand-bg-gray: #f5f5f5;
+    --color-brand-text-dark: #1a1a1a;
+    --color-brand-text-gray: #666666;
     --color-parchment: #fdfbf6;
-    --color-bg-light: #f9fafb;
-    --color-bg-white: #ffffff;
     --color-border-subtle: rgba(0, 0, 0, 0.05);
 
-    --color-primary-50: #f5f5f0;
-    --color-primary-400: #a4a400;
-    --color-primary-600: #808000;
+    --color-primary-50: #fef3c7;
+    --color-primary-400: #fbbf24;
+    --color-primary-600: #d97706;
     --color-success-50: #f0fdf4;
     --color-success-400: #4ade80;
     --color-success-600: #16a34a;
-    --color-warning-50: #fffbeb;
-    --color-warning-400: #fbbf24;
-    --color-warning-600: #d97706;
+    --color-warning-50: #fff7ed;
+    --color-warning-400: #fb923c;
+    --color-warning-600: #ea580c;
     --color-danger-50: #fef2f2;
     --color-danger-400: #f87171;
     --color-danger-600: #dc2626;
@@ -32,8 +34,8 @@
     --color-info-400: #38bdf8;
     --color-info-600: #0284c7;
 
-    --font-serif: "Playfair Display", serif;
-    --font-sans: "Outfit", sans-serif;
+    --font-serif: "Hind Siliguri", serif;
+    --font-sans: "Hind Siliguri", sans-serif;
     --font-bengali: "Hind Siliguri", sans-serif;
 
     --radius-xl: 1rem;
@@ -44,16 +46,16 @@
     --shadow-luxury: 0 20px 60px -15px rgba(6, 78, 59, 0.2);
     --shadow-card: 0 4px 20px -4px rgba(0, 0, 0, 0.06);
     --shadow-glow-gold: 0 0 40px -10px rgba(180, 83, 9, 0.3);
-    --shadow-glow-emerald: 0 0 40px -10px rgba(6, 78, 59, 0.3);
+    --shadow-glow-orange: 0 0 30px -10px rgba(249, 115, 22, 0.4);
 }
 
 @layer base {
     body {
-        @apply bg-bg-light text-slate-800 font-sans antialiased;
+        @apply bg-white text-[#333333] font-bengali antialiased;
     }
 
     h1, h2, h3, h4, h5, h6 {
-        @apply font-sans font-bold text-slate-900;
+        @apply font-bengali font-bold text-[#333333];
     }
 
     html {
@@ -71,23 +73,23 @@
     }
 
     .glass-dark {
-        @apply bg-brand-emerald/95 backdrop-blur-xl border border-white/10;
+        @apply bg-[#c01c1c]/95 backdrop-blur-xl border border-white/10;
     }
 
-    .btn-brand {
-        @apply bg-brand-primary text-white px-8 py-3.5 rounded-full font-bold tracking-wide transition-all duration-300 hover:bg-brand-primary-light hover:shadow-premium hover:-translate-y-0.5 active:translate-y-0;
+    .btn-primary {
+        @apply bg-[#c01c1c] text-white px-8 py-3.5 rounded-lg font-bold tracking-wide transition-all duration-300 hover:bg-[#d92e2e] hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0;
     }
 
-    .btn-brand-outline {
-        @apply border-2 border-brand-primary text-brand-primary px-8 py-3.5 rounded-full font-bold tracking-wide transition-all duration-300 hover:bg-brand-primary hover:text-white;
+    .btn-primary-outline {
+        @apply border-2 border-[#c01c1c] text-[#c01c1c] px-8 py-3.5 rounded-lg font-bold tracking-wide transition-all duration-300 hover:bg-[#c01c1c] hover:text-white;
     }
 
-    .btn-royal {
-        @apply bg-brand-gold text-white px-8 py-3.5 rounded-full font-bold tracking-wide transition-all duration-300 hover:bg-brand-gold-light hover:shadow-glow-gold hover:-translate-y-0.5 active:translate-y-0;
+    .btn-gold {
+        @apply bg-[#fbbf24] text-[#1a1a1a] px-8 py-3.5 rounded-lg font-bold tracking-wide transition-all duration-300 hover:bg-[#fcd34d] hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0;
     }
 
-    .btn-emerald {
-        @apply bg-brand-emerald text-white px-6 py-3 rounded-xl font-bold transition-all duration-300 hover:bg-brand-emerald-light hover:shadow-luxury hover:-translate-y-0.5 active:translate-y-0;
+    .btn-dark {
+        @apply bg-[#1a1a1a] text-white px-6 py-3 rounded-xl font-bold transition-all duration-300 hover:bg-[#333] hover:-translate-y-0.5 active:translate-y-0;
     }
 
     .section-padding {
@@ -280,5 +282,26 @@ img {
 }
 
 ::selection {
-    @apply bg-brand-gold/30 text-brand-emerald;
+    @apply bg-[#c01c1c]/30 text-[#c01c1c];
+}
+
+/* Filament Admin - Smaller Font */
+.fi-body {
+    font-size: 13px !important;
+}
+
+.fi-body .fi-wi-stat-card-value,
+.fi-body .fi-table-header-cell-text,
+.fi-body .fi-table-cell-text,
+.fi-body .fi-form-field-label,
+.fi-body .fi-form-component-label,
+.fi-body .fi-sidebar-item-label,
+.fi-body .fi-dropdown-list-item-label,
+.fi-body .fi-tabs-item-label,
+.fi-body .fi-btn {
+    font-size: 13px !important;
+}
+
+.fi-body h1, .fi-body h2, .fi-body h3, .fi-body h4 {
+    font-size: 1rem !important;
 }

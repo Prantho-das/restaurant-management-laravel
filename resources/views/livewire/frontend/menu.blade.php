@@ -1,26 +1,26 @@
 <div class="relative">
     {{-- Search + Category Navigation Row --}}
-    <div class="mb-12 lg:mb-20 flex flex-col gap-6">
+    <div class="mb-10 flex flex-col gap-6">
         {{-- Search bar --}}
         <div class="relative max-w-md mx-auto w-full">
-            <span class="absolute inset-y-0 left-4 flex items-center pointer-events-none text-brand-emerald/40">
+            <span class="absolute inset-y-0 left-4 flex items-center pointer-events-none text-[#666666]">
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
             </span>
             <input
                 wire:model.live.debounce.350ms="search"
                 type="text"
-                placeholder="Search menu items…"
+                placeholder="খাবার খুঁজুন..."
                 id="menu-search"
-                class="w-full pl-12 pr-4 py-3 rounded-2xl border border-brand-emerald/15 bg-white text-sm text-brand-emerald placeholder-brand-emerald/40 shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-emerald/20 focus:border-brand-emerald/30 transition-all duration-300"
+                class="w-full pl-12 pr-4 py-3 rounded-xl border border-[#e5e5e5] bg-white text-sm text-[#333333] placeholder-[#999999] shadow-sm focus:outline-none focus:ring-2 focus:ring-[#c01c1c]/20 focus:border-[#c01c1c]/30 transition-all duration-300"
             >
             @if($search)
-                <button wire:click="$set('search', '')" class="absolute inset-y-0 right-4 flex items-center text-brand-emerald/40 hover:text-brand-emerald transition-colors">
+                <button wire:click="$set('search', '')" class="absolute inset-y-0 right-4 flex items-center text-[#666666] hover:text-[#c01c1c] transition-colors">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             @endif
         </div>
 
-        {{-- Category Tabs: scroll on mobile + desktop with arrow buttons --}}
+        {{-- Category Tabs --}}
         <div
             x-data="{
                 canScrollLeft: false,
@@ -47,7 +47,7 @@
                 x-transition:leave="transition ease-in duration-150"
                 x-transition:leave-start="opacity-100 scale-100"
                 x-transition:leave-end="opacity-0 scale-90"
-                class="hidden lg:flex flex-shrink-0 w-9 h-9 items-center justify-center rounded-full bg-white border border-slate-200 text-brand-emerald shadow-sm hover:bg-brand-emerald hover:text-white hover:border-brand-emerald hover:shadow-md transition-all duration-200 z-10"
+                class="hidden lg:flex flex-shrink-0 w-9 h-9 items-center justify-center rounded-full bg-white border border-[#e5e5e5] text-[#c01c1c] shadow-sm hover:bg-[#c01c1c] hover:text-white hover:border-[#c01c1c] hover:shadow-md transition-all duration-200 z-10"
                 aria-label="Scroll categories left"
             >
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
@@ -62,13 +62,13 @@
                 <div class="flex items-center gap-2 min-w-max">
                     <button
                         wire:click="selectCategory(null)"
-                        class="px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 {{ is_null($selectedCategoryId) ? 'bg-brand-emerald text-white shadow-lg shadow-brand-emerald/20' : 'bg-white text-slate-500 border border-slate-200 hover:border-brand-emerald/30 hover:text-brand-emerald hover:shadow-md' }}">
-                        All
+                        class="px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 {{ is_null($selectedCategoryId) ? 'bg-[#c01c1c] text-white shadow-lg shadow-[#c01c1c]/20' : 'bg-white text-[#666666] border border-[#e5e5e5] hover:border-[#c01c1c]/30 hover:text-[#c01c1c] hover:shadow-md' }}">
+                        সব
                     </button>
                     @foreach($categories as $category)
                         <button
                             wire:click="selectCategory({{ $category->id }})"
-                            class="px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 {{ $selectedCategoryId == $category->id ? 'bg-brand-emerald text-white shadow-lg shadow-brand-emerald/20' : 'bg-white text-slate-500 border border-slate-200 hover:border-brand-emerald/30 hover:text-brand-emerald hover:shadow-md' }}">
+                            class="px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 {{ $selectedCategoryId == $category->id ? 'bg-[#c01c1c] text-white shadow-lg shadow-[#c01c1c]/20' : 'bg-white text-[#666666] border border-[#e5e5e5] hover:border-[#c01c1c]/30 hover:text-[#c01c1c] hover:shadow-md' }}">
                             {{ $category->name }}
                         </button>
                     @endforeach
@@ -85,7 +85,7 @@
                 x-transition:leave="transition ease-in duration-150"
                 x-transition:leave-start="opacity-100 scale-100"
                 x-transition:leave-end="opacity-0 scale-90"
-                class="hidden lg:flex flex-shrink-0 w-9 h-9 items-center justify-center rounded-full bg-white border border-slate-200 text-brand-emerald shadow-sm hover:bg-brand-emerald hover:text-white hover:border-brand-emerald hover:shadow-md transition-all duration-200 z-10"
+                class="hidden lg:flex flex-shrink-0 w-9 h-9 items-center justify-center rounded-full bg-white border border-[#e5e5e5] text-[#c01c1c] shadow-sm hover:bg-[#c01c1c] hover:text-white hover:border-[#c01c1c] hover:shadow-md transition-all duration-200 z-10"
                 aria-label="Scroll categories right"
             >
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
@@ -95,73 +95,75 @@
 
     {{-- Result count --}}
     @if($totalCount > 0)
-        <p class="text-xs text-brand-emerald/50 font-semibold uppercase tracking-widest mb-8 -mt-6 lg:-mt-12 text-center">
-            Showing {{ $menuItems->count() }} of {{ $totalCount }} items
+        <p class="text-xs text-[#666666]/50 font-semibold uppercase tracking-widest mb-8 text-center">
+            {{ $menuItems->count() }} টি আইটেম দেখাচ্ছে (মোট {{ $totalCount }})
         </p>
     @endif
 
     {{-- Menu Grid --}}
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 xl:gap-16">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         @forelse($menuItems as $index => $item)
-            <div class="group relative bg-white rounded-3xl overflow-hidden shadow-card hover:shadow-2xl hover:shadow-brand-emerald/10 transition-all duration-500 flex flex-col md:flex-row card-hover" wire:key="item-{{ $item->id }}">
+            <div class="group relative bg-white rounded-2xl overflow-hidden shadow-lg border border-[#e5e5e5] hover:shadow-xl hover:border-[#c01c1c]/20 transition-all duration-300 flex flex-col sm:flex-row" wire:key="item-{{ $item->id }}">
                 {{-- Image --}}
-                <div class="md:w-5/12 relative aspect-square overflow-hidden">
+                <div class="sm:w-2/5 relative aspect-square sm:aspect-auto overflow-hidden">
                     <img src="{{ $item->image ? Storage::url($item->image) : asset('placeholder.png') }}"
                          class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-                    <div class="absolute inset-0 bg-gradient-to-t from-brand-emerald/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-
+                    
                     @if($item->discount_price && $item->discount_price < $item->base_price)
-                        <span class="absolute top-3 left-3 bg-brand-red text-white text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-full shadow-lg">
-                            Sale
+                        <span class="absolute top-2 left-2 bg-[#c01c1c] text-white text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-full shadow-lg">
+                            -{{ round((($item->base_price - $item->discount_price) / $item->base_price) * 100) }}%
                         </span>
                     @endif
                 </div>
 
                 {{-- Content --}}
-                <div class="md:w-7/12 p-5 lg:p-6 flex flex-col justify-center">
-                    <div class="flex justify-between items-start border-b border-brand-gold/10 pb-3 lg:pb-4 mb-3 lg:mb-4">
-                        <h3 class="text-lg lg:text-xl xl:text-2xl text-brand-emerald font-bold tracking-tight">{{ $item->name }}</h3>
-                        <span class="text-sm lg:text-base font-black text-brand-gold whitespace-nowrap ml-4">৳{{ number_format($item->final_price, 0) }}</span>
+                <div class="sm:w-3/5 p-4 flex flex-col justify-center">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="text-lg font-bold text-[#333333]">{{ $item->name }}</h3>
                     </div>
-                    <p class="text-brand-emerald/60 text-xs lg:text-sm leading-relaxed mb-5 lg:mb-6 line-clamp-3 font-medium">{{ $item->description }}</p>
-
-                    <button wire:click="addToCart({{ $item->id }})"
-                        wire:loading.attr="disabled"
-                        wire:loading.class="opacity-70 cursor-wait"
-                        class="inline-flex items-center justify-center gap-2 bg-brand-emerald/5 text-brand-emerald text-[10px] lg:text-xs font-black tracking-[0.2em] uppercase px-5 lg:px-6 py-3 lg:py-3.5 rounded-xl transition-all duration-300 hover:bg-brand-emerald hover:text-white active:scale-95">
-                        <svg wire:loading.remove wire:target="addToCart({{ $item->id }})" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
-                        <svg wire:loading wire:target="addToCart({{ $item->id }})" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
-                        <span wire:loading wire:target="addToCart({{ $item->id }})">Adding...</span>
-                        <span wire:loading.remove wire:target="addToCart({{ $item->id }})">Add to Cart</span>
-                    </button>
+                    <p class="text-[#666666] text-sm leading-relaxed mb-4 line-clamp-2">{{ $item->description }}</p>
+                    
+                    <div class="flex items-center justify-between">
+                        <div>
+                            @if($item->discount_price && $item->discount_price < $item->base_price)
+                                <span class="text-lg font-black text-[#c01c1c]">৳{{ number_format($item->final_price, 0) }}</span>
+                                <span class="text-sm text-[#999999] line-through ml-2">৳{{ number_format($item->base_price, 0) }}</span>
+                            @else
+                                <span class="text-lg font-black text-[#c01c1c]">৳{{ number_format($item->final_price, 0) }}</span>
+                            @endif
+                        </div>
+                        <button wire:click="addToCart({{ $item->id }})"
+                            wire:loading.attr="disabled"
+                            wire:loading.class="opacity-70 cursor-wait"
+                            class="flex items-center gap-2 bg-[#c01c1c] text-white text-xs font-bold px-4 py-2 rounded-lg transition-all duration-300 hover:bg-[#d92e2e] active:scale-95">
+                            <svg wire:loading.remove wire:target="addToCart({{ $item->id }})" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+                            <svg wire:loading wire:target="addToCart({{ $item->id }})" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                            <span>অর্ডার</span>
+                        </button>
+                    </div>
                 </div>
-
-                {{-- Decorative --}}
-                <div class="absolute -bottom-8 -right-8 w-24 h-24 bg-brand-gold/5 rounded-full blur-2xl group-hover:bg-brand-gold/10 transition-colors duration-500"></div>
             </div>
         @empty
-            <div class="col-span-full py-20 text-center">
-                <div class="w-20 h-20 mx-auto mb-6 bg-brand-emerald/5 rounded-full flex items-center justify-center">
-                    <svg class="w-10 h-10 text-brand-emerald/30" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+            <div class="col-span-full py-16 text-center">
+                <div class="w-16 h-16 mx-auto mb-4 bg-[#c01c1c]/5 rounded-full flex items-center justify-center">
+                    <svg class="w-8 h-8 text-[#c01c1c]/30" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                 </div>
-                <h3 class="text-lg font-bold text-brand-emerald mb-2">No items found</h3>
-                <p class="text-sm text-brand-emerald/50">Try a different category or search term.</p>
+                <h3 class="text-lg font-bold text-[#333333] mb-2">কোনো আইটেম পাওয়া যায়নি</h3>
+                <p class="text-sm text-[#666666]">অন্য ক্যাটাগরি বা সার্চ টার্ম চেষ্টা করুন।</p>
             </div>
         @endforelse
     </div>
 
     {{-- Load More --}}
     @if($hasMoreItems)
-        <div class="mt-16 text-center">
+        <div class="mt-10 text-center">
             <button
                 wire:click="loadMore"
                 wire:loading.attr="disabled"
                 wire:target="loadMore"
-                class="inline-flex items-center gap-3 px-10 py-4 border-2 border-brand-emerald text-brand-emerald text-xs font-black tracking-[0.3em] uppercase rounded-full hover:bg-brand-emerald hover:text-white transition-all duration-300 active:scale-[0.98] disabled:opacity-60 disabled:cursor-wait">
-                <svg wire:loading.remove wire:target="loadMore" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                <svg wire:loading wire:target="loadMore" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
-                <span wire:loading.remove wire:target="loadMore">Load More — {{ $totalCount - $menuItems->count() }} remaining</span>
-                <span wire:loading wire:target="loadMore">Loading…</span>
+                class="inline-flex items-center gap-2 px-8 py-3 border-2 border-[#c01c1c] text-[#c01c1c] text-sm font-bold rounded-lg hover:bg-[#c01c1c] hover:text-white transition-all duration-300 active:scale-[0.98] disabled:opacity-60 disabled:cursor-wait">
+                <span wire:loading.remove wire:target="loadMore">আরো দেখুন</span>
+                <span wire:loading wire:target="loadMore">লোড হচ্ছে...</span>
             </button>
         </div>
     @endif
@@ -170,18 +172,18 @@
     @if(count($cart) > 0)
         <div class="hidden md:block fixed bottom-6 left-1/2 -translate-x-1/2 z-50 animate-fade-in-up">
             <a href="/order" wire:navigate
-                class="flex items-center gap-4 bg-brand-emerald text-white px-8 py-4 rounded-2xl shadow-2xl shadow-brand-emerald/30 hover:bg-brand-emerald-light hover:shadow-xl hover:-translate-y-1 transition-all active:scale-[0.98] group">
+                class="flex items-center gap-4 bg-[#c01c1c] text-white px-8 py-4 rounded-2xl shadow-xl hover:bg-[#d92e2e] hover:shadow-2xl hover:-translate-y-1 transition-all active:scale-[0.98] group">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
                     </div>
                     <div>
-                        <span class="text-sm font-bold block">{{ $this->cartCount }} item(s) in cart</span>
+                        <span class="text-sm font-bold block">{{ $this->cartCount }} টি আইটেম</span>
                         <span class="text-xs text-white/70">৳{{ number_format($this->subtotal) }}</span>
                     </div>
                 </div>
                 <div class="h-8 w-px bg-white/20 mx-2"></div>
-                <span class="text-xs font-bold uppercase tracking-widest group-hover:translate-x-1 transition-transform">Checkout →</span>
+                <span class="text-xs font-bold uppercase tracking-widest group-hover:translate-x-1 transition-transform">চেকআউট →</span>
             </a>
         </div>
     @endif

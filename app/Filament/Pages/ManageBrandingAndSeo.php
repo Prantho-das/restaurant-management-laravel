@@ -83,6 +83,15 @@ class ManageBrandingAndSeo extends Page implements HasForms
                             ->helperText('Only needed for testing server-side events.'),
                     ])->columns(2),
 
+                Section::make('Google Tag Manager')
+                    ->description('Configuration for Google Tag Manager.')
+                    ->schema([
+                        TextInput::make('gtm_id')
+                            ->label('GTM Container ID')
+                            ->placeholder('e.g. G-XXXXXXXXXX')
+                            ->helperText('Enter your GTM container ID (e.g., G-XXXXXXX or GTM-XXXXXX)'),
+                    ])->columns(2),
+
                 Section::make('Brand Assets')
                     ->description('Upload your website logo and favicon.')
                     ->schema([
