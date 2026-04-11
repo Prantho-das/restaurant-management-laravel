@@ -21,7 +21,7 @@ class MenuItemResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCake;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Menu Management';
+    protected static string|UnitEnum|null $navigationGroup = 'Menu';
 
     protected static ?int $navigationSort = 1;
 

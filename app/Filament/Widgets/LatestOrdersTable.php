@@ -36,12 +36,16 @@ class LatestOrdersTable extends BaseWidget
                         'dine_in' => 'primary',
                         'takeaway' => 'warning',
                         'delivery' => 'success',
+                        'foodpanda' => 'info',
+                        'pathao' => 'danger',
                         default => 'gray',
                     })
                     ->formatStateUsing(fn (string $state): string => match ($state) {
                         'dine_in' => 'Dine In',
                         'takeaway' => 'Takeaway',
                         'delivery' => 'Delivery',
+                        'foodpanda' => 'Foodpanda',
+                        'pathao' => 'Pathao',
                         default => ucfirst($state),
                     }),
                 TextColumn::make('status')

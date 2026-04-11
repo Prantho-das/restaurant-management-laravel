@@ -108,7 +108,7 @@
                 <div class="sm:w-2/5 relative aspect-square sm:aspect-auto overflow-hidden">
                     <img src="{{ $item->image ? Storage::url($item->image) : asset('placeholder.png') }}"
                          class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-                    
+
                     @if($item->discount_price && $item->discount_price < $item->base_price)
                         <span class="absolute top-2 left-2 bg-[#c01c1c] text-white text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-full shadow-lg">
                             -{{ round((($item->base_price - $item->discount_price) / $item->base_price) * 100) }}%
@@ -122,7 +122,7 @@
                         <h3 class="text-lg font-bold text-[#333333]">{{ $item->name }}</h3>
                     </div>
                     <p class="text-[#666666] text-sm leading-relaxed mb-4 line-clamp-2">{{ $item->description }}</p>
-                    
+
                     <div class="flex items-center justify-between">
                         <div>
                             @if($item->discount_price && $item->discount_price < $item->base_price)
@@ -138,7 +138,7 @@
                             class="flex items-center gap-2 bg-[#c01c1c] text-white text-xs font-bold px-4 py-2 rounded-lg transition-all duration-300 hover:bg-[#d92e2e] active:scale-95">
                             <svg wire:loading.remove wire:target="addToCart({{ $item->id }})" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
                             <svg wire:loading wire:target="addToCart({{ $item->id }})" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
-                            <span>অর্ডার</span>
+                            <span>কার্ট</span>
                         </button>
                     </div>
                 </div>
@@ -170,9 +170,9 @@
 
     {{-- Floating Cart Bar --}}
     @if(count($cart) > 0)
-        <div class="hidden md:block fixed bottom-6 left-1/2 -translate-x-1/2 z-50 animate-fade-in-up">
+        <div class="fixed bottom-4 md:bottom-6 left-1/2 -translate-x-1/2 z-50 animate-fade-in-up w-[calc(100%-1.5rem)] md:w-auto max-w-md md:max-w-none">
             <a href="/order" wire:navigate
-                class="flex items-center gap-4 bg-[#c01c1c] text-white px-8 py-4 rounded-2xl shadow-xl hover:bg-[#d92e2e] hover:shadow-2xl hover:-translate-y-1 transition-all active:scale-[0.98] group">
+                class="flex items-center justify-between md:justify-start gap-3 md:gap-4 bg-[#c01c1c] text-white px-5 md:px-8 py-3.5 md:py-4 rounded-2xl shadow-xl hover:bg-[#d92e2e] hover:shadow-2xl hover:-translate-y-1 transition-all active:scale-[0.98] group w-full md:w-auto">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
@@ -182,8 +182,8 @@
                         <span class="text-xs text-white/70">৳{{ number_format($this->subtotal) }}</span>
                     </div>
                 </div>
-                <div class="h-8 w-px bg-white/20 mx-2"></div>
-                <span class="text-xs font-bold uppercase tracking-widest group-hover:translate-x-1 transition-transform">চেকআউট →</span>
+                <div class="h-8 w-px bg-white/20 mx-1 md:mx-2"></div>
+                <span class="text-xs font-bold uppercase tracking-widest group-hover:translate-x-1 transition-transform whitespace-nowrap">Cart / চেকআউট →</span>
             </a>
         </div>
     @endif

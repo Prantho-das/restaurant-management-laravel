@@ -58,7 +58,7 @@ class FoodPreparationForm
                             ])
                             ->columns(2)
                             ->itemLabel(fn (array $state): ?string => Ingredient::find($state['ingredient_id'])?->name ?? null),
-                    ]),
+                    ])->columnSpanFull(),
             ]);
     }
 }

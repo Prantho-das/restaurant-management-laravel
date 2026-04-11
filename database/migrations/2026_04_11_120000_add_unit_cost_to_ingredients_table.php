@@ -8,15 +8,15 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('exports', function (Blueprint $table) {
-            $table->string('file_name')->nullable()->after('file_path');
+        Schema::table('ingredients', function (Blueprint $table) {
+            $table->decimal('unit_cost', 12, 2)->default(0)->after('alert_threshold');
         });
     }
 
     public function down(): void
     {
-        Schema::table('exports', function (Blueprint $table) {
-            $table->dropColumn('file_name');
+        Schema::table('ingredients', function (Blueprint $table) {
+            $table->dropColumn('unit_cost');
         });
     }
 };

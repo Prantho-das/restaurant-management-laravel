@@ -28,7 +28,15 @@ class Ingredient extends Model
         'unit',
         'current_stock',
         'alert_threshold',
+        'unit_cost',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'unit_cost' => 'decimal:2',
+        ];
+    }
 
     public function recipes(): HasMany
     {

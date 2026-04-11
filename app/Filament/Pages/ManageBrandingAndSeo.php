@@ -23,7 +23,7 @@ class ManageBrandingAndSeo extends Page implements HasForms
 
     protected string $view = 'filament.pages.manage-branding-and-seo';
 
-    protected static string|UnitEnum|null $navigationGroup = 'Settings';
+    protected static string|UnitEnum|null $navigationGroup = 'Setup';
 
     protected static ?int $navigationSort = 2;
 

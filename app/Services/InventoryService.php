@@ -5,16 +5,20 @@ namespace App\Services;
 use App\Models\Ingredient;
 use App\Models\InventoryLog;
 use App\Models\Order;
+use App\Models\PremadeStock;
 use App\Models\Purchase;
 use App\Models\StockAdjustment;
 use App\Models\Wastage;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use RuntimeException;
 
 class InventoryService
 {
     /**
-     * Deduct ingredient stock based on the order items and their recipes.
+     * Deduct stock based on order items.
+     * - Premade items deduct from premade stock.
+     * - Made-to-order items deduct from ingredient stock.
      */
     public function deductStockForOrder(Order $order): void
     {
@@ -30,8 +34,25 @@ class InventoryService
                     continue;
                 }
 
-                // Only deduct stock if the item is NOT pre-made (cooked on demand)
                 if ($menuItem->preparation_type === 'premade') {
+                    $premadeStock = PremadeStock::query()
+                        ->where('menu_item_id', $menuItem->id)
+                        ->lockForUpdate()
+                        ->first();
+
+                    if (! $premadeStock) {
+                        throw new RuntimeException("Insufficient prepared stock for {$menuItem->name}");
+                    }
+
+                    $required = (float) $item->quantity;
+                    $available = (float) $premadeStock->available_quantity;
+
+                    if ($available < $required) {
+                        throw new RuntimeException("Insufficient prepared stock for {$menuItem->name}");
+                    }
+
+                    $premadeStock->decrement('available_quantity', $required);
+
                     continue;
                 }
 
@@ -62,7 +83,9 @@ class InventoryService
     }
 
     /**
-     * Restore ingredient stock based on the order items and their recipes.
+     * Restore stock based on order items.
+     * - Premade items restore premade stock.
+     * - Made-to-order items restore ingredient stock.
      */
     public function restoreStockForOrder(Order $order): void
     {
@@ -79,6 +102,20 @@ class InventoryService
                 }
 
                 if ($menuItem->preparation_type === 'premade') {
+                    $premadeStock = PremadeStock::query()
+                        ->where('menu_item_id', $menuItem->id)
+                        ->lockForUpdate()
+                        ->first();
+
+                    if (! $premadeStock) {
+                        $premadeStock = PremadeStock::create([
+                            'menu_item_id' => $menuItem->id,
+                            'available_quantity' => 0,
+                        ]);
+                    }
+
+                    $premadeStock->increment('available_quantity', (float) $item->quantity);
+
                     continue;
                 }
 
@@ -102,6 +139,34 @@ class InventoryService
             }
 
             $order->update(['is_stock_deducted' => false]);
+        });
+    }
+
+    public function getPremadeAvailableQuantity(int $menuItemId): float
+    {
+        return (float) (PremadeStock::query()->where('menu_item_id', $menuItemId)->value('available_quantity') ?? 0);
+    }
+
+    public function addPremadeStock(int $menuItemId, float $quantity): void
+    {
+        if ($quantity <= 0) {
+            return;
+        }
+
+        DB::transaction(function () use ($menuItemId, $quantity) {
+            $premadeStock = PremadeStock::query()
+                ->where('menu_item_id', $menuItemId)
+                ->lockForUpdate()
+                ->first();
+
+            if (! $premadeStock) {
+                $premadeStock = PremadeStock::create([
+                    'menu_item_id' => $menuItemId,
+                    'available_quantity' => 0,
+                ]);
+            }
+
+            $premadeStock->increment('available_quantity', $quantity);
         });
     }
 

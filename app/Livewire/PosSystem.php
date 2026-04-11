@@ -11,6 +11,8 @@ use App\Models\OrderPayment;
 use App\Models\Setting;
 use App\Models\Table;
 use App\Services\InventoryService;
+use Throwable;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
@@ -26,7 +28,7 @@ class PosSystem extends Component
     public array $cart = [];
 
     // New Order Details
-    public $orderType = 'dine_in'; // dine_in, takeaway, delivery
+    public $orderType = 'dine_in'; // dine_in, takeaway, delivery, foodpanda, pathao
 
     public $paymentMethod = 'cash'; // cash, card, bkash, sslcommerze
 
@@ -105,7 +107,7 @@ class PosSystem extends Component
     {
         // Use cache to prevent heavy stock calculations on every render if possible
         $query = MenuItem::query()
-            ->with(['category', 'recipes.ingredient'])
+            ->with(['category', 'recipes.ingredient', 'premadeStock'])
             ->where('is_active', true)
             ->when($this->selectedCategoryId, fn ($q) => $q->where('category_id', $this->selectedCategoryId))
             ->when($this->search, fn ($q) => $q->where('name', 'like', "%{$this->search}%"));
@@ -128,7 +130,7 @@ class PosSystem extends Component
     protected function getFrequentItems()
     {
         return MenuItem::query()
-            ->with(['category', 'recipes.ingredient'])
+            ->with(['category', 'recipes.ingredient', 'premadeStock'])
             ->where('is_active', true)
             ->select('menu_items.*')
             ->join('order_items', 'menu_items.id', '=', 'order_items.menu_item_id')
@@ -146,6 +148,10 @@ class PosSystem extends Component
 
     protected function calculateItemStock($item): int
     {
+        if ($item->isPremade()) {
+            return (int) floor((float) ($item->premadeStock?->available_quantity ?? 0));
+        }
+
         if ($item->recipes->isEmpty()) {
             return 999;
         }
@@ -180,7 +186,7 @@ class PosSystem extends Component
 
     public function addToCart($itemId)
     {
-        $item = MenuItem::with('recipes.ingredient')->find($itemId);
+        $item = MenuItem::with(['recipes.ingredient', 'premadeStock'])->find($itemId);
 
         if (! $item) {
             return;
@@ -220,7 +226,7 @@ class PosSystem extends Component
     public function updateQuantity($index, $delta)
     {
         $itemId = $this->cart[$index]['id'];
-        $item = MenuItem::with('recipes.ingredient')->find($itemId);
+        $item = MenuItem::with(['recipes.ingredient', 'premadeStock'])->find($itemId);
         $availableStock = $item ? $this->calculateItemStock($item) : 0;
 
         $newQty = $this->cart[$index]['quantity'] + $delta;
@@ -332,66 +338,87 @@ class PosSystem extends Component
             'guest_count' => $this->guestCount,
             'notes' => $this->notes,
             'reference_no' => (! $this->isSplitPayment && $this->paymentMethod !== 'cash') ? $this->referenceNo : null,
-            'user_id' => auth()->id(),
+            'user_id' => Auth::id(),
         ];
 
         $items = $this->cart;
         $receiptData = null;
         $orderId = null;
 
-        DB::transaction(function () use (&$receiptData, $orderData, $items, &$orderId) {
-            if ($this->customerPhone) {
-                Customer::updateOrCreate(
-                    ['phone' => $this->customerPhone],
-                    ['name' => $this->customerName ?: 'Walking Customer']
-                );
+        foreach ($items as $cartItem) {
+            $menuItem = MenuItem::with(['recipes.ingredient', 'premadeStock'])->find($cartItem['id']);
+
+            if (! $menuItem) {
+                return ['success' => false, 'message' => 'One or more items are no longer available'];
             }
 
-            $order = Order::create($orderData);
-            $orderId = $order->id;
+            $availableStock = $this->calculateItemStock($menuItem);
 
-            // Save payments
-            if ($this->isSplitPayment) {
-                foreach ($this->paymentSplits as $split) {
+            if ((float) $cartItem['quantity'] > $availableStock) {
+                return ['success' => false, 'message' => "Insufficient stock for {$menuItem->name}"];
+            }
+        }
+
+        try {
+            DB::transaction(function () use (&$receiptData, $orderData, $items, &$orderId) {
+                if ($this->customerPhone) {
+                    Customer::updateOrCreate(
+                        ['phone' => $this->customerPhone],
+                        ['name' => $this->customerName ?: 'Walking Customer']
+                    );
+                }
+
+                $order = Order::create($orderData);
+                $orderId = $order->id;
+
+                // Save payments
+                if ($this->isSplitPayment) {
+                    foreach ($this->paymentSplits as $split) {
+                        OrderPayment::create([
+                            'order_id' => $order->id,
+                            'payment_method' => $split['method'],
+                            'amount' => $split['amount'],
+                            'reference_no' => $split['reference_no'],
+                        ]);
+                    }
+                } else {
                     OrderPayment::create([
                         'order_id' => $order->id,
-                        'payment_method' => $split['method'],
-                        'amount' => $split['amount'],
-                        'reference_no' => $split['reference_no'],
+                        'payment_method' => $this->paymentMethod,
+                        'amount' => $this->total,
+                        'reference_no' => $this->referenceNo,
                     ]);
                 }
-            } else {
-                OrderPayment::create([
-                    'order_id' => $order->id,
-                    'payment_method' => $this->paymentMethod,
-                    'amount' => $this->total,
-                    'reference_no' => $this->referenceNo,
-                ]);
-            }
 
-            foreach ($items as $item) {
-                OrderItem::create([
-                    'order_id' => $order->id,
-                    'menu_item_id' => $item['id'],
-                    'quantity' => $item['quantity'],
-                    'price' => $item['price'],
-                ]);
-            }
+                foreach ($items as $item) {
+                    OrderItem::create([
+                        'order_id' => $order->id,
+                        'menu_item_id' => $item['id'],
+                        'quantity' => $item['quantity'],
+                        'price' => $item['price'],
+                    ]);
+                }
 
-            // Deduct stock explicitly since OrderObserver won't catch status transition for directly completed orders
-            app(InventoryService::class)->deductStockForOrder($order->load('items.menuItem.recipes.ingredient'));
+                // Deduct stock explicitly since OrderObserver won't catch status transition for directly completed orders
+                app(InventoryService::class)->deductStockForOrder($order->load([
+                    'items.menuItem.recipes.ingredient',
+                    'items.menuItem.premadeStock',
+                ]));
 
-            $receiptData = $order->load(['items.menuItem', 'user', 'payments'])->toReceiptArray();
-            $receiptData['auto_print'] = (bool) Setting::getValue('pos_auto_print_receipt', false);
+                $receiptData = $order->load(['items.menuItem', 'user', 'payments'])->toReceiptArray();
+                $receiptData['auto_print'] = (bool) Setting::getValue('pos_auto_print_receipt', false);
 
-            // Add split info to receipt if needed
-            if ($this->isSplitPayment) {
-                $receiptData['payments'] = $order->payments->map(fn ($p) => [
-                    'method' => $this->paymentMethodConfigs[$p->payment_method]['label'] ?? $p->payment_method,
-                    'amount' => $p->amount,
-                ])->toArray();
-            }
-        });
+                // Add split info to receipt if needed
+                if ($this->isSplitPayment) {
+                    $receiptData['payments'] = $order->payments->map(fn ($p) => [
+                        'method' => $this->paymentMethodConfigs[$p->payment_method]['label'] ?? $p->payment_method,
+                        'amount' => $p->amount,
+                    ])->toArray();
+                }
+            });
+        } catch (Throwable $e) {
+            return ['success' => false, 'message' => $e->getMessage() ?: 'Unable to complete order due to stock issue'];
+        }
 
         return [
             'success' => true,
@@ -428,7 +455,7 @@ class PosSystem extends Component
             'customer_phone' => $this->customerPhone,
             'guest_count' => $this->guestCount,
             'notes' => $this->notes,
-            'user_id' => auth()->id(),
+            'user_id' => Auth::id(),
         ];
 
         $items = $this->cart;

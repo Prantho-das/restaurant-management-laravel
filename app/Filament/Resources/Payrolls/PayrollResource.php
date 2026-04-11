@@ -18,7 +18,7 @@ class PayrollResource extends Resource
 
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-banknotes';
 
-    protected static \UnitEnum|string|null $navigationGroup = 'Finance';
+    protected static \UnitEnum|string|null $navigationGroup = 'Money';
 
     protected static ?int $navigationSort = 2;
 

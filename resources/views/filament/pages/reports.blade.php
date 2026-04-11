@@ -6,26 +6,21 @@
 
     @php
     $reports = [
-    ['name' => 'Sales Summary', 'slug' => 'sales-summary', 'icon' => 'heroicon-o-banknotes', 'color' => 'info', 'desc'
-    => 'Revenue, tax, and order volume overview.'],
-    ['name' => 'Product Performance', 'slug' => 'product-performance', 'icon' => 'heroicon-o-presentation-chart-line',
-    'color' => 'success', 'desc' => 'Ranking items by quantity and revenue.'],
-    ['name' => 'Inventory & Wastage', 'slug' => 'inventory-wastage', 'icon' => 'heroicon-o-archive-box', 'color' =>
-    'warning', 'desc' => 'Current stock and registered wastage.'],
-    ['name' => 'Profit & Loss', 'slug' => 'profit-loss', 'icon' => 'heroicon-o-calculator', 'color' => 'danger', 'desc'
-    => 'Financial health: Sales vs Expenses.'],
-    ['name' => 'Staff Performance', 'slug' => 'staff-performance', 'icon' => 'heroicon-o-users', 'color' => 'gray',
-    'desc' => 'Sales and order metrics per employee.'],
-    ['name' => 'Purchases Report', 'slug' => 'purchases', 'icon' => 'heroicon-o-shopping-cart', 'color' => 'info',
-    'desc' => 'Inventory procurement and supplier costs.'],
-    ['name' => 'Expense Report', 'slug' => 'expenses', 'icon' => 'heroicon-o-currency-dollar', 'color' => 'danger',
-    'desc' => 'Detailed list of all operational expenses.'],
-    ['name' => 'Stock Adjustments', 'slug' => 'stock-adjustments', 'icon' => 'heroicon-o-adjustments-horizontal', 'color' => 'warning',
-    'desc' => 'Manual stock corrections and audit trail.'],
-    ['name' => 'Wastage Report', 'slug' => 'wastage', 'icon' => 'heroicon-o-trash', 'color' => 'danger',
-    'desc' => 'Registered wastage of ingredients and menu items.'],
-    ['name' => 'Cash Flow', 'slug' => 'cash-flow', 'icon' => 'heroicon-o-arrows-right-left', 'color' => 'success',
-    'desc' => 'Net cash flow and balance overview.'],
+    ['name' => 'Sales Summary', 'slug' => 'sales-summary', 'icon' => 'heroicon-o-banknotes', 'color' => 'info', 'desc' => 'Revenue, tax, and order volume overview.'],
+    ['name' => 'Product Performance', 'slug' => 'product-performance', 'icon' => 'heroicon-o-presentation-chart-line', 'color' => 'success', 'desc' => 'Ranking items by quantity and revenue.'],
+    ['name' => 'Inventory & Wastage', 'slug' => 'inventory-wastage', 'icon' => 'heroicon-o-archive-box', 'color' => 'warning', 'desc' => 'Current stock and registered wastage.'],
+    ['name' => 'Profit & Loss', 'slug' => 'profit-loss', 'icon' => 'heroicon-o-calculator', 'color' => 'danger', 'desc' => 'Financial health: Sales vs Expenses.'],
+    ['name' => 'Staff Performance', 'slug' => 'staff-performance', 'icon' => 'heroicon-o-users', 'color' => 'gray', 'desc' => 'Sales and order metrics per employee.'],
+    ['name' => 'Purchases Report', 'slug' => 'purchases', 'icon' => 'heroicon-o-shopping-cart', 'color' => 'info', 'desc' => 'Inventory procurement and supplier costs.'],
+    ['name' => 'Expense Report', 'slug' => 'expenses', 'icon' => 'heroicon-o-currency-dollar', 'color' => 'danger', 'desc' => 'Detailed list of all operational expenses.'],
+    ['name' => 'Stock Adjustments', 'slug' => 'stock-adjustments', 'icon' => 'heroicon-o-adjustments-horizontal', 'color' => 'warning', 'desc' => 'Manual stock corrections and audit trail.'],
+    ['name' => 'Wastage Report', 'slug' => 'wastage', 'icon' => 'heroicon-o-trash', 'color' => 'danger', 'desc' => 'Registered wastage of ingredients and menu items.'],
+    ['name' => 'Cash Flow', 'slug' => 'cash-flow', 'icon' => 'heroicon-o-arrows-right-left', 'color' => 'success', 'desc' => 'Net cash flow and balance overview.'],
+    ];
+
+    $languages = [
+        ['code' => 'en', 'name' => 'English', 'flag' => 'EN'],
+        ['code' => 'bn', 'name' => 'বাংলা', 'flag' => 'বাং'],
     ];
     @endphp
 
@@ -59,12 +54,17 @@
                 </div>
             </div>
 
-            <div class="mt-auto">
-                <x-filament::button tag="a" :color="$report['color']" variant="soft"
-                    x-bind:href="'{{ route('reports.' . $report['slug']) }}?start_date=' + $wire.data.start_date + '&end_date=' + $wire.data.end_date"
-                    target="_blank" icon="heroicon-m-arrow-down-tray" class="w-full justify-center">
-                    Download PDF
-                </x-filament::button>
+            <div class="mt-auto space-y-2">
+                <p class="text-xs text-gray-500 dark:text-gray-400 text-center">{{ __('Language') }}</p>
+                <div class="flex gap-2">
+                    @foreach($languages as $lang)
+                    <x-filament::button tag="a" :color="$report['color']" variant="soft"
+                        x-bind:href="'{{ route('reports.' . $report['slug']) }}?start_date=' + $wire.data.start_date + '&end_date=' + $wire.data.end_date + '&lang={{ $lang['code'] }}'"
+                        target="_blank" icon="heroicon-m-arrow-down-tray" class="w-1/2 justify-center text-xs py-1">
+                        {{ $lang['flag'] }}
+                    </x-filament::button>
+                    @endforeach
+                </div>
             </div>
         </div>
         @endforeach

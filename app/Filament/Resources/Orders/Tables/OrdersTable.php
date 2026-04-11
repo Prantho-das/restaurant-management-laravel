@@ -45,12 +45,16 @@ class OrdersTable
                         'dine_in' => 'success',
                         'takeaway' => 'warning',
                         'delivery' => 'info',
+                        'foodpanda' => 'primary',
+                        'pathao' => 'danger',
                         default => 'gray',
                     })
                     ->formatStateUsing(fn (string $state): string => match ($state) {
                         'dine_in' => 'Dine In',
                         'takeaway' => 'Takeaway',
                         'delivery' => 'Delivery',
+                        'foodpanda' => 'Foodpanda',
+                        'pathao' => 'Pathao',
                         default => ucfirst($state),
                     })
                     ->sortable(),
@@ -136,6 +140,8 @@ class OrdersTable
                         'dine_in' => 'Dine In',
                         'takeaway' => 'Takeaway',
                         'delivery' => 'Delivery',
+                        'foodpanda' => 'Foodpanda',
+                        'pathao' => 'Pathao',
                     ]),
                 SelectFilter::make('payment_method')
                     ->label('Payment Method')

@@ -30,6 +30,17 @@ class LandingPageSettingSeeder extends Seeder
             'lp_heritage_subtitle' => 'Our Secret',
             'lp_heritage_description' => 'Our recipes are secrets passed down through generations, refined with modern culinary techniques to bring you the best of both worlds.',
 
+            // Reservation Section
+            'lp_reservation_subtitle' => 'টেবিল বুকিং',
+            'lp_reservation_title' => 'আপনার জন্য <span class="text-[#c01c1c]">টেবিল</span> রিজার্ভ',
+            'lp_reservation_description' => 'প্রাইভেট ইভেন্ট ও কর্পোরেট গাদারিং এর জন্য আমরা সর্বদা প্রস্তুত।',
+            'lp_reservation_contact_label' => 'হেল্পলাইন',
+
+            // Reviews Section
+            'lp_reviews_subtitle' => 'আমাদের গ্রাহকদের কথা',
+            'lp_reviews_title' => 'স্বাদের <span class="text-brand-primary">স্মৃতি</span>',
+            'lp_reviews_description' => 'আমাদের খাবারের স্বাদ নিয়ে যারা মুগ্ধ, তাদের কিছু কথা।',
+
             // Advanced Settings (Multiple Socials & Opening Times)
             'footer_social_links' => json_encode([
                 ['platform' => 'facebook', 'url' => '#'],

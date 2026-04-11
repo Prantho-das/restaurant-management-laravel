@@ -40,7 +40,7 @@ class AdminPanelProvider extends PanelProvider
             ->globalSearch(false)
             ->breadcrumbs(false)
             ->maxContentWidth(Width::Full)
-            ->sidebarWidth('16rem')
+            ->sidebarWidth('11rem')
             ->sidebarCollapsibleOnDesktop()
             ->colors([
                 'primary' => Color::Olive,
@@ -52,7 +52,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([])
-            ->plugin(FilamentShieldPlugin::make())
+            ->plugin(FilamentShieldPlugin::make()->navigationLabel('Permission'))
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,

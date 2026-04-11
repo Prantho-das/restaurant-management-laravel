@@ -21,6 +21,7 @@ class ReviewForm
                             ->required()
                             ->maxLength(255),
                         FileUpload::make('customer_image')
+                        ->disk('public')
                             ->label('Customer Image')
                             ->directory('reviews')
                             ->image()

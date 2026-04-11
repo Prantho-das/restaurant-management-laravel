@@ -21,7 +21,7 @@ class CustomerResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
-    protected static string|UnitEnum|null $navigationGroup = 'HRM & Customers';
+    protected static string|UnitEnum|null $navigationGroup = 'People';
 
     protected static ?int $navigationSort = 2;
 

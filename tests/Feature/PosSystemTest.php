@@ -6,6 +6,7 @@ use App\Models\Ingredient;
 use App\Models\MenuItem;
 use App\Models\Order;
 use App\Models\Outlet;
+use App\Models\PremadeStock;
 use App\Models\Recipe;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -64,4 +65,61 @@ it('prevents adding items when stock is insufficient', function () {
         ->test(PosSystem::class)
         ->call('addToCart', $item->id)
         ->assertCount('cart', 0);
+});
+
+it('uses premade prepared quantity when adding premade item to cart', function () {
+    $user = User::factory()->create();
+    $outlet = Outlet::factory()->create();
+    $category = Category::factory()->create();
+
+    $item = MenuItem::factory()->create([
+        'category_id' => $category->id,
+        'outlet_id' => $outlet->id,
+        'name' => 'Prepared Sandwich',
+        'base_price' => 150,
+        'preparation_type' => 'premade',
+        'is_active' => true,
+    ]);
+
+    PremadeStock::create([
+        'menu_item_id' => $item->id,
+        'available_quantity' => 2,
+    ]);
+
+    $test = Livewire::actingAs($user)
+        ->test(PosSystem::class)
+        ->call('addToCart', $item->id)
+        ->call('addToCart', $item->id);
+
+    $test->assertSet('cart.0.quantity', 2)
+        ->call('addToCart', $item->id)
+        ->assertSet('cart.0.quantity', 2);
+});
+
+it('deducts premade stock when a completed order is placed from pos', function () {
+    $user = User::factory()->create();
+    $outlet = Outlet::factory()->create();
+    $category = Category::factory()->create();
+
+    $item = MenuItem::factory()->create([
+        'category_id' => $category->id,
+        'outlet_id' => $outlet->id,
+        'name' => 'Prepared Roll',
+        'base_price' => 120,
+        'preparation_type' => 'premade',
+        'is_active' => true,
+    ]);
+
+    PremadeStock::create([
+        'menu_item_id' => $item->id,
+        'available_quantity' => 5,
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(PosSystem::class)
+        ->call('addToCart', $item->id)
+        ->call('addToCart', $item->id)
+        ->call('placeOrder');
+
+    expect((float) PremadeStock::where('menu_item_id', $item->id)->value('available_quantity'))->toBe(3.0);
 });

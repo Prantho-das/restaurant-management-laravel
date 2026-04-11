@@ -1,3 +1,35 @@
+@php
+use App\Http\Controllers\ReportHelper;
+$locale = $reportLocale ?? 'en';
+ReportHelper::setLocale($locale);
+
+function t(string $key): string {
+    return ReportHelper::t($key);
+}
+
+function formatNum($num, int $decimals = 2): string {
+    $locale = $GLOBALS['locale'] ?? 'en';
+    $num = number_format((float) $num, $decimals);
+    if ($locale === 'bn') {
+        return ReportHelper::toBanglaNumbers($num);
+    }
+    return $num;
+}
+
+function formatDate($date, string $format = 'M d, Y'): string {
+    return ReportHelper::formatDate($date, $format);
+}
+
+function tt(string $type): string {
+    return ReportHelper::translateOrderType($type);
+}
+
+function tm(string $method): string {
+    return ReportHelper::translatePaymentMethod($method);
+}
+
+$GLOBALS['locale'] = $locale;
+@endphp
 <!DOCTYPE html>
 <html>
 <head>
@@ -24,6 +56,15 @@
         .header p {
             margin: 5px 0 0;
             color: #718096;
+        }
+        .lang-badge {
+            float: right;
+            background: #4a5568;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 10px;
+            text-transform: uppercase;
         }
         .footer {
             position: fixed;
@@ -85,9 +126,10 @@
 </head>
 <body>
     <div class="header">
+        <span class="lang-badge">{{ $locale === 'bn' ? 'বাংলা' : 'English' }}</span>
         <h1>{{ \App\Models\Setting::getValue('site_name', \App\Models\Setting::getValue('site_title', config('app.name'))) }}</h1>
         <p>@yield('report_name')</p>
-        <p>Period: {{ \Carbon\Carbon::parse($startDate)->format('M d, Y') }} - {{ \Carbon\Carbon::parse($endDate)->format('M d, Y') }}</p>
+        <p>{{ t('period') }}: {{ formatDate($startDate) }} - {{ formatDate($endDate) }}</p>
     </div>
 
     <div class="content">
@@ -95,7 +137,7 @@
     </div>
 
     <div class="footer">
-        Generated on {{ now()->format('M d, Y H:i:s') }} | Page <span class="pagenum"></span>
+        {{ t('generated_on') }}: {{ formatDate(now(), 'M d, Y H:i:s') }} | {{ t('page') }} <span class="pagenum"></span>
     </div>
 </body>
 </html>

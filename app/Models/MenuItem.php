@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
@@ -59,6 +60,11 @@ class MenuItem extends Model
         return $this->belongsToMany(Ingredient::class, 'recipes')
             ->withPivot('quantity')
             ->withTimestamps();
+    }
+
+    public function premadeStock(): HasOne
+    {
+        return $this->hasOne(PremadeStock::class);
     }
 
     public function getFinalPriceAttribute(): float

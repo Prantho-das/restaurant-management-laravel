@@ -5,8 +5,8 @@
         <!-- Header -->
         <div class="bg-[#c01c1c] text-white py-12">
             <div class="container-wide">
-                <h1 class="text-3xl md:text-4xl lg:text-5xl font-black mb-2">আমাদের মেনু</h1>
-                <p class="text-white/70">সেরা ঐতিহ্যবাহী বাংলা খাবারের সমাহার</p>
+                <h1 class="text-3xl md:text-4xl lg:text-5xl font-black mb-2">{{ App\Models\Setting::getValue('menu_page_title', 'আমাদের মেনু') }}</h1>
+                <p class="text-white/70">{{ App\Models\Setting::getValue('menu_page_description', 'সেরা ঐতিহ্যবাহী বাংলা খাবারের সমাহার') }}</p>
             </div>
         </div>
 

@@ -17,7 +17,7 @@ class Reports extends Page implements HasForms
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-document-chart-bar';
 
-    protected static string|UnitEnum|null $navigationGroup = 'Administration';
+    protected static string|UnitEnum|null $navigationGroup = 'Admin';
 
     protected static ?int $navigationSort = 2;
 

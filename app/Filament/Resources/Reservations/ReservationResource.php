@@ -23,11 +23,18 @@ class ReservationResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Sales & POS';
+    protected static string|UnitEnum|null $navigationGroup = 'Sale';
+
+    protected static ?string $navigationLabel = 'Reserve';
 
     protected static ?int $navigationSort = 3;
 
     protected static ?string $recordTitleAttribute = 'name';
+
+    public static function getNavigationBadge(): ?string
+    {
+        return (string) static::getModel()::count();
+    }
 
     public static function form(Schema $schema): Schema
     {

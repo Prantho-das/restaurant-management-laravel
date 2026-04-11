@@ -27,8 +27,8 @@ class OrdersChart extends ChartWidget
             ->get()
             ->groupBy('order_type');
 
-        $types = ['dine_in' => 'Dine In', 'takeaway' => 'Takeaway', 'delivery' => 'Delivery'];
-        $colors = ['dine_in' => '#808000', 'takeaway' => '#c5a059', 'delivery' => '#4f9d69'];
+        $types = ['dine_in' => 'Dine In', 'takeaway' => 'Takeaway', 'delivery' => 'Delivery', 'foodpanda' => 'Foodpanda', 'pathao' => 'Pathao'];
+        $colors = ['dine_in' => '#808000', 'takeaway' => '#c5a059', 'delivery' => '#4f9d69', 'foodpanda' => '#06c167', 'pathao' => '#e21a4c'];
 
         $datasets = [];
         foreach ($types as $type => $label) {

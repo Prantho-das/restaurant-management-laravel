@@ -20,7 +20,7 @@ class StockAdjustmentResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-adjustments-horizontal';
 
-    protected static UnitEnum|string|null $navigationGroup = 'Inventory';
+    protected static UnitEnum|string|null $navigationGroup = 'Stock';
 
     protected static ?int $navigationSort = 5;
 

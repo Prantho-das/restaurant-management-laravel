@@ -1,0 +1,4 @@
+- [x] Fix Success Modal background (added dark:bg-slate-900)
+- [x] Fix Payment Button colors (added dark variant to bg and text)
+- [x] Fix Cart Qty controls (added dark mode support for inner elements)
+- [x] Audit bg-white and text-white for theme compatibility

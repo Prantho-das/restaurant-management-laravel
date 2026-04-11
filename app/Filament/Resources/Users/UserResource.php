@@ -22,7 +22,7 @@ class UserResource extends Resource
 
     protected static ?string $modelLabel = 'Employee';
 
-    protected static \UnitEnum|string|null $navigationGroup = 'HRM & Customers';
+    protected static \UnitEnum|string|null $navigationGroup = 'People';
 
     protected static ?int $navigationSort = 1;
 

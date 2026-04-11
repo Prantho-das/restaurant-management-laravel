@@ -8,13 +8,12 @@ class DatabaseSeeder extends Seeder
 {
     /**
      * Seed the application's database.
+     * Run this seeder to populate the database with test data.
      */
     public function run(): void
     {
         $this->call([
-            UserPermissionSeeder::class,
-            SettingSeeder::class,
-            MenuImportSeeder::class,
+            TestSeeder::class,
         ]);
     }
 }

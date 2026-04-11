@@ -36,6 +36,11 @@ class IngredientsTable
                     ->numeric()
                     ->sortable()
                     ->color('gray'),
+                TextColumn::make('unit_cost')
+                    ->numeric(2)
+                    ->prefix('৳')
+                    ->sortable()
+                    ->color('info'),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

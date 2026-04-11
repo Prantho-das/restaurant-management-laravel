@@ -27,14 +27,14 @@
                 <h3 class="text-base lg:text-lg text-brand-emerald font-bold leading-tight mb-2">{{ $item->name }}</h3>
                 <p class="text-brand-emerald/60 text-sm mb-4 line-clamp-2">{{ $item->description }}</p>
 
-                <!-- Add to Cart Button -->
+                <!-- Cart Button -->
                 <button wire:click="addToCart({{ $item->id }})" 
                     wire:loading.attr="disabled"
-                    class="w-full py-2.5 bg-brand-emerald text-white text-xs font-bold uppercase tracking-wider rounded-lg hover:bg-brand-emerald-light transition-all active:scale-[0.97] flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-wait">
+                    class="w-full py-2.5 bg-[#c01c1c] text-white text-xs font-bold uppercase tracking-wider rounded-lg hover:bg-[#d92e2e] transition-all active:scale-[0.97] flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-wait">
                     <svg wire:loading.remove wire:target="addToCart({{ $item->id }})" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
                     <svg wire:loading wire:target="addToCart({{ $item->id }})" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
                     <span wire:loading wire:target="addToCart({{ $item->id }})">Adding...</span>
-                    <span wire:loading.remove wire:target="addToCart({{ $item->id }})">Add to Cart</span>
+                    <span wire:loading.remove wire:target="addToCart({{ $item->id }})">কার্ট</span>
                 </button>
             </div>
             

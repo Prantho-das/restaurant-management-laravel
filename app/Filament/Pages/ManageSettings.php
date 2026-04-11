@@ -25,7 +25,7 @@ class ManageSettings extends Page implements HasForms
 
     protected string $view = 'filament.pages.manage-settings';
 
-    protected static string|UnitEnum|null $navigationGroup = 'Settings';
+    protected static string|UnitEnum|null $navigationGroup = 'Setup';
 
     protected static ?int $navigationSort = 1;
 

@@ -16,8 +16,24 @@ use Illuminate\Support\Facades\DB;
 
 class ReportController extends Controller
 {
+    private string $reportLocale = 'en';
+
+    public function setLocale(string $locale): void
+    {
+        $this->reportLocale = in_array($locale, ['en', 'bn']) ? $locale : 'en';
+    }
+
+    public function getLocale(): string
+    {
+        return $this->reportLocale;
+    }
+
     public function salesSummary(Request $request)
     {
+        $this->setLocale($request->get('lang', 'en'));
+        ReportHelper::setLocale($this->reportLocale);
+        $reportLocale = $this->reportLocale;
+        
         $startDate = $request->get('start_date', now()->startOfMonth());
         $endDate = $request->get('end_date', now()->endOfMonth());
 
@@ -35,13 +51,17 @@ class ReportController extends Controller
             'end_date' => $endDate,
         ];
 
-        $pdf = Pdf::loadView('reports.sales-summary', compact('summary', 'orders', 'startDate', 'endDate'));
+        $pdf = Pdf::loadView('reports.sales-summary', compact('summary', 'orders', 'startDate', 'endDate', 'reportLocale'));
 
         return $pdf->download("sales-summary-{$startDate}-to-{$endDate}.pdf");
     }
 
     public function productPerformance(Request $request)
     {
+        $this->setLocale($request->get('lang', 'en'));
+        ReportHelper::setLocale($this->reportLocale);
+        $reportLocale = $this->reportLocale;
+        
         $startDate = $request->get('start_date', now()->startOfMonth());
         $endDate = $request->get('end_date', now()->endOfMonth());
 
@@ -59,38 +79,39 @@ class ReportController extends Controller
             ->orderByDesc('total_quantity')
             ->get();
 
-        $pdf = Pdf::loadView('reports.product-performance', compact('products', 'startDate', 'endDate'));
+        $pdf = Pdf::loadView('reports.product-performance', compact('products', 'startDate', 'endDate', 'reportLocale'));
 
         return $pdf->download("product-performance-{$startDate}-to-{$endDate}.pdf");
     }
 
     public function inventoryWastage(Request $request)
     {
+        $this->setLocale($request->get('lang', 'en'));
+        ReportHelper::setLocale($this->reportLocale);
+        $reportLocale = $this->reportLocale;
+        
         $startDate = $request->get('start_date', now()->startOfMonth());
         $endDate = $request->get('end_date', now()->endOfMonth());
 
-        $latestPurchases = DB::table('purchase_items')
-            ->select('ingredient_id', DB::raw('MAX(id) as max_id'))
-            ->groupBy('ingredient_id');
-
-        $ingredients = Ingredient::leftJoinSub($latestPurchases, 'latest_purchases', function ($join) {
-            $join->on('ingredients.id', '=', 'latest_purchases.ingredient_id');
-        })
-            ->leftJoin('purchase_items', 'purchase_items.id', '=', 'latest_purchases.max_id')
-            ->select('ingredients.*', DB::raw('COALESCE(purchase_items.unit_price, 0) as estimated_cost'))
+        $ingredients = Ingredient::select('ingredients.*',
+            DB::raw('COALESCE(ingredients.unit_cost, 0) as estimated_cost'))
             ->get();
         $wastages = Wastage::with('ingredient')
             ->whereBetween('date', [$startDate, $endDate])
             ->get()
             ->groupBy('ingredient_id');
 
-        $pdf = Pdf::loadView('reports.inventory-wastage', compact('ingredients', 'wastages', 'startDate', 'endDate'));
+        $pdf = Pdf::loadView('reports.inventory-wastage', compact('ingredients', 'wastages', 'startDate', 'endDate', 'reportLocale'));
 
         return $pdf->download("inventory-wastage-{$startDate}-to-{$endDate}.pdf");
     }
 
     public function profitLoss(Request $request)
     {
+        $this->setLocale($request->get('lang', 'en'));
+        ReportHelper::setLocale($this->reportLocale);
+        $reportLocale = $this->reportLocale;
+        
         $startDate = $request->get('start_date', now()->startOfMonth());
         $endDate = $request->get('end_date', now()->endOfMonth());
 
@@ -98,10 +119,10 @@ class ReportController extends Controller
             ->where('status', 'completed')
             ->sum('total_amount');
 
-        $totalExpenses = Expense::whereBetween('created_at', [$startDate, $endDate])
+        $totalExpenses = Expense::whereBetween('date', [$startDate, $endDate])
             ->sum('amount');
 
-        $expensesByCategory = Expense::whereBetween('created_at', [$startDate, $endDate])
+        $expensesByCategory = Expense::whereBetween('date', [$startDate, $endDate])
             ->get()
             ->groupBy('category');
 
@@ -119,7 +140,8 @@ class ReportController extends Controller
             'totalPayroll',
             'grandTotalExpenses',
             'startDate',
-            'endDate'
+            'endDate',
+            'reportLocale'
         ));
 
         return $pdf->download("profit-loss-{$startDate}-to-{$endDate}.pdf");
@@ -127,6 +149,10 @@ class ReportController extends Controller
 
     public function staffPerformance(Request $request)
     {
+        $this->setLocale($request->get('lang', 'en'));
+        ReportHelper::setLocale($this->reportLocale);
+        $reportLocale = $this->reportLocale;
+        
         $startDate = $request->get('start_date', now()->startOfMonth());
         $endDate = $request->get('end_date', now()->endOfMonth());
 
@@ -139,13 +165,17 @@ class ReportController extends Controller
             ->get()
             ->filter(fn ($user) => $user->orders_count > 0);
 
-        $pdf = Pdf::loadView('reports.staff-performance', compact('staffData', 'startDate', 'endDate'));
+        $pdf = Pdf::loadView('reports.staff-performance', compact('staffData', 'startDate', 'endDate', 'reportLocale'));
 
         return $pdf->download("staff-performance-{$startDate}-to-{$endDate}.pdf");
     }
 
     public function purchasesReport(Request $request)
     {
+        $this->setLocale($request->get('lang', 'en'));
+        ReportHelper::setLocale($this->reportLocale);
+        $reportLocale = $this->reportLocale;
+        
         $startDate = $request->get('start_date', now()->startOfMonth());
         $endDate = $request->get('end_date', now()->endOfMonth());
 
@@ -161,13 +191,17 @@ class ReportController extends Controller
             'end_date' => $endDate,
         ];
 
-        $pdf = Pdf::loadView('reports.purchases', compact('purchases', 'summary', 'startDate', 'endDate'));
+        $pdf = Pdf::loadView('reports.purchases', compact('purchases', 'summary', 'startDate', 'endDate', 'reportLocale'));
 
         return $pdf->download("purchases-report-{$startDate}-to-{$endDate}.pdf");
     }
 
     public function stockAdjustmentsReport(Request $request)
     {
+        $this->setLocale($request->get('lang', 'en'));
+        ReportHelper::setLocale($this->reportLocale);
+        $reportLocale = $this->reportLocale;
+        
         $startDate = $request->get('start_date', now()->startOfMonth());
         $endDate = $request->get('end_date', now()->endOfMonth());
 
@@ -176,13 +210,17 @@ class ReportController extends Controller
             ->where('status', 'completed')
             ->get();
 
-        $pdf = Pdf::loadView('reports.stock-adjustments', compact('adjustments', 'startDate', 'endDate'));
+        $pdf = Pdf::loadView('reports.stock-adjustments', compact('adjustments', 'startDate', 'endDate', 'reportLocale'));
 
         return $pdf->download("stock-adjustments-report-{$startDate}-to-{$endDate}.pdf");
     }
 
     public function expensesReport(Request $request)
     {
+        $this->setLocale($request->get('lang', 'en'));
+        ReportHelper::setLocale($this->reportLocale);
+        $reportLocale = $this->reportLocale;
+        
         $startDate = $request->get('start_date', now()->startOfMonth());
         $endDate = $request->get('end_date', now()->endOfMonth());
 
@@ -198,13 +236,17 @@ class ReportController extends Controller
             'end_date' => $endDate,
         ];
 
-        $pdf = Pdf::loadView('reports.expenses', compact('expenses', 'summary', 'startDate', 'endDate'));
+        $pdf = Pdf::loadView('reports.expenses', compact('expenses', 'summary', 'startDate', 'endDate', 'reportLocale'));
 
         return $pdf->download("expenses-report-{$startDate}-to-{$endDate}.pdf");
     }
 
     public function wastageReport(Request $request)
     {
+        $this->setLocale($request->get('lang', 'en'));
+        ReportHelper::setLocale($this->reportLocale);
+        $reportLocale = $this->reportLocale;
+        
         $startDate = $request->get('start_date', now()->startOfMonth());
         $endDate = $request->get('end_date', now()->endOfMonth());
 
@@ -213,13 +255,17 @@ class ReportController extends Controller
             ->orderBy('date', 'desc')
             ->get();
 
-        $pdf = Pdf::loadView('reports.wastage', compact('wastages', 'startDate', 'endDate'));
+        $pdf = Pdf::loadView('reports.wastage', compact('wastages', 'startDate', 'endDate', 'reportLocale'));
 
         return $pdf->download("wastage-report-{$startDate}-to-{$endDate}.pdf");
     }
 
     public function cashFlow(Request $request)
     {
+        $this->setLocale($request->get('lang', 'en'));
+        ReportHelper::setLocale($this->reportLocale);
+        $reportLocale = $this->reportLocale;
+        
         $startDate = $request->get('start_date', now()->startOfMonth());
         $endDate = $request->get('end_date', now()->endOfMonth());
 
@@ -273,7 +319,8 @@ class ReportController extends Controller
             'netCashFlow',
             'closingBalance',
             'startDate',
-            'endDate'
+            'endDate',
+            'reportLocale'
         ));
 
         return $pdf->download("cash-flow-{$startDate}-to-{$endDate}.pdf");

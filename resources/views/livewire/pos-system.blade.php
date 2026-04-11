@@ -217,7 +217,7 @@
         </button>
 
         <!-- ═══════════════════ MAIN PANEL ═══════════════════ -->
-        <main class="flex-1 flex flex-col min-w-0 overflow-hidden">
+        <main class="flex-1 flex flex-col h-[100vh] min-w-0 overflow-hidden">
 
             <!-- ── Top Header Bar ── -->
             <div class="pos-header px-4 md:px-6 py-3 flex flex-col md:flex-row items-center gap-3 shrink-0">
@@ -273,67 +273,90 @@
             </div>
 
             <!-- ── Category Filter Pills ── -->
-            <div class="pos-categories px-4 md:px-6 py-2.5 flex items-center gap-2 overflow-x-auto scrollbar-hide shrink-0">
-                <button wire:click="selectCategory(null)"
-                    class="pos-category-pill flex-shrink-0 {{ !$selectedCategoryId ? 'active' : '' }}">
+            <div class="px-1 md:px-2 py-1 flex items-center gap-1 shrink-0">
+                <button
+                    type="button"
+                    @click="$refs.categoryScroller.scrollBy({ left: -220, behavior: 'smooth' })"
+                    class="w-6 h-6 md:w-7 md:h-7 rounded-full flex items-center justify-center border border-slate-200 bg-white/90 text-slate-500 hover:text-brand-primary hover:border-brand-primary transition-all duration-200 shadow-sm"
+                    aria-label="Scroll categories left">
                     <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
                     </svg>
-                    All
                 </button>
-                @foreach($categories as $category)
-                    <button wire:key="category-{{ $category->id }}" wire:click="selectCategory({{ $category->id }})"
-                        class="pos-category-pill flex-shrink-0 {{ $selectedCategoryId == $category->id ? 'active' : '' }}">
-                        {{ $category->name }}
-                    </button>
-                @endforeach
-            </div>
 
-            <!-- ── Most Ordered / Fast Moving Items (Only shown on "All" category and no search) ── -->
-            @if(!$selectedCategoryId && !$search && $frequentItems->isNotEmpty())
-            <div class="px-4 md:px-6 pt-4 shrink-0">
-                <div class="flex items-center justify-between mb-3">
-                    <h3 class="text-[10px] font-black text-slate-800 uppercase tracking-[0.15em] flex items-center gap-2">
-                        <svg class="w-4 h-4 text-brand-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                <div x-ref="categoryScroller" class="pos-categories flex-1 px-0.5 py-0 flex items-center gap-1 overflow-x-auto scrollbar-hide">
+                    <button wire:click="selectCategory(null)"
+                        class="pos-category-pill flex-shrink-0 text-[9px] px-2 py-1 {{ !$selectedCategoryId ? 'active' : '' }}">
+                        <svg class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                         </svg>
-                        Most Ordered
-                    </h3>
-                </div>
-                <div class="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
-                    @foreach($frequentItems as $item)
-                        <div wire:key="frequent-{{ $item->id }}" wire:click="addToCart({{ $item->id }})"
-                             class="flex-shrink-0 w-32 md:w-40 group cursor-pointer">
-                            <div class="relative aspect-square rounded-2xl overflow-hidden mb-2 shadow-sm group-hover:shadow-md transition-all duration-300">
-                                <img src="{{ $item->image ? Storage::url($item->image) : asset('placeholder.png') }}" 
-                                     class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
-                                <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                                <div class="absolute bottom-2 left-2">
-                                    <span class="text-[9px] font-black text-white">৳{{ number_format($item->final_price) }}</span>
-                                </div>
-                                @if($item->available_stock <= 0)
-                                    <div class="absolute inset-0 bg-slate-900/60 flex items-center justify-center">
-                                        <span class="text-[7px] text-white font-black uppercase">Sold Out</span>
-                                    </div>
-                                @endif
-                            </div>
-                            <h4 class="text-[9px] font-bold text-slate-700 truncate text-center group-hover:text-brand-primary uppercase tracking-tight">{{ $item->name }}</h4>
-                        </div>
+                        All
+                    </button>
+                    @foreach($categories as $category)
+                        <button wire:key="category-{{ $category->id }}" wire:click="selectCategory({{ $category->id }})"
+                            class="pos-category-pill flex-shrink-0 text-[9px] px-2 py-1 {{ $selectedCategoryId == $category->id ? 'active' : '' }}">
+                            {{ $category->name }}
+                        </button>
                     @endforeach
                 </div>
-                <div class="h-px bg-slate-100 mt-2"></div>
-            </div>
-            @endif
 
-            <!-- ── Menu Grid ── -->
-            <div class="flex-1 overflow-y-auto p-4 md:p-5 custom-scrollbar">
-                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 md:gap-4">
+                <button
+                    type="button"
+                    @click="$refs.categoryScroller.scrollBy({ left: 220, behavior: 'smooth' })"
+                    class="w-6 h-6 md:w-7 md:h-7 rounded-full flex items-center justify-center border border-slate-200 bg-white/90 text-slate-500 hover:text-brand-primary hover:border-brand-primary transition-all duration-200 shadow-sm"
+                    aria-label="Scroll categories right">
+                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
+                    </svg>
+                </button>
+            </div>
+
+            <div class="flex-1 min-h-0 overflow-y-auto custom-scrollbar">
+                <!-- ── Most Ordered / Fast Moving Items (Only shown on "All" category and no search) ── -->
+                @if(!$selectedCategoryId && !$search && $frequentItems->isNotEmpty())
+                <div class="px-4 md:px-6 pt-2">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-[10px] font-black text-slate-800 uppercase tracking-[0.15em] flex items-center gap-2">
+                            <svg class="w-4 h-4 text-brand-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            </svg>
+                            Most Ordered
+                        </h3>
+                    </div>
+                    <div class="flex gap-1.5 overflow-x-auto pb-2 scrollbar-hide">
+                        @foreach($frequentItems as $item)
+                            <div wire:key="frequent-{{ $item->id }}" wire:click="addToCart({{ $item->id }})"
+                                 class="flex-shrink-0 w-20 md:w-22 group cursor-pointer">
+                                <div class="relative aspect-square rounded-md overflow-hidden mb-0.5 shadow-sm group-hover:shadow-md transition-all duration-300">
+                                    <img src="{{ $item->image ? Storage::url($item->image) : asset('placeholder.png') }}" 
+                                         class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+                                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                                    <div class="absolute bottom-1 left-1">
+                                        <span class="text-[7px] font-black text-white">৳{{ number_format($item->final_price) }}</span>
+                                    </div>
+                                    @if($item->available_stock <= 0)
+                                        <div class="absolute inset-0 bg-slate-900/60 flex items-center justify-center">
+                                            <span class="text-[7px] text-white font-black uppercase">Sold Out</span>
+                                        </div>
+                                    @endif
+                                </div>
+                                <h4 class="text-[6px] font-bold text-slate-700 truncate text-center group-hover:text-brand-primary uppercase tracking-tight">{{ $item->name }}</h4>
+                            </div>
+                        @endforeach
+                    </div>
+                    <div class="h-px bg-slate-100 mt-2"></div>
+                </div>
+                @endif
+
+                <!-- ── Menu Grid ── -->
+                <div class="p-4 md:p-5 min-h-0">
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2.5 md:gap-3">
                     @foreach($items as $item)
                         <div wire:key="item-{{ $item->id }}" wire:click="addToCart({{ $item->id }})"
                             class="pos-menu-card group flex flex-col h-full relative cursor-pointer {{ $item->available_stock <= 0 ? 'opacity-75 cursor-not-allowed' : '' }}">
 
                             <!-- Image Container -->
-                            <div class="relative aspect-[4/3] overflow-hidden rounded-xl mb-2.5">
+                            <div class="relative aspect-[4/3] overflow-hidden rounded-lg mb-2">
                                 <img src="{{ $item->image ? Storage::url($item->image) : asset('placeholder.png') }}"
                                     alt="{{ $item->name }}"
                                     class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out">
@@ -365,8 +388,8 @@
                                 <!-- Add to Cart hover overlay -->
                                 @if($item->available_stock > 0)
                                     <div class="absolute inset-0 bg-brand-primary/0 group-hover:bg-brand-primary/15 transition-all duration-300 rounded-xl flex items-center justify-center">
-                                        <div class="w-9 h-9 bg-white rounded-full shadow-xl flex items-center justify-center opacity-0 group-hover:opacity-100 transform scale-75 group-hover:scale-100 transition-all duration-300">
-                                            <svg class="w-4 h-4 text-brand-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <div class="w-8 h-8 bg-white rounded-full shadow-xl flex items-center justify-center opacity-0 group-hover:opacity-100 transform scale-75 group-hover:scale-100 transition-all duration-300">
+                                            <svg class="w-3.5 h-3.5 text-brand-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
                                             </svg>
                                         </div>
@@ -376,7 +399,7 @@
 
                             <!-- Info -->
                             <div class="flex-1 px-0.5 pb-0.5">
-                                <h3 class="text-[10px] font-black text-slate-800 uppercase tracking-tight mb-0.5 group-hover:text-brand-primary transition-colors duration-200 line-clamp-1">
+                                <h3 class="text-[9px] font-black text-slate-800 uppercase tracking-tight mb-0.5 group-hover:text-brand-primary transition-colors duration-200 line-clamp-1">
                                     {{ $item->name }}
                                 </h3>
                                 <p class="text-[8px] text-slate-400 font-semibold italic leading-none">{{ $item->category->name }}</p>
@@ -423,12 +446,13 @@
                         <p class="text-[9px] text-slate-400 mt-1">Try a different search or category</p>
                     </div>
                 @endif
+                </div>
             </div>
         </main>
 
         <!-- ═══════════════════ ORDER SIDEBAR ═══════════════════ -->
         <aside
-            class="fixed inset-y-0 right-0 w-full md:w-[380px] flex flex-col z-50 transform transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] lg:relative lg:translate-x-0 pos-sidebar"
+            class="fixed inset-y-0 right-0 w-full md:w-[360px] xl:w-[380px] h-[100dvh] max-h-[100dvh] overflow-hidden flex flex-col z-50 transform transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] lg:relative lg:translate-x-0 pos-sidebar"
             :class="{ 'translate-x-0': $wire.showCart, 'translate-x-full': !$wire.showCart }"
             @click.away="$wire.showCart = false">
 
@@ -465,7 +489,7 @@
             </div>
 
             <!-- ── Cart Items ── -->
-            <div class="flex-1 overflow-y-auto px-4 py-3 space-y-2 min-h-[15vh] custom-scrollbar">
+            <div class="flex-1 overflow-y-auto px-3 md:px-4 py-2.5 space-y-1.5 min-h-[22vh] max-h-[40vh] md:max-h-[42vh] custom-scrollbar">
                 @forelse($cart as $index => $item)
                     <div wire:key="cart-item-{{ $item['id'] }}-{{ $index }}"
                         class="pos-cart-item flex items-center gap-3 animate-fadeIn">
@@ -480,8 +504,18 @@
                             <p class="text-brand-primary font-black text-[10px] mt-0.5">৳{{ number_format($item['price'] * $item['quantity']) }}</p>
                         </div>
 
-                        <!-- Qty Controls -->
-                        <div class="flex items-center gap-1 bg-slate-100 rounded-lg p-0.5">
+                        <!-- Qty Controls + Remove -->
+                        <div class="flex items-center gap-1">
+                            <button wire:click="removeFromCart({{ $index }})"
+                                class="w-6 h-6 rounded-md flex items-center justify-center text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-all duration-150"
+                                title="Remove item">
+                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                            </button>
+
+                            <div class="flex items-center gap-1 bg-slate-100 rounded-lg p-0.5">
                             <button wire:click="updateQuantity({{ $index }}, -1)"
                                 class="w-6 h-6 rounded-md flex items-center justify-center text-slate-500 hover:text-rose-500 hover:bg-white transition-all duration-150 font-black text-sm">
                                 −
@@ -491,6 +525,7 @@
                                 class="w-6 h-6 rounded-md flex items-center justify-center text-slate-500 hover:text-brand-primary hover:bg-white transition-all duration-150 font-black text-sm">
                                 +
                             </button>
+                            </div>
                         </div>
                     </div>
                 @empty
@@ -508,7 +543,9 @@
             </div>
 
             <!-- ── Checkout Panel ── -->
-            <div class="shrink overflow-y-auto lg:shrink-0 lg:overflow-visible pos-checkout-panel px-4 pt-4 pb-20 lg:pb-5 space-y-3 custom-scrollbar">
+            <div class="shrink min-h-0 lg:shrink-0 pos-checkout-panel px-3 md:px-4 pt-3 pb-2 space-y-2.5 flex flex-col">
+
+                <div class="flex-1 min-h-0 space-y-2.5 pr-0.5 pb-24 lg:pb-2 overflow-y-auto custom-scrollbar">
 
                 <!-- Divider with label -->
                 <div class="flex items-center gap-2 mb-1">
@@ -517,8 +554,20 @@
                     <div class="flex-1 h-px bg-slate-200"></div>
                 </div>
 
+                <div>
+
                 <!-- Customer Fields Grid -->
-                <div class="grid grid-cols-2 gap-2">
+                <div x-data="{ showCustomerFields: window.innerWidth >= 768 }" class="space-y-2">
+                    <button type="button"
+                        class="md:hidden w-full flex items-center justify-between px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-[9px] font-black uppercase tracking-[0.12em] text-slate-600"
+                        @click="showCustomerFields = !showCustomerFields">
+                        <span>Customer & Order Details</span>
+                        <svg class="w-3.5 h-3.5 transition-transform duration-200" :class="{ 'rotate-180': showCustomerFields }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+
+                    <div x-show="showCustomerFields || window.innerWidth >= 768" x-collapse class="grid grid-cols-2 gap-1.5 md:gap-2">
                     <div class="space-y-1">
                         <label class="pos-field-label">Customer Name</label>
                         <input wire:model.live="customerName" type="text" placeholder="Walk-in Customer"
@@ -529,36 +578,41 @@
                         <input wire:model.live="customerPhone" type="text" placeholder="017xxxxxxxx"
                             class="pos-field-input">
                     </div>
-                    <div class="space-y-1">
-                        <label class="pos-field-label">Order Type</label>
-                        <select wire:model.live="orderType" class="pos-field-select">
-                            <option value="dine_in">🍽 Walk-In</option>
-                            <option value="takeaway">🛍 Takeaway</option>
-                            <option value="delivery">🚴 Delivery</option>
-                        </select>
+                    <div class="col-span-2 grid grid-cols-3 gap-1.5 md:gap-2">
+                        <div class="space-y-1">
+                            <label class="pos-field-label">Order Type</label>
+                            <select wire:model.live="orderType" class="pos-field-select">
+                                <option value="dine_in">🍽 Walk-In</option>
+                                <option value="takeaway">🛍 Takeaway</option>
+                                <option value="delivery">🚴 Delivery</option>
+                                <option value="foodpanda">🐼 Foodpanda</option>
+                                <option value="pathao">🚗 Pathao</option>
+                            </select>
+                        </div>
+                        <div class="space-y-1">
+                            <label class="pos-field-label">Guests</label>
+                            <input wire:model.live="guestCount" type="number" min="1" placeholder="1"
+                                class="pos-field-input">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="pos-field-label">Table (Optional)</label>
+                            <select wire:model.live="tableNumber" class="pos-field-select">
+                                <option value="">No Table</option>
+                                @foreach($tables as $table)
+                                    <option value="{{ $table->name }}">{{ $table->name }} ({{ $table->capacity }} seats)</option>
+                                @endforeach
+                            </select>
+                        </div>
                     </div>
-                    <div class="space-y-1">
-                        <label class="pos-field-label">Guests</label>
-                        <input wire:model.live="guestCount" type="number" min="1" placeholder="1"
-                            class="pos-field-input">
-                    </div>
-                    <div class="space-y-1">
-                        <label class="pos-field-label">Table (Optional)</label>
-                        <select wire:model.live="tableNumber" class="pos-field-select">
-                            <option value="">No Table</option>
-                            @foreach($tables as $table)
-                                <option value="{{ $table->name }}">{{ $table->name }} ({{ $table->capacity }} seats)</option>
-                            @endforeach
-                        </select>
                     </div>
                 </div>
 
                 <!-- Old Visual Table Selector Removed to follow "select option" request -->
 
                 <!-- Discount Row -->
-                <div class="pos-discount-row rounded-xl p-3 space-y-2">
+                <div class="pos-discount-row rounded-xl p-2 space-y-1.5">
                     <div class="flex items-center justify-between">
-                        <span class="flex items-center gap-1.5 text-[8px] font-black text-slate-600 uppercase tracking-wider">
+                        <span class="flex items-center gap-1 text-[8px] font-black text-slate-600 uppercase tracking-wider">
                             <svg class="w-3 h-3 text-brand-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
@@ -567,17 +621,19 @@
                         </span>
                         <div class="flex items-center gap-0.5 bg-white rounded-lg p-0.5 border border-slate-200">
                             <button wire:click="$set('discountType', 'percentage')"
-                                class="px-2.5 py-1 rounded-md text-[8px] font-black transition-all duration-200 {{ $discountType == 'percentage' ? 'bg-brand-primary text-white shadow-sm' : 'text-slate-500 hover:text-slate-700' }}">%</button>
+                                class="px-2 py-0.5 rounded-md text-[8px] font-black transition-all duration-200 {{ $discountType == 'percentage' ? 'bg-brand-primary text-white shadow-sm' : 'text-slate-500 hover:text-slate-700' }}">%</button>
                             <button wire:click="$set('discountType', 'fixed')"
-                                class="px-2.5 py-1 rounded-md text-[8px] font-black transition-all duration-200 {{ $discountType == 'fixed' ? 'bg-brand-primary text-white shadow-sm' : 'text-slate-500 hover:text-slate-700' }}">৳</button>
+                                class="px-2 py-0.5 rounded-md text-[8px] font-black transition-all duration-200 {{ $discountType == 'fixed' ? 'bg-brand-primary text-white shadow-sm' : 'text-slate-500 hover:text-slate-700' }}">৳</button>
                         </div>
                     </div>
                     <input wire:model.live="discountValue" type="number" placeholder="0.00"
-                        class="pos-field-input text-center font-black">
+                        class="pos-field-input !py-1.5 text-center font-black text-[10px]">
+                </div>
+
                 </div>
 
                 <!-- Totals -->
-                <div class="pos-totals-card rounded-xl p-3 space-y-2">
+                <div class="pos-totals-card rounded-xl p-2.5 md:p-3 space-y-1.5 sticky bottom-[4.65rem] md:bottom-[4.95rem] z-20 bg-white/95 backdrop-blur-sm border border-slate-200">
                     <div class="flex justify-between items-center">
                         <span class="text-[9px] font-bold text-slate-500 uppercase tracking-wider">Subtotal</span>
                         <span class="text-[10px] font-black text-slate-700">৳{{ number_format($this->subtotal) }}</span>
@@ -610,7 +666,7 @@
 
                 <!-- Split Payment Rows -->
                 @if($isSplitPayment)
-                    <div class="space-y-2 max-h-[180px] overflow-y-auto pr-1 animate-fadeIn">
+                    <div class="space-y-2 max-h-[140px] md:max-h-[180px] overflow-y-auto pr-1 animate-fadeIn">
                         @foreach($paymentSplits as $index => $split)
                             <div class="bg-white border border-slate-200 rounded-xl p-2 space-y-2 relative group shadow-sm">
                                 <div class="flex items-center gap-2">
@@ -636,7 +692,7 @@
                     </div>
                 @else
                     <!-- Payment Methods -->
-                    <div class="grid grid-cols-3 lg:grid-cols-3 gap-2">
+                    <div class="grid grid-cols-3 lg:grid-cols-3 gap-1.5 md:gap-2">
                         @foreach($enabledPaymentMethods as $methodKey => $methodLabel)
                             @php
                                 $config = $paymentMethodConfigs[$methodKey] ?? null;
@@ -669,8 +725,10 @@
                     </div>
                 @endif
 
+                </div>
+
                 <!-- Action Buttons -->
-                <div class="flex gap-2 pt-1">
+                <div class="fixed lg:static bottom-0 left-0 right-0 md:left-auto md:w-[360px] xl:w-[380px] shrink-0 z-40 bg-white/95 backdrop-blur-sm border-t border-slate-200 pt-2 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] px-3 md:px-4 flex gap-2 mt-1">
                     <button @click="placeOrderStandard()" 
                         {{ empty($cart) ? 'disabled' : '' }}
                         class="flex-1 py-3.5 text-white text-[10px] font-black uppercase tracking-[0.25em] rounded-xl transition-all duration-200 disabled:opacity-30 flex items-center justify-center gap-2.5 group active:scale-[0.98]"
@@ -891,7 +949,7 @@
             .pos-menu-card {
                 background: #ffffff;
                 border-radius: 1rem;
-                padding: 0.75rem;
+                padding: 0.55rem;
                 border: 1.5px solid #f1f5f9;
                 box-shadow: 0 1px 4px rgba(0,0,0,0.04);
                 transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);

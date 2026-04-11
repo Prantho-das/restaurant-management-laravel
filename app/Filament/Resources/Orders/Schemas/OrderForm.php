@@ -65,6 +65,8 @@ class OrderForm
                                 'dine_in' => 'Dine In',
                                 'takeaway' => 'Takeaway',
                                 'delivery' => 'Delivery',
+                                'foodpanda' => 'Foodpanda',
+                                'pathao' => 'Pathao',
                             ])
                             ->required()
                             ->default('dine_in'),

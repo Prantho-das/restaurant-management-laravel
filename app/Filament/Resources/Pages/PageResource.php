@@ -8,6 +8,7 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\Action;
 use Filament\Forms\Components\Builder;
 use Filament\Forms\Components\Builder\Block;
 use Filament\Forms\Components\FileUpload;
@@ -32,13 +33,21 @@ class PageResource extends Resource
 
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-document-duplicate';
 
-    protected static \UnitEnum|string|null $navigationGroup = 'Settings';
+    protected static \UnitEnum|string|null $navigationGroup = 'Setup';
 
     public static function form(Schema $schema): Schema
     {
         return $schema
             ->components([
                 Section::make('Page Information')
+                    ->description('Basic page details')
+                    ->headerActions([
+                        Action::make('preview')
+                            ->label('Preview')
+                            ->icon('heroicon-o-eye')
+                            ->url(fn () => route('page.show', ['slug' => 'sample']))
+                            ->openUrlInNewTab(),
+                    ])
                     ->schema([
                         Grid::make(3)
                             ->schema([
@@ -49,20 +58,28 @@ class PageResource extends Resource
                                 TextInput::make('slug')
                                     ->required()
                                     ->unique(ignoreRecord: true),
-                                Grid::make(2)
-                                    ->schema([
-                                        Toggle::make('is_active')
-                                            ->label('Active')
-                                            ->default(true),
-                                        Toggle::make('show_in_footer')
-                                            ->label('Show in Footer')
-                                            ->default(true),
-                                    ])->columnSpan(1),
+                            ]),
+                        Grid::make(2)
+                            ->schema([
+                                Toggle::make('is_active')
+                                    ->label('Active')
+                                    ->default(true),
+                                Toggle::make('show_in_footer')
+                                    ->label('Show in Footer')
+                                    ->default(true),
                             ]),
                     ])->columnSpanFull(),
 
                 Section::make('Page Content (Blocks)')
                     ->description('Build your page using modular sections. Each section can have a different design.')
+                    ->headerActions([
+                        // Action::make('addTemplate')
+                        //     ->label('Load Template')
+                        //     ->icon('heroicon-o-document-plus')
+                        //     ->action(function (array $data) {
+                        //         // Add your template loading logic here
+                        //     }),
+                    ])
                     ->schema([
                         Builder::make('content')
                             ->blocks([
@@ -79,6 +96,19 @@ class PageResource extends Resource
                                                 'center' => 'Center',
                                                 'right' => 'Right',
                                             ])->default('center'),
+                                        // Optional Button
+                                        Grid::make(3)
+                                            ->schema([
+                                                TextInput::make('button_text')->label('Button Text'),
+                                                TextInput::make('button_url')->label('Button URL'),
+                                                Select::make('button_style')
+                                                    ->label('Button Style')
+                                                    ->options([
+                                                        'primary' => 'Primary',
+                                                        'secondary' => 'Secondary',
+                                                        'outline' => 'Outline',
+                                                    ])->default('primary'),
+                                            ]),
                                     ]),
                                 Block::make('rich_text')
                                     ->icon('heroicon-o-document-text')
@@ -90,6 +120,19 @@ class PageResource extends Resource
                                                 'wide' => 'Wide',
                                                 'narrow' => 'Narrow (Centered)',
                                             ])->default('standard'),
+                                        // Optional Button
+                                        Grid::make(3)
+                                            ->schema([
+                                                TextInput::make('button_text')->label('Button Text'),
+                                                TextInput::make('button_url')->label('Button URL'),
+                                                Select::make('button_style')
+                                                    ->label('Button Style')
+                                                    ->options([
+                                                        'primary' => 'Primary',
+                                                        'secondary' => 'Secondary',
+                                                        'outline' => 'Outline',
+                                                    ])->default('primary'),
+                                            ]),
                                     ]),
                                 Block::make('image_text')
                                     ->label('Image + Text')
@@ -104,12 +147,38 @@ class PageResource extends Resource
                                                 'left' => 'Left',
                                                 'right' => 'Right',
                                             ])->default('left'),
+                                        // Optional Button
+                                        Grid::make(3)
+                                            ->schema([
+                                                TextInput::make('button_text')->label('Button Text'),
+                                                TextInput::make('button_url')->label('Button URL'),
+                                                Select::make('button_style')
+                                                    ->label('Button Style')
+                                                    ->options([
+                                                        'primary' => 'Primary',
+                                                        'secondary' => 'Secondary',
+                                                        'outline' => 'Outline',
+                                                    ])->default('primary'),
+                                            ]),
                                     ]),
                                 Block::make('featured_menu')
                                     ->icon('heroicon-o-list-bullet')
                                     ->schema([
                                         TextInput::make('title')->default('Featured Delicacies'),
                                         TextInput::make('subtitle'),
+                                        // Optional Button
+                                        Grid::make(3)
+                                            ->schema([
+                                                TextInput::make('button_text')->label('Button Text'),
+                                                TextInput::make('button_url')->label('Button URL'),
+                                                Select::make('button_style')
+                                                    ->label('Button Style')
+                                                    ->options([
+                                                        'primary' => 'Primary',
+                                                        'secondary' => 'Secondary',
+                                                        'outline' => 'Outline',
+                                                    ])->default('primary'),
+                                            ]),
                                     ]),
                                 Block::make('faq')
                                     ->label('FAQ Section')
@@ -121,6 +190,19 @@ class PageResource extends Resource
                                                 TextInput::make('question')->required(),
                                                 Textarea::make('answer')->required(),
                                             ])->collapsible()->itemLabel(fn ($state) => $state['question'] ?? 'New Item'),
+                                        // Optional Button
+                                        Grid::make(3)
+                                            ->schema([
+                                                TextInput::make('button_text')->label('Button Text'),
+                                                TextInput::make('button_url')->label('Button URL'),
+                                                Select::make('button_style')
+                                                    ->label('Button Style')
+                                                    ->options([
+                                                        'primary' => 'Primary',
+                                                        'secondary' => 'Secondary',
+                                                        'outline' => 'Outline',
+                                                    ])->default('primary'),
+                                            ]),
                                     ]),
                             ])
                             ->collapsible()

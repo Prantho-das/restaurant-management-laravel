@@ -44,6 +44,12 @@ class IngredientForm
                     ->numeric()
                     ->default(0)
                     ->helperText('Stock level at which to trigger a low-stock alert.'),
+                TextInput::make('unit_cost')
+                    ->required()
+                    ->numeric()
+                    ->default(0)
+                    ->prefix('৳')
+                    ->helperText('Unit cost per ingredient for inventory valuation.'),
             ]);
     }
 }

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Auth;
+use App\Services\InventoryService;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
@@ -64,6 +65,17 @@ class FoodPreparation extends Model
                 if ($foodPreparation->menuItem && $foodPreparation->menuItem->outlet_id) {
                     $foodPreparation->outlet_id = $foodPreparation->menuItem->outlet_id;
                 }
+            }
+        });
+
+        static::created(function (FoodPreparation $foodPreparation) {
+            $foodPreparation->loadMissing('menuItem');
+
+            if ($foodPreparation->menuItem?->isPremade()) {
+                app(InventoryService::class)->addPremadeStock(
+                    (int) $foodPreparation->menu_item_id,
+                    (float) $foodPreparation->quantity
+                );
             }
         });
     }

@@ -10,11 +10,11 @@ class Pos extends Page
 {
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-calculator';
 
-    protected static string|UnitEnum|null $navigationGroup = 'Sales & POS';
+    protected static string|UnitEnum|null $navigationGroup = 'Sale';
 
     protected static ?int $navigationSort = 1;
 
-    protected static ?string $navigationLabel = 'POS System';
+    protected static ?string $navigationLabel = 'Pos';
 
     protected static ?string $title = '';
 

@@ -21,7 +21,7 @@ class IngredientResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBeaker;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Inventory';
+    protected static string|UnitEnum|null $navigationGroup = 'Stock';
 
     protected static ?int $navigationSort = 1;
 
