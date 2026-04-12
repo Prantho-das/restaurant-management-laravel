@@ -117,6 +117,30 @@ class Order extends Model
     }
 
     /**
+     * Get KOT orders for this order.
+     */
+    public function kotOrders(): HasMany
+    {
+        return $this->hasMany(KotOrder::class);
+    }
+
+    /**
+     * Check if order has been sent to kitchen.
+     */
+    public function hasKot(): bool
+    {
+        return $this->kotOrders()->exists();
+    }
+
+    /**
+     * Get the latest KOT for this order.
+     */
+    public function latestKot(): ?KotOrder
+    {
+        return $this->kotOrders()->latest()->first();
+    }
+
+    /**
      * @return array<string, mixed>
      */
     public function toReceiptArray(): array

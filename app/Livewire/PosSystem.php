@@ -11,6 +11,7 @@ use App\Models\OrderPayment;
 use App\Models\Setting;
 use App\Models\Table;
 use App\Services\InventoryService;
+use App\Services\KotService;
 use Throwable;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -92,6 +93,9 @@ class PosSystem extends Component
 
     // Online payment gateways that require internet
     public array $onlinePaymentMethods = ['bkash', 'sslcommerze'];
+
+    // Last placed order ID for KOT
+    public ?int $lastOrderId = null;
 
     protected function getCategories()
     {
@@ -501,6 +505,9 @@ class PosSystem extends Component
         $order = $result['order'];
         $receiptData = $result['receipt'];
 
+        // Store the order ID for KOT sending
+        $this->lastOrderId = $order->id;
+
         $this->clearCart();
         $this->reset(['tableNumber', 'customerName', 'customerPhone', 'notes', 'referenceNo', 'discountValue', 'discountType', 'orderType', 'paymentMethod', 'guestCount', 'isSplitPayment', 'paymentSplits']);
 
@@ -519,6 +526,42 @@ class PosSystem extends Component
         unset($this->subtotal);
         unset($this->discountAmount);
         unset($this->total);
+    }
+
+    /**
+     * Send current order to kitchen (KOT).
+     * This requires an existing completed order.
+     */
+    public function sendToKitchen(int $orderId): array
+    {
+        try {
+            $order = Order::with('items.menuItem')->find($orderId);
+
+            if (!$order) {
+                return ['success' => false, 'message' => 'Order not found'];
+            }
+
+            // Check if already sent to kitchen
+            if ($order->hasKot()) {
+                return ['success' => false, 'message' => 'Order already sent to kitchen'];
+            }
+
+            // Send to kitchen
+            $kotService = app(KotService::class);
+            $kotOrder = $kotService->sendToKitchen($order, Auth::id());
+
+            // Dispatch event for printing KOT
+            $this->dispatch('kot-sent', kotId: $kotOrder->id);
+            $this->dispatch('notify', type: 'success', message: 'Order sent to kitchen: ' . $kotOrder->kot_number);
+
+            return [
+                'success' => true,
+                'message' => 'Order sent to kitchen',
+                'kot_number' => $kotOrder->kot_number,
+            ];
+        } catch (Throwable $e) {
+            return ['success' => false, 'message' => $e->getMessage() ?: 'Failed to send to kitchen'];
+        }
     }
 
     public function render()

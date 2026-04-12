@@ -783,6 +783,31 @@
                         </svg>
                     </button>
                 </div>
+
+                {{-- Send to Kitchen Button (appears after order is placed) --}}
+                @if(isset($lastOrderId) && $lastOrderId)
+                @php
+                    $orderHasKot = \App\Models\Order::find($lastOrderId)?->hasKot() ?? false;
+                @endphp
+                @if(!$orderHasKot)
+                <div class="px-3 md:px-4 mt-2">
+                    <button wire:click="sendToKitchen({{ $lastOrderId }})"
+                        class="w-full py-2 bg-orange-500 text-white text-xs font-bold uppercase tracking-wider rounded-lg shadow-lg hover:bg-orange-600 transition-all flex items-center justify-center gap-2 active:scale-[0.98]">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z" />
+                        </svg>
+                        Send to Kitchen
+                    </button>
+                </div>
+                @else
+                <div class="px-3 md:px-4 mt-2">
+                    <div class="w-full py-2 bg-green-100 text-green-700 text-xs font-bold uppercase tracking-wider rounded-lg text-center">
+                        ✓ Sent to Kitchen
+                    </div>
+                </div>
+                @endif
+                @endif
             </div>
         </aside>
 
