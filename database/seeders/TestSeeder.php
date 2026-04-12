@@ -103,10 +103,10 @@ class TestSeeder extends Seeder
         $this->command->info('Comprehensive test data seeding completed!');
         $this->command->info('========================================');
         $this->command->info('Test Credentials:');
-        $this->command->info('  Admin: admin@test.com / password');
-        $this->command->info('  Manager: manager@test.com / password');
-        $this->command->info('  Cashier: cashier@test.com / password');
-        $this->command->info('  Waiter: waiter@test.com / password');
+        $this->command->info('  Admin: admin@gmail.com / password');
+        $this->command->info('  Manager: manager@gmail.com / password');
+        $this->command->info('  Cashier: cashier@gmail.com / password');
+        $this->command->info('  Waiter: waiter@gmail.com / password');
         $this->command->info('========================================');
     }
 
@@ -173,7 +173,7 @@ class TestSeeder extends Seeder
         $this->command->info('Creating users...');
 
         $admin = User::firstOrCreate(
-            ['email' => 'admin@test.com'],
+            ['email' => 'admin@gmail.com'],
             [
                 'name' => 'Test Admin',
                 'password' => Hash::make('password'),
@@ -186,7 +186,7 @@ class TestSeeder extends Seeder
         $admin->assignRole('super_admin');
 
         $manager = User::firstOrCreate(
-            ['email' => 'manager@test.com'],
+            ['email' => 'manager@gmail.com'],
             [
                 'name' => 'Test Manager',
                 'password' => Hash::make('password'),
@@ -199,7 +199,7 @@ class TestSeeder extends Seeder
         $manager->assignRole('manager');
 
         $cashier = User::firstOrCreate(
-            ['email' => 'cashier@test.com'],
+            ['email' => 'cashier@gmail.com'],
             [
                 'name' => 'Test Cashier',
                 'password' => Hash::make('password'),
@@ -212,7 +212,7 @@ class TestSeeder extends Seeder
         $cashier->assignRole('cashier');
 
         $waiter = User::firstOrCreate(
-            ['email' => 'waiter@test.com'],
+            ['email' => 'waiter@gmail.com'],
             [
                 'name' => 'Test Waiter',
                 'password' => Hash::make('password'),
@@ -225,7 +225,7 @@ class TestSeeder extends Seeder
         $waiter->assignRole('waiter');
 
         $chef = User::firstOrCreate(
-            ['email' => 'chef@test.com'],
+            ['email' => 'chef@gmail.com'],
             [
                 'name' => 'Test Chef',
                 'password' => Hash::make('password'),

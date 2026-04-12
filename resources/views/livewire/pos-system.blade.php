@@ -20,12 +20,30 @@
                 lastReceipt: null,
                 showSuccessModal: false,
                 isProcessing: false,
+                isReady: false,
+                isDarkMode: false,
                 init() {
+                    this.isDarkMode = document.documentElement.classList.contains('dark') || window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+                    const darkClassObserver = new MutationObserver(() => {
+                        this.isDarkMode = document.documentElement.classList.contains('dark');
+                    });
+
+                    darkClassObserver.observe(document.documentElement, {
+                        attributes: true,
+                        attributeFilter: ['class']
+                    });
+
+                    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (event) => {
+                        if (!document.documentElement.classList.contains('dark')) {
+                            this.isDarkMode = event.matches;
+                        }
+                    });
                     this.db = new Dexie('POS_Offline_DB');
                     this.db.version(2).stores({
                         orders: '++id, cart, total, timestamp, details, synced'
                     });
-                    
+
                     // Keyboard Shortcuts
                     window.addEventListener('keydown', (e) => {
                         // Focus search on '/'
@@ -33,12 +51,12 @@
                             e.preventDefault();
                             document.querySelector('.pos-search-input')?.focus();
                         }
-                        
+
                         // Close modal on 'Escape'
                         if (e.key === 'Escape') {
                             this.showSuccessModal = false;
                         }
-                        
+
                         // Confirm order on 'Enter' (if cart is not empty and modal is not open)
                         if (e.key === 'Enter' && !this.showSuccessModal && !this.isProcessing) {
                             const cartCount = @json(count($cart));
@@ -63,6 +81,10 @@
                     if (this.isOnline) {
                         this.syncOrders();
                     }
+
+                    this.$nextTick(() => {
+                        this.isReady = true;
+                    });
                 },
                 async saveOfflineOrder(cart, total, details) {
                     await this.db.orders.add({
@@ -169,7 +191,7 @@
                             this.$wire.referenceNo = '';
                             this.$wire.notes = '';
                             this.$wire.discountValue = 0;
-                            
+
                             window.dispatchEvent(new CustomEvent('notify', { detail: { type: 'success', message: 'Offline Order Saved! It will sync once online.' } }));
                         } finally {
                             this.isProcessing = false;
@@ -186,12 +208,14 @@
         }
     </script>
 
-    <div x-data="posSystemData()"
+        <div x-data="posSystemData()"
         x-on:order-placed.window="if (!isOnline) { await saveOfflineOrder($wire.cart, $wire.total, { order_number: $event.detail?.order_number, order_type: $wire.orderType, payment_method: $wire.paymentMethod, table_number: $wire.tableNumber, customer_name: $wire.customerName, customer_phone: $wire.customerPhone, guest_count: $wire.guestCount, notes: $wire.notes, reference_no: $wire.referenceNo }); } else { syncOrders(); }"
         x-on:pos-receipt-ready.window="lastReceipt = $event.detail; showSuccessModal = !$event.detail.auto_print"
+        x-cloak
+        x-show="isReady"
         style="display: none;"
         class="!flex flex h-full overflow-hidden font-sans relative pos-bg"
-        :class="{ 'overflow-hidden': $wire.showCart }"
+        :class="{ 'overflow-hidden': $wire.showCart, 'pos-dark': isDarkMode }"
 >
 
         <!-- Offline Sync Status Indicator -->
@@ -328,7 +352,7 @@
                             <div wire:key="frequent-{{ $item->id }}" wire:click="addToCart({{ $item->id }})"
                                  class="flex-shrink-0 w-20 md:w-22 group cursor-pointer">
                                 <div class="relative aspect-square rounded-md overflow-hidden mb-0.5 shadow-sm group-hover:shadow-md transition-all duration-300">
-                                    <img src="{{ $item->image ? Storage::url($item->image) : asset('placeholder.png') }}" 
+                                    <img src="{{ $item->image ? Storage::url($item->image) : asset('placeholder.png') }}"
                                          class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
                                     <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                                     <div class="absolute bottom-1 left-1">
@@ -404,12 +428,20 @@
                                 </h3>
                                 <p class="text-[8px] text-slate-400 font-semibold italic leading-none">{{ $item->category->name }}</p>
 
-                                @if($item->available_stock > 0 && $item->available_stock >= 5)
-                                    <div class="mt-1.5 flex items-center gap-1">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                                        <span class="text-[7px] font-bold text-slate-400 uppercase tracking-wide">In Stock</span>
-                                    </div>
-                                @endif
+                                <div class="mt-1.5 flex items-center gap-1.5 flex-wrap">
+                                    @if($item->isPremade())
+                                        <span class="inline-flex items-center rounded-full bg-amber-100 text-amber-700 text-[7px] font-black uppercase tracking-wide px-1.5 py-0.5 border border-amber-200">
+                                            Premade
+                                        </span>
+                                    @endif
+
+                                    @if($item->available_stock > 0 && $item->available_stock >= 5)
+                                        <span class="inline-flex items-center gap-1">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                            <span class="text-[7px] font-bold text-slate-400 uppercase tracking-wide">In Stock</span>
+                                        </span>
+                                    @endif
+                                </div>
                             </div>
                         </div>
                     @endforeach
@@ -457,31 +489,31 @@
             @click.away="$wire.showCart = false">
 
             <!-- ── Sidebar Header ── -->
-            <div class="px-5 py-4 flex items-center justify-between shrink-0 pos-sidebar-header">
-                <div class="flex items-center gap-3">
-                    <button @click="$wire.showCart = false" class="lg:hidden w-8 h-8 rounded-lg flex items-center justify-center text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition-colors">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div class="px-4 py-3 flex items-center justify-between shrink-0 pos-sidebar-header">
+                <div class="flex items-center gap-2.5">
+                    <button @click="$wire.showCart = false" class="lg:hidden w-7 h-7 rounded-lg flex items-center justify-center text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition-colors">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </button>
-                    <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, #808000 0%, #a4a400 100%); box-shadow: 0 4px 12px rgba(128,128,0,0.3);">
-                        <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background: linear-gradient(135deg, #808000 0%, #a4a400 100%); box-shadow: 0 3px 10px rgba(128,128,0,0.25);">
+                        <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                         </svg>
                     </div>
                     <div>
-                        <h2 class="text-[11px] font-black text-slate-800 uppercase tracking-tight leading-none">Current Order</h2>
-                        <span class="text-[9px] text-slate-400 font-bold mt-0.5 inline-flex items-center gap-1">
-                            <span class="w-1.5 h-1.5 rounded-full {{ count($cart ?? []) > 0 ? 'bg-brand-primary' : 'bg-slate-300' }}"></span>
+                        <h2 class="text-[7px] font-black text-slate-800 uppercase tracking-tight leading-none">Current Order</h2>
+                        <span class="text-[7px] text-slate-400 font-bold mt-0.5 inline-flex items-center gap-1">
+                            <span class="w-1 h-1 rounded-full {{ count($cart ?? []) > 0 ? 'bg-brand-primary' : 'bg-slate-300' }}"></span>
                             {{ count($cart ?? []) }} {{ count($cart ?? []) === 1 ? 'item' : 'items' }}
                         </span>
                     </div>
                 </div>
                 <button wire:click="clearCart"
-                    class="group w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200 {{ empty($cart) ? 'text-slate-300 cursor-not-allowed' : 'text-rose-400 hover:text-rose-600 hover:bg-rose-50' }}"
+                    class="group w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 {{ empty($cart) ? 'text-slate-300 cursor-not-allowed' : 'text-rose-400 hover:text-rose-600 hover:bg-rose-50' }}"
                     {{ empty($cart) ? 'disabled' : '' }}
                     title="Clear cart">
-                    <svg class="w-4 h-4 group-hover:scale-110 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg class="w-3.5 h-3.5 group-hover:scale-110 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                     </svg>
@@ -489,7 +521,7 @@
             </div>
 
             <!-- ── Cart Items ── -->
-            <div class="flex-1 overflow-y-auto px-3 md:px-4 py-2.5 space-y-1.5 min-h-[22vh] max-h-[40vh] md:max-h-[42vh] custom-scrollbar">
+            <div class="flex-1 overflow-y-auto px-3 md:px-4 py-2.5 space-y-1.5 min-h-[20vh] max-h-[38vh] md:max-h-[40vh] custom-scrollbar">
                 @forelse($cart as $index => $item)
                     <div wire:key="cart-item-{{ $item['id'] }}-{{ $index }}"
                         class="pos-cart-item flex items-center gap-3 animate-fadeIn">
@@ -650,21 +682,21 @@
                     </div>
                 </div>
 
-                <!-- Split Payment Toggle -->
-                <div class="flex items-center justify-between bg-slate-50 p-2 rounded-xl border border-slate-200">
-                    <span class="text-[9px] font-black text-slate-600 uppercase tracking-wider flex items-center gap-2">
-                         <svg class="w-3.5 h-3.5 text-brand-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <!-- Partial Payment Toggle -->
+                <div class="flex items-center justify-between bg-gradient-to-r from-slate-50 to-white px-2.5 py-1.5 rounded-xl border border-slate-200/90 shadow-sm">
+                    <span class="text-[8px] font-black text-slate-600 uppercase tracking-[0.2em] flex items-center gap-1.5">
+                         <svg class="w-3 h-3 text-brand-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                         </svg>
-                        Split Payment
+                        Partial Payment
                     </span>
-                    <button wire:click="$toggle('isSplitPayment')" 
-                        class="relative inline-flex h-5 w-10 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none {{ $isSplitPayment ? 'bg-brand-primary' : 'bg-slate-300' }}">
-                        <span class="pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out {{ $isSplitPayment ? 'translate-x-5' : 'translate-x-0' }}"></span>
+                    <button wire:click="$toggle('isSplitPayment')"
+                        class="relative inline-flex h-4.5 w-9 shrink-0 cursor-pointer rounded-full border border-slate-300/80 transition-all duration-200 ease-in-out focus:outline-none {{ $isSplitPayment ? 'bg-brand-primary/90' : 'bg-slate-200' }}">
+                        <span class="pointer-events-none inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out {{ $isSplitPayment ? 'translate-x-5' : 'translate-x-0.5' }}"></span>
                     </button>
                 </div>
 
-                <!-- Split Payment Rows -->
+                <!-- Partial Payment Rows -->
                 @if($isSplitPayment)
                     <div class="space-y-2 max-h-[140px] md:max-h-[180px] overflow-y-auto pr-1 animate-fadeIn">
                         @foreach($paymentSplits as $index => $split)
@@ -692,7 +724,7 @@
                     </div>
                 @else
                     <!-- Payment Methods -->
-                    <div class="grid grid-cols-3 lg:grid-cols-3 gap-1.5 md:gap-2">
+                    <div class="grid grid-cols-3 lg:grid-cols-3 gap-1 md:gap-1.5">
                         @foreach($enabledPaymentMethods as $methodKey => $methodLabel)
                             @php
                                 $config = $paymentMethodConfigs[$methodKey] ?? null;
@@ -701,12 +733,12 @@
                                 $color = $config['color'];
                             @endphp
                             <button wire:click="$set('paymentMethod', '{{ $methodKey }}')" :class="{
-                                        'ring-2 ring-offset-1 ring-{{ $color }}-500 bg-white text-slate-500 shadow-lg': $wire.paymentMethod === '{{ $methodKey }}',
-                                        'bg-white text-slate-500 border border-slate-200 hover:border-{{ $color }}-300 hover:bg-{{ $color }}-50': $wire.paymentMethod !== '{{ $methodKey }}'
+                                        'ring-2 ring-offset-1 ring-{{ $color }}-500 bg-gradient-to-b from-white to-slate-50 text-slate-600 shadow-md scale-[1.01]': $wire.paymentMethod === '{{ $methodKey }}',
+                                        'bg-white/95 text-slate-500 border border-slate-200 hover:border-{{ $color }}-300 hover:bg-{{ $color }}-50/60': $wire.paymentMethod !== '{{ $methodKey }}'
                                     }"
-                                class="py-2.5 rounded-xl flex flex-col items-center gap-1 transition-all duration-200 relative">
+                                class="py-1.5 rounded-lg flex flex-col items-center gap-0.5 transition-all duration-200 relative">
                                 {!! $config['icon'] !!}
-                                <span class="text-[7px] font-black uppercase tracking-widest">{{ $methodLabel }}</span>
+                                <span class="text-[6px] font-black uppercase tracking-[0.16em] text-slate-600">{{ $methodLabel }}</span>
                             </button>
                         @endforeach
                     </div>
@@ -729,11 +761,11 @@
 
                 <!-- Action Buttons -->
                 <div class="fixed lg:static bottom-0 left-0 right-0 md:left-auto md:w-[360px] xl:w-[380px] shrink-0 z-40 bg-white/95 backdrop-blur-sm border-t border-slate-200 pt-2 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] px-3 md:px-4 flex gap-2 mt-1">
-                    <button @click="placeOrderStandard()" 
+                    <button @click="placeOrderStandard()"
                         {{ empty($cart) ? 'disabled' : '' }}
-                        class="flex-1 py-3.5 text-white text-[10px] font-black uppercase tracking-[0.25em] rounded-xl transition-all duration-200 disabled:opacity-30 flex items-center justify-center gap-2.5 group active:scale-[0.98]"
-                        style="{{ !empty($cart) ? 'background: linear-gradient(135deg, #808000 0%, #a4a400 100%); box-shadow: 0 6px 24px rgba(128,128,0,0.4);' : 'background: #94a3b8;' }}">
-                        <svg class="w-4 h-4 group-hover:rotate-12 transition-transform duration-300" fill="none" viewBox="0 0 24 24"
+                        class="flex-1 py-2.5 text-white text-[9px] font-black uppercase tracking-[0.2em] rounded-lg transition-all duration-200 disabled:opacity-30 flex items-center justify-center gap-2 group active:scale-[0.98]"
+                        style="{{ !empty($cart) ? 'background: linear-gradient(135deg, #0f766e 0%, #0ea5a4 100%); box-shadow: 0 6px 18px rgba(15,118,110,0.35);' : 'background: #cbd5e1;' }}">
+                        <svg class="w-3.5 h-3.5 group-hover:rotate-12 transition-transform duration-300" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -973,7 +1005,7 @@
                 font-weight: 900;
                 color: #808000;
                 border: 1px solid rgba(128,128,0,0.2);
-                shadow: 0 2px 8px rgba(0,0,0,0.15);
+                box-shadow: 0 2px 8px rgba(0,0,0,0.15);
             }
 
             .pos-low-stock-badge {
@@ -1122,6 +1154,171 @@
             /* ─── Modal Header ─── */
             .pos-modal-header {
                 background: linear-gradient(135deg, #808000 0%, #a4a400 100%);
+            }
+
+            /* ─── Dark Mode (Scoped) ─── */
+            .pos-bg.pos-dark {
+                background: #0b1220;
+            }
+
+            .pos-dark .pos-header {
+                background: #111827;
+                border-bottom-color: #1f2937;
+                box-shadow: 0 1px 0 rgba(255,255,255,0.03);
+            }
+
+            .pos-dark .pos-search-input {
+                background: #0f172a;
+                border-color: #334155;
+                color: #e2e8f0;
+            }
+            .pos-dark .pos-search-input::placeholder {
+                color: #64748b;
+            }
+            .pos-dark .pos-search-input:focus {
+                background: #0b1220;
+                border-color: #a4a400;
+                box-shadow: 0 0 0 3px rgba(164,128,0,0.18);
+            }
+
+            .pos-dark .pos-stat-badge {
+                background: #1e293b;
+                border-color: #334155;
+                color: #cbd5e1;
+            }
+
+            .pos-dark .pos-categories {
+                background: #111827;
+                border-bottom-color: #1f2937;
+            }
+
+            .pos-dark .pos-category-pill {
+                background: #1e293b;
+                color: #cbd5e1;
+            }
+            .pos-dark .pos-category-pill:hover {
+                background: #334155;
+                color: #f1f5f9;
+            }
+
+            .pos-dark .pos-menu-card {
+                background: #111827;
+                border-color: #1f2937;
+                box-shadow: 0 1px 6px rgba(0,0,0,0.35);
+            }
+            .pos-dark .pos-menu-card:hover {
+                border-color: rgba(164,164,0,0.35);
+                box-shadow: 0 10px 28px rgba(0,0,0,0.45);
+            }
+
+            .pos-dark .pos-price-chip {
+                background: rgba(15,23,42,0.9);
+                color: #d9f99d;
+                border-color: rgba(164,164,0,0.35);
+            }
+
+            .pos-dark .pos-empty-icon-bg,
+            .pos-dark .pos-empty-cart-icon {
+                background: #0f172a;
+                border-color: #334155;
+            }
+
+            .pos-dark .pos-sidebar {
+                background: #0f172a;
+                border-left-color: #1f2937;
+                box-shadow: -4px 0 24px rgba(0,0,0,0.45);
+            }
+
+            .pos-dark .pos-sidebar-header {
+                border-bottom-color: #1f2937;
+                background: #111827;
+            }
+
+            .pos-dark .pos-cart-item {
+                background: #111827;
+                border-color: #1f2937;
+            }
+            .pos-dark .pos-cart-item:hover {
+                border-color: rgba(164,164,0,0.35);
+                background: #172033;
+            }
+
+            .pos-dark .pos-checkout-panel {
+                border-top-color: #1f2937;
+                background: #0b1220;
+            }
+
+            .pos-dark .pos-field-label {
+                color: #94a3b8;
+            }
+
+            .pos-dark .pos-field-input,
+            .pos-dark .pos-field-select {
+                background: #111827;
+                border-color: #334155;
+                color: #e2e8f0;
+            }
+            .pos-dark .pos-field-input::placeholder {
+                color: #64748b;
+            }
+            .pos-dark .pos-field-input:focus,
+            .pos-dark .pos-field-select:focus {
+                border-color: #a4a400;
+                box-shadow: 0 0 0 3px rgba(164,164,0,0.16);
+                background: #0f172a;
+            }
+
+            .pos-dark .pos-discount-row {
+                background: #111827;
+                border-color: #334155;
+            }
+
+            .pos-dark .pos-totals-card {
+                background: linear-gradient(135deg, #111827 0%, #182235 100%);
+                border-color: rgba(164,164,0,0.28);
+            }
+
+            .pos-dark .custom-scrollbar::-webkit-scrollbar-thumb {
+                background: rgba(148,163,184,0.25);
+            }
+            .pos-dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+                background: rgba(148,163,184,0.42);
+            }
+
+            .pos-dark .bg-white,
+            .pos-dark .bg-white\/95,
+            .pos-dark .bg-white\/90,
+            .pos-dark .bg-slate-50,
+            .pos-dark .from-white,
+            .pos-dark .to-white {
+                background-color: #111827 !important;
+            }
+
+            .pos-dark .border-slate-100,
+            .pos-dark .border-slate-200,
+            .pos-dark .border-slate-200\/90,
+            .pos-dark .border-slate-300,
+            .pos-dark .border-slate-300\/80,
+            .pos-dark .border-t,
+            .pos-dark .border-l {
+                border-color: #334155 !important;
+            }
+
+            .pos-dark .text-slate-800,
+            .pos-dark .text-slate-700,
+            .pos-dark .text-slate-600,
+            .pos-dark .text-slate-500 {
+                color: #e2e8f0 !important;
+            }
+
+            .pos-dark .text-slate-400,
+            .pos-dark .text-slate-300 {
+                color: #94a3b8 !important;
+            }
+
+            .pos-dark option {
+                background-color: #111827;
+                color: #e2e8f0;
             }
 
             /* ─── Scrollbar ─── */

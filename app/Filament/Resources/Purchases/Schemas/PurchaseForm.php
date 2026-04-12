@@ -28,9 +28,9 @@ class PurchaseForm
                             ->unique(ignoreRecord: true),
                         Select::make('supplier_id')
                             ->relationship('supplier', 'name')
-                            ->required()
                             ->searchable()
-                            ->preload(),
+                            ->preload()
+                            ->nullable(),
                         DatePicker::make('purchase_date')
                             ->required()
                             ->default(now()),
@@ -58,11 +58,11 @@ class PurchaseForm
                             ->numeric()
                             ->default(0)
                             ->minValue(0)
-                            ->prefix('$')
+                            ->prefix('BDT')
                             ->live(onBlur: true)
                             ->afterStateUpdated(fn (Get $get, Set $set) => self::updateTotalAmount($get, $set)),
                         TextInput::make('total_amount')
-                            ->prefix('$')
+                            ->prefix('BDT')
                             ->readOnly(),
                         Textarea::make('notes')
                             ->rows(3)
@@ -90,14 +90,14 @@ class PurchaseForm
                                     ->required()
                                     ->numeric()
                                     ->minValue(0)
-                                    ->prefix('$')
+                                    ->prefix('BDT')
                                     ->live(onBlur: true)
                                     ->afterStateUpdated(fn (Get $get, Set $set) => self::updateSubtotal($get, $set)),
                                 TextInput::make('subtotal')
                                     ->required()
                                     ->numeric()
                                     ->readOnly()
-                                    ->prefix('$'),
+                                    ->prefix('BDT'),
                             ])
                             ->columns(4)
                             ->live()

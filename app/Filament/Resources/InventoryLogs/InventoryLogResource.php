@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\InventoryLogs;
 
-use App\Filament\Resources\InventoryLogs\Pages\CreateInventoryLog;
 use App\Filament\Resources\InventoryLogs\Pages\EditInventoryLog;
 use App\Filament\Resources\InventoryLogs\Pages\ListInventoryLogs;
 use App\Filament\Resources\InventoryLogs\Schemas\InventoryLogForm;
@@ -46,7 +45,6 @@ class InventoryLogResource extends Resource
     {
         return [
             'index' => ListInventoryLogs::route('/'),
-            'create' => CreateInventoryLog::route('/create'),
             'edit' => EditInventoryLog::route('/{record}/edit'),
         ];
     }
