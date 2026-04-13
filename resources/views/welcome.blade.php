@@ -447,69 +447,33 @@
             </script>
         </div>
     </section>
-    <!-- Delivery Partner Section (Kacchi Bhai Style) -->
+    <!-- Delivery Partner Section (Online Order Blocks) -->
     @php($activePartners = \App\Models\DeliveryPartner::where('is_active', true)->get())
     @if($activePartners->count() > 0)
     <section class="section-padding bg-[#f4f7f9]">
         <div class="container-wide">
-            <div
-                class="bg-white rounded-[2rem] p-8 md:p-12 lg:p-16 shadow-xl border border-[#e5e7eb] flex flex-col lg:flex-row items-center justify-between gap-12">
+            <div class="max-w-5xl mx-auto text-center mb-10">
+                <h2 class="text-4xl md:text-5xl font-black text-[#222222] mb-4 leading-tight">
+                    অনলাইন অর্ডার প্লেস
+                </h2>
+                <p class="text-[#6b7280] text-base md:text-lg leading-relaxed max-w-2xl mx-auto">
+                    একটি ক্লিকে প্রিয় প্ল্যাটফর্ম বেছে নিয়ে আমাদের থেকে অর্ডার করুন
+                </p>
+            </div>
 
-                <!-- Left: Title & Status -->
-                <div class="lg:w-1/2 text-center lg:text-left">
-                    <div class="inline-flex items-center gap-2 px-4 py-2 bg-[#c01c1c]/5 rounded-full mb-6">
-                        <span class="relative flex h-3 w-3">
-                            <span
-                                class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#c01c1c] opacity-75"></span>
-                            <span class="relative inline-flex rounded-full h-3 w-3 bg-[#c01c1c]"></span>
-                        </span>
-                        <span class="text-[#c01c1c] font-bold text-xs uppercase tracking-widest">{{
-                            $activePartners->count() }} জন পার্টনার অনলাইনে</span>
-                    </div>
-
-                    <h2 class="text-4xl md:text-5xl font-black text-[#333333] mb-6 leading-tight">
-                        আমাদের <span class="text-[#c01c1c]">ডেলিভারি</span> পার্টনার
-                    </h2>
-
-                    <p class="text-[#666666] text-lg leading-relaxed max-w-md mx-auto lg:mx-0">
-                        আপনার প্রিয় কাচ্চি এখন আপনার দরজায়। আমাদের বিশ্বস্ত পার্টনাররা আপনার খাবার দ্রুত পৌঁছে দিতে
-                        সর্বদা প্রস্তুত।
-                    </p>
-                </div>
-
-                <!-- Right: Partner Logos Grid -->
-                <div class="lg:w-1/2 w-full bg-[#fafafa] rounded-2xl p-8 border border-[#e5e5e5]">
-                    <div class="grid grid-cols-2 md:grid-cols-3 gap-8 items-center justify-items-center">
-                        {{-- Static placeholders for major partners as per demo --}}
-                        @if($activePartners->count() == 0)
-                        <div
-                            class="grayscale hover:grayscale-0 transition-all duration-500 opacity-60 hover:opacity-100 transform hover:scale-110">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Foodpanda_logo.svg/2560px-Foodpanda_logo.svg.png"
-                                alt="Foodpanda" class="h-8 md:h-10 object-contain">
-                        </div>
-                        <div
-                            class="grayscale hover:grayscale-0 transition-all duration-500 opacity-60 hover:opacity-100 transform hover:scale-110">
-                            <img src="https://pathao.com/wp-content/uploads/2018/10/pathao_logo_red.png" alt="Pathao"
-                                class="h-8 md:h-10 object-contain">
-                        </div>
-                        <div
-                            class="grayscale hover:grayscale-0 transition-all duration-500 opacity-60 hover:opacity-100 transform hover:scale-110">
-                            <h3 class="text-2xl font-black text-brand-red tracking-tighter italic">foodi</h3>
-                        </div>
-                        @endif
-                        {{-- Dynamic partners from database --}}
-                        @foreach($activePartners->take(3) as $partner)
-                        @if($partner->image)
-                        <div
-                            class="grayscale hover:grayscale-0 transition-all duration-500 opacity-60 hover:opacity-100 transform hover:scale-110">
-                            <img src="{{ Storage::url($partner->image) }}" alt="{{ $partner->name }}"
-                                class="h-8 md:h-10 object-contain">
-                        </div>
-                        @endif
-                        @endforeach
-                    </div>
-                </div>
-
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8 max-w-5xl mx-auto">
+                @foreach($activePartners->take(3) as $partner)
+                @if($partner->image)
+                <a href="{{ $partner->phone ? 'tel:' . $partner->phone : '#' }}"
+                    class="group relative h-52 md:h-56 rounded-2xl overflow-hidden bg-gradient-to-b from-[#f8fafc] via-[#bfc7d1] to-[#111827] shadow-lg border border-[#d1d5db] flex items-center justify-center px-8">
+                    <img src="{{ Storage::url($partner->image) }}" alt="{{ $partner->name }}"
+                        class="max-h-14 md:max-h-16 object-contain transition-transform duration-500 group-hover:scale-110">
+                    <div class="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/70 to-transparent"></div>
+                    <span
+                        class="absolute bottom-4 left-6 text-white text-xl leading-none transition-transform duration-300 group-hover:translate-x-1">→</span>
+                </a>
+                @endif
+                @endforeach
             </div>
         </div>
     </section>

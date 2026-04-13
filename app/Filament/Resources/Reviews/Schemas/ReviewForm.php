@@ -25,7 +25,7 @@ class ReviewForm
                             ->label('Customer Image')
                             ->directory('reviews')
                             ->image()
-                            ->maxSize(2048),
+                            ->maxSize(5120),
                     ])
                     ->columns(2),
                 Section::make('Review Details')

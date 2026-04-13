@@ -20,7 +20,7 @@ class KitchenDisplay extends Page
 
     protected static ?string $navigationLabel = 'Kitchen Display';
 
-    protected static ?string $title = 'Kitchen Display System (KDS)';
+    protected static ?string $title = 'KDS';
 
     protected string $view = 'filament.pages.kitchen-display';
 

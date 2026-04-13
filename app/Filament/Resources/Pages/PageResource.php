@@ -45,25 +45,29 @@ class PageResource extends Resource
                         Action::make('preview')
                             ->label('Preview')
                             ->icon('heroicon-o-eye')
-                            ->url(fn () => route('page.show', ['slug' => 'sample']))
-                            ->openUrlInNewTab(),
+                            ->url(fn ($get) => route('page.show', ['slug' => $get('slug')]))
+                            ->openUrlInNewTab()
+                            ->visible(fn (string $operation): bool => $operation !== 'create'),
                     ])
                     ->schema([
                         Grid::make(3)
                             ->schema([
-                                TextInput::make('title')
-                                    ->required()
-                                    ->live()
-                                    ->afterStateUpdated(fn (string $operation, $state, $set) => $operation === 'create' ? $set('slug', Str::slug($state)) : null),
+                        TextInput::make('title')
+                            ->required()
+                            ->live()
+                            ->afterStateUpdated(fn ($state, $set, $get) => ! $get('slug') || $get('slug') === Str::slug($get('__original_title')) ? $set('slug', Str::slug($state)) : null),
                                 TextInput::make('slug')
                                     ->required()
                                     ->unique(ignoreRecord: true),
                             ]),
-                        Grid::make(2)
+                        Grid::make(3)
                             ->schema([
                                 Toggle::make('is_active')
                                     ->label('Active')
                                     ->default(true),
+                                Toggle::make('show_in_header')
+                                    ->label('Show in Header')
+                                    ->default(false),
                                 Toggle::make('show_in_footer')
                                     ->label('Show in Footer')
                                     ->default(true),
@@ -140,7 +144,10 @@ class PageResource extends Resource
                                     ->schema([
                                         TextInput::make('title'),
                                         RichEditor::make('content'),
-                                        FileUpload::make('image')->image()->directory('pages'),
+                                        FileUpload::make('image')
+                                        ->disk('public')
+                                        ->image()
+                                        ->directory('pages'),
                                         Select::make('image_position')
                                             ->label('Image Position')
                                             ->options([
@@ -204,6 +211,66 @@ class PageResource extends Resource
                                                     ])->default('primary'),
                                             ]),
                                     ]),
+                                Block::make('image_cards_section')
+                                    ->label('Image Cards Section')
+                                    ->icon('heroicon-o-photo')
+                                    ->schema([
+                                        TextInput::make('title')
+                                            ->required()
+                                            ->default('আপনার প্রিয় অ্যাপে অর্ডার করুন'),
+                                        TextInput::make('subtitle')
+                                            ->default('Online Ordering'),
+                                        Textarea::make('description')
+                                            ->default('আমাদের অফিশিয়াল পার্টনার প্ল্যাটফর্ম থেকে দ্রুত এবং নিরাপদে অর্ডার করুন।'),
+                                        Repeater::make('cards')
+                                            ->required()
+                                            ->minItems(1)
+                                            ->schema([
+                                                FileUpload::make('image')
+                                                    ->label('Card Image')
+                                                    ->required()
+                                                    ->image()
+                                                    ->disk('public')
+                                                    ->directory('pages/cards'),
+                                                TextInput::make('alt')
+                                                    ->label('Image Alt Text'),
+                                                TextInput::make('link')
+                                                    ->label('Card Link')
+                                                    ->url(),
+                                            ])
+                                            ->collapsible()
+                                            ->itemLabel(fn ($state) => $state['alt'] ?? 'Card'),
+                                    ]),
+                                Block::make('image_cards_section_modern')
+                                    ->label('Image Cards Section (Modern)')
+                                    ->icon('heroicon-o-squares-2x2')
+                                    ->schema([
+                                        TextInput::make('title')
+                                            ->required()
+                                            ->default('পছন্দের প্ল্যাটফর্মে অর্ডার দিন'),
+                                        TextInput::make('subtitle')
+                                            ->default('Fast Delivery Partners'),
+                                        Textarea::make('description')
+                                            ->default('আপনার জন্য সেরা অফার এবং দ্রুত ডেলিভারির জন্য নিচের অ্যাপগুলো ব্যবহার করুন।'),
+                                        Repeater::make('cards')
+                                            ->required()
+                                            ->minItems(1)
+                                            ->schema([
+                                                FileUpload::make('image')
+                                                    ->label('Card Image')
+                                                    ->required()
+                                                    ->image()
+                                                    ->disk('public')
+                                                    ->directory('pages/cards'),
+                                                TextInput::make('alt')
+                                                    ->label('Image Alt Text'),
+                                                TextInput::make('link')
+                                                    ->label('Card Link')
+                                                    ->url(),
+                                            ])
+                                            ->collapsible()
+                                            ->itemLabel(fn ($state) => $state['alt'] ?? 'Card'),
+                                    ]),
                             ])
                             ->collapsible()
                             ->collapsed(),
@@ -220,6 +287,8 @@ class PageResource extends Resource
                 TextColumn::make('slug')
                     ->searchable(),
                 IconColumn::make('is_active')
+                    ->boolean(),
+                IconColumn::make('show_in_header')
                     ->boolean(),
                 IconColumn::make('show_in_footer')
                     ->boolean(),

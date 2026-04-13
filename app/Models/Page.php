@@ -12,11 +12,13 @@ class Page extends Model
         'content',
         'is_active',
         'show_in_footer',
+        'show_in_header',
     ];
 
     protected $casts = [
         'content' => 'array',
         'is_active' => 'boolean',
         'show_in_footer' => 'boolean',
+        'show_in_header' => 'boolean',
     ];
 }

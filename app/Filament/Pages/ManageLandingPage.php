@@ -58,7 +58,7 @@ class ManageLandingPage extends Page implements HasForms
                             ->columnSpanFull(),
                         FileUpload::make('lp_hero_image')
                             ->image()
-                            ->disk('public')
+                            ->disk('public')->maxSize(5120)
                             ->directory('landing-page'),
                     ])->columns(2),
 
@@ -70,15 +70,15 @@ class ManageLandingPage extends Page implements HasForms
                             ->columnSpanFull(),
                         FileUpload::make('lp_heritage_image_1')
                             ->image()
-                            ->disk('public')
+                            ->disk('public')->maxSize(5120)
                             ->directory('landing-page'),
                         FileUpload::make('lp_heritage_image_2')
                             ->image()
-                            ->disk('public')
+                            ->disk('public')->maxSize(5120)
                             ->directory('landing-page'),
                         FileUpload::make('lp_heritage_image_3')
                             ->image()
-                            ->disk('public')
+                            ->disk('public')->maxSize(5120)
                             ->directory('landing-page'),
                     ])->columns(2),
 
@@ -103,7 +103,7 @@ class ManageLandingPage extends Page implements HasForms
                                     ->label('Mission Description')
                                     ->columnSpanFull(),
                                 FileUpload::make('lp_mission_image')
-                                    ->disk('public')
+                                    ->disk('public')->maxSize(5120)
                                     ->label('Mission Image')
                                     ->image()
                                     ->directory('landing-page'),
@@ -118,7 +118,7 @@ class ManageLandingPage extends Page implements HasForms
                                     ->label('Vision Description')
                                     ->columnSpanFull(),
                                 FileUpload::make('lp_vision_image')
-                                    ->disk('public')
+                                    ->disk('public')->maxSize(5120)
                                     ->label('Vision Image')
                                     ->image()
                                     ->directory('landing-page'),
@@ -172,22 +172,22 @@ class ManageLandingPage extends Page implements HasForms
                             ->columnSpanFull(),
                         FileUpload::make('lp_visual_story_image_1')
                             ->image()
-                            ->disk('public')
+                            ->disk('public')->maxSize(5120)
                             ->directory('landing-page')
                             ->label('Gallery Image 1 (Large)'),
                         FileUpload::make('lp_visual_story_image_2')
                             ->image()
-                            ->disk('public')
+                            ->disk('public')->maxSize(5120)
                             ->directory('landing-page')
                             ->label('Gallery Image 2 (Square)'),
                         FileUpload::make('lp_visual_story_image_3')
                             ->image()
-                            ->disk('public')
+                            ->disk('public')->maxSize(5120)
                             ->directory('landing-page')
                             ->label('Gallery Image 3 (Square)'),
                         FileUpload::make('lp_visual_story_image_4')
                             ->image()
-                            ->disk('public')
+                            ->disk('public')->maxSize(5120)
                             ->directory('landing-page')
                             ->label('Gallery Image 4 (Wide)'),
                     ])->columns(2),
@@ -243,7 +243,7 @@ class ManageLandingPage extends Page implements HasForms
                                 FileUpload::make('image')
                                     ->label('Image')
                                     ->image()
-                                    ->disk('public')
+                                    ->disk('public')->maxSize(5120)
                                     ->directory('landing-page/custom-blocks'),
                                 TextInput::make('button_text')
                                     ->label('Button Text'),

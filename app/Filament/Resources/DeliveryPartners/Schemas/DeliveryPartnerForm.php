@@ -23,7 +23,7 @@ class DeliveryPartnerForm
                             ->label('Photo')
                             ->directory('delivery-partners')
                             ->image()
-                            ->maxSize(2048),
+                            ->maxSize(5120),
                         TextInput::make('phone')
                             ->label('Phone Number')
                             ->tel()

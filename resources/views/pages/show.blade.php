@@ -214,6 +214,138 @@
                     </div>
                 </section>
 
+            @elseif($blockType === 'image_cards_section')
+                <section class="section-padding bg-gradient-to-b from-parchment to-white relative">
+                    <div class="container-wide max-w-6xl">
+                        <div class="text-center mb-12 md:mb-16">
+                            @if(!empty($data['subtitle']))
+                                <span class="inline-flex items-center gap-2 px-4 py-2 mb-4 rounded-full bg-brand-emerald/10 text-brand-emerald font-bold tracking-[0.2em] uppercase text-xs">
+                                    <span class="w-2 h-2 rounded-full bg-brand-emerald"></span>
+                                    {{ $data['subtitle'] }}
+                                </span>
+                            @endif
+
+                            @if(!empty($data['title']))
+                                <h2 class="font-serif text-4xl md:text-5xl text-brand-emerald mb-4">{{ $data['title'] }}</h2>
+                                <div class="w-24 h-1.5 bg-brand-gold mx-auto rounded-full mb-5"></div>
+                            @endif
+
+                            @if(!empty($data['description']))
+                                <p class="text-slate-600 text-lg max-w-2xl mx-auto">{{ $data['description'] }}</p>
+                            @endif
+                        </div>
+
+                        @php
+                            $cards = collect($data['cards'] ?? [])->filter(fn ($card) => ! empty($card['image']));
+                        @endphp
+
+                        @if($cards->isNotEmpty())
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8">
+                                @foreach($cards as $card)
+                                    @php
+                                        $cardUrl = ! empty($card['link']) ? $card['link'] : null;
+                                        $cardAlt = $card['alt'] ?? ($data['title'] ?? 'Ordering card');
+                                    @endphp
+
+                                    @if($cardUrl)
+                                        <a href="{{ $cardUrl }}" class="group relative block rounded-3xl border border-slate-200 bg-white shadow-sm overflow-hidden hover:shadow-xl transition-shadow duration-300" target="_blank" rel="noopener noreferrer">
+                                    @else
+                                        <div class="group relative rounded-3xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+                                    @endif
+                                            <div class="relative aspect-[4/3] p-8 md:p-10 bg-gradient-to-b from-slate-100 to-slate-800">
+                                                <img src="{{ Storage::url($card['image']) }}" alt="{{ $cardAlt }}" class="w-full h-full object-contain drop-shadow-xl">
+                                                <div class="absolute inset-0 bg-gradient-to-t from-slate-900/40 via-transparent to-transparent"></div>
+
+                                                <div class="absolute right-5 bottom-5 w-11 h-11 rounded-full bg-white/90 text-slate-800 flex items-center justify-center shadow-md transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1">
+                                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                    @if($cardUrl)
+                                        </a>
+                                    @else
+                                        </div>
+                                    @endif
+                                @endforeach
+                            </div>
+                        @else
+                            <div class="max-w-xl mx-auto rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-6 py-10 text-center text-slate-500">
+                                কোনও কার্ড এখনো যোগ করা হয়নি।
+                            </div>
+                        @endif
+                    </div>
+                </section>
+
+            @elseif($blockType === 'image_cards_section_modern')
+                <section class="section-padding relative overflow-hidden bg-slate-950">
+                    <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(16,185,129,0.2),_transparent_45%),radial-gradient(circle_at_bottom_left,_rgba(245,158,11,0.16),_transparent_40%)]"></div>
+                    <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cartographer.png')]"></div>
+
+                    <div class="container-wide max-w-6xl relative z-10">
+                        <div class="text-center mb-12 md:mb-16">
+                            @if(!empty($data['subtitle']))
+                                <span class="inline-flex items-center gap-2 px-4 py-2 mb-4 rounded-full border border-emerald-300/30 bg-emerald-400/10 text-emerald-200 font-semibold tracking-[0.2em] uppercase text-xs">
+                                    <span class="w-2 h-2 rounded-full bg-emerald-300"></span>
+                                    {{ $data['subtitle'] }}
+                                </span>
+                            @endif
+
+                            <h2 class="font-serif text-4xl md:text-5xl text-white mb-4">{{ $data['title'] ?? 'Order Online' }}</h2>
+
+                            @if(!empty($data['description']))
+                                <p class="text-slate-300 text-lg max-w-2xl mx-auto">{{ $data['description'] }}</p>
+                            @endif
+                        </div>
+
+                        @php
+                            $cards = collect($data['cards'] ?? [])->filter(fn ($card) => ! empty($card['image']));
+                        @endphp
+
+                        @if($cards->isNotEmpty())
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8">
+                                @foreach($cards as $card)
+                                    @php
+                                        $cardUrl = ! empty($card['link']) ? $card['link'] : null;
+                                        $cardAlt = $card['alt'] ?? ($data['title'] ?? 'Ordering card');
+                                    @endphp
+
+                                    @if($cardUrl)
+                                        <a href="{{ $cardUrl }}" class="group block" target="_blank" rel="noopener noreferrer">
+                                    @else
+                                        <div class="group block">
+                                    @endif
+                                            <article class="relative h-full rounded-[2rem] p-[1px] bg-gradient-to-br from-emerald-300/70 via-slate-400/20 to-amber-300/60 shadow-[0_20px_60px_-25px_rgba(15,23,42,0.8)]">
+                                                <div class="relative h-full rounded-[calc(2rem-1px)] bg-slate-900/90 backdrop-blur overflow-hidden">
+                                                    <div class="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/10 to-transparent"></div>
+                                                    <div class="relative aspect-[4/3] p-8 md:p-10 flex items-center justify-center">
+                                                        <img src="{{ Storage::url($card['image']) }}" alt="{{ $cardAlt }}" class="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105">
+                                                    </div>
+                                                    <div class="absolute inset-x-0 bottom-0 p-5 flex items-center justify-between bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent">
+                                                        <span class="text-slate-200 text-sm">Tap to open</span>
+                                                        <span class="w-10 h-10 rounded-full border border-white/20 bg-white/10 text-white flex items-center justify-center transition-transform duration-300 group-hover:translate-x-1">
+                                                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                                            </svg>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </article>
+                                    @if($cardUrl)
+                                        </a>
+                                    @else
+                                        </div>
+                                    @endif
+                                @endforeach
+                            </div>
+                        @else
+                            <div class="max-w-xl mx-auto rounded-2xl border border-dashed border-slate-600 bg-slate-900/60 px-6 py-10 text-center text-slate-300">
+                                কোনও কার্ড এখনো যোগ করা হয়নি।
+                            </div>
+                        @endif
+                    </div>
+                </section>
+
             @elseif($blockType === 'faq')
                 <section class="section-padding bg-gradient-to-b from-parchment to-white relative">
                     <div class="container-wide max-w-4xl">

@@ -60,7 +60,7 @@ class ExpenseForm
                             ->label('Receipt / Document')
                             ->directory('expenses/receipts')
                             ->image()
-                            ->maxSize(2048)
+                            ->maxSize(5120)
                             ->columnSpanFull(),
                     ])
                     ->columns(2),

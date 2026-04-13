@@ -3,6 +3,7 @@
     $categories = \App\Models\Category::where('is_active', true)->whereNull('parent_id')->orderBy('priority_order')->get();
     $fbUrl = \App\Models\Setting::getValue('social_facebook_url');
     $igUrl = \App\Models\Setting::getValue('social_instagram_url');
+    $headerPages = \App\Models\Page::where('is_active', true)->where('show_in_header', true)->get();
 @endphp
 <nav x-data="{
         open: false,
@@ -35,6 +36,9 @@
             <a href="/" wire:navigate class="text-sm font-bold uppercase tracking-wider hover:text-[#c01c1c] {{ request()->routeIs('home') ? 'text-[#c01c1c]' : 'text-[#333333]' }}">হোম</a>
             <a href="{{ url('/menu') }}" wire:navigate class="text-sm font-bold uppercase tracking-wider hover:text-[#c01c1c] {{ request()->routeIs('menu') ? 'text-[#c01c1c]' : 'text-[#333333]' }}">মেনু</a>
             <a href="{{ url('/') }}#reservation" class="text-sm font-bold uppercase tracking-wider hover:text-[#c01c1c] text-[#333333]">বুকিং</a>
+            @foreach($headerPages as $page)
+                <a href="{{ route('page.show', $page->slug) }}" wire:navigate class="text-sm font-bold uppercase tracking-wider hover:text-[#c01c1c] {{ request()->routeIs('page.show') && request('slug') === $page->slug ? 'text-[#c01c1c]' : 'text-[#333333]' }}">{{ $page->title }}</a>
+            @endforeach
             
             <a href="/order" wire:navigate class="bg-[#c01c1c] text-white px-5 py-2 rounded-lg text-sm font-bold uppercase hover:bg-[#d92e2e]">
                 অর্ডার করুন

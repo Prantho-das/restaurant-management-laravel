@@ -3,6 +3,7 @@
     $aboutText = App\Models\Setting::getValue('footer_about_text', 'আমাদের ঐতিহ্যবাহী কাচ্চি সর্বদা আপনার সেবায়।');
     $address = App\Models\Setting::getValue('footer_address', 'ঢাকা, বাংলাদেশ');
     $phone = App\Models\Setting::getValue('footer_phone', '+880 1234 567890');
+    $footerPages = \App\Models\Page::where('is_active', true)->where('show_in_footer', true)->get();
 @endphp
 
 <footer class="bg-[#c01c1c] text-white mt-0">
@@ -32,6 +33,9 @@
                     <li><a href="/menu" class="hover:text-[#f97316] transition-colors">মেনু</a></li>
                     <li><a href="/order" class="hover:text-[#f97316] transition-colors">অর্ডার</a></li>
                     <li><a href="#reservation" class="hover:text-[#f97316] transition-colors">বুকিং</a></li>
+                    @foreach($footerPages as $page)
+                        <li><a href="{{ route('page.show', $page->slug) }}" wire:navigate class="hover:text-[#f97316] transition-colors">{{ $page->title }}</a></li>
+                    @endforeach
                 </ul>
             </div>
 
