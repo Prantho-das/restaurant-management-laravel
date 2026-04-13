@@ -48,6 +48,32 @@ Route::middleware('auth')->prefix('api/offline')->name('api.offline.')->group(fu
     Route::get('/status', [OfflineSyncController::class, 'status'])->name('status');
 });
 
+// KOT Print Route
+Route::middleware('auth')->get('/print/kot/{kotId}', function ($kotId) {
+    $kot = App\Models\KotOrder::with('items', 'order', 'createdBy')->findOrFail($kotId);
+    
+    return view('print.kot', [
+        'kotNumber' => $kot->kot_number,
+        'orderNumber' => $kot->order?->order_number,
+        'date' => $kot->created_at->format('d/m/Y'),
+        'time' => $kot->created_at->format('h:i A'),
+        'orderType' => ucwords(str_replace('_', ' ', $kot->order?->order_type ?? 'takeaway')),
+        'tableNumber' => $kot->order?->table_number,
+        'items' => $kot->items->map(function ($item) {
+            return [
+                'item_name' => $item->item_name,
+                'quantity' => $item->quantity,
+                'notes' => $item->notes,
+            ];
+        }),
+        'notes' => $kot->order?->notes,
+        'sentBy' => $kot->createdBy?->name ?? 'System',
+        'restaurantName' => App\Models\Setting::getValue('site_name', config('app.name')),
+        'restaurantAddress' => App\Models\Setting::getValue('footer_address', ''),
+        'restaurantPhone' => App\Models\Setting::getValue('footer_phone', ''),
+    ]);
+})->name('print.kot');
+
 // Payment Gateway Routes
 Route::prefix('payment')->name('payment.')->group(function () {
     // POS/Admin Initiators (require auth)

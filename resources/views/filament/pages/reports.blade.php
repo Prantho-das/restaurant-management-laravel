@@ -54,17 +54,12 @@
                 </div>
             </div>
 
-            <div class="mt-auto space-y-2">
-                <p class="text-xs text-gray-500 dark:text-gray-400 text-center">{{ __('Language') }}</p>
-                <div class="flex gap-2">
-                    @foreach($languages as $lang)
-                    <x-filament::button tag="a" :color="$report['color']" variant="soft"
-                        x-bind:href="'{{ route('reports.' . $report['slug']) }}?start_date=' + $wire.data.start_date + '&end_date=' + $wire.data.end_date + '&lang={{ $lang['code'] }}'"
-                        target="_blank" icon="heroicon-m-arrow-down-tray" class="w-1/2 justify-center text-xs py-1">
-                        {{ $lang['flag'] }}
-                    </x-filament::button>
-                    @endforeach
-                </div>
+            <div class="mt-auto">
+                <x-filament::button tag="a" :color="$report['color']" variant="soft"
+                    x-bind:href="'{{ route('reports.' . $report['slug']) }}?start_date=' + $wire.data.start_date + '&end_date=' + $wire.data.end_date"
+                    target="_blank" icon="heroicon-m-arrow-down-tray" class="w-full justify-center">
+                    Download
+                </x-filament::button>
             </div>
         </div>
         @endforeach

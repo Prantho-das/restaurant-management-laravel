@@ -1382,6 +1382,41 @@
                     window.printPosReceipt(receipt);
                 }
             });
+            
+            // Listen for kot-sent event to print KOT
+            $wire.on('kot-sent', ({ kotId }) => {
+                fetch('/print/kot/' + kotId)
+                    .then(response => response.text())
+                    .then(html => {
+                        window.printKot(html);
+                    })
+                    .catch(err => console.error('Failed to load KOT:', err));
+            });
+            
+            // KOT Print function
+            window.printKot = function(kotHtml) {
+                const printWindow = window.open('', '_blank', 'width=300,height=600');
+                printWindow.document.write(`
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <title>KOT Print</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; margin: 0; padding: 10px; font-size: 12px; }
+                            @media print {
+                                body { margin: 0; padding: 0; }
+                                @page { margin: 0; size: 80mm auto; }
+                            }
+                        </style>
+                    </head>
+                    <body>${kotHtml}</body>
+                    </html>
+                `);
+                printWindow.document.close();
+                printWindow.focus();
+                printWindow.print();
+                setTimeout(() => printWindow.close(), 500);
+            };
         </script>
         @endscript
     </div>

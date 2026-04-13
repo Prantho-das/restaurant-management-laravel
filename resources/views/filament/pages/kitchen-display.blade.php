@@ -1,4 +1,5 @@
 <div>
+    @vite('resources/css/app.css')
     <div class="grid grid-cols-4 gap-4 mb-6">
         <div class="bg-yellow-100 border-l-4 border-yellow-500 p-4 rounded">
             <div class="text-yellow-800 text-sm font-medium">Pending</div>

@@ -305,3 +305,225 @@ img {
 .fi-body h1, .fi-body h2, .fi-body h3, .fi-body h4 {
     font-size: 1rem !important;
 }
+
+/* POS System Styles */
+.pos-bg {
+    background: #f8fafc;
+}
+
+.pos-dark {
+    background: #0f172a;
+}
+
+.pos-header {
+    background: #ffffff;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.pos-search-input {
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+    transition: all 0.2s;
+}
+
+.pos-search-input:focus {
+    background: #ffffff;
+    border-color: #808000;
+    box-shadow: 0 0 0 3px rgba(128, 128, 0, 0.1);
+}
+
+.pos-stat-badge {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+}
+
+.pos-categories {
+    background: #ffffff;
+}
+
+.pos-category-pill {
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    color: #64748b;
+    transition: all 0.2s;
+}
+
+.pos-category-pill.active {
+    background: linear-gradient(135deg, #808000 0%, #a4a400 100%);
+    border-color: #808000;
+    color: #ffffff;
+}
+
+.pos-category-pill:hover {
+    border-color: #808000;
+    color: #808000;
+}
+
+.pos-menu-card {
+    background: #ffffff;
+    border-radius: 0.875rem;
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
+    transition: all 0.3s;
+}
+
+.pos-menu-card:hover {
+    border-color: #808000;
+    box-shadow: 0 10px 25px -5px rgba(128, 128, 0, 0.15);
+}
+
+.pos-price-chip {
+    background: rgba(0, 0, 0, 0.6);
+    color: #ffffff;
+    padding: 2px 6px;
+    border-radius: 0.375rem;
+    font-size: 9px;
+    font-weight: 900;
+    backdrop-filter: blur(4px);
+}
+
+.pos-low-stock-badge {
+    background: #fef3c7;
+    color: #92400e;
+    padding: 2px 6px;
+    border-radius: 0.375rem;
+    font-size: 7px;
+    font-weight: 900;
+    border: 1px solid #fcd34d;
+}
+
+.pos-sidebar {
+    background: #ffffff;
+    border-left: 1px solid #e2e8f0;
+}
+
+.pos-sidebar-header {
+    background: #ffffff;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.pos-cart-item {
+    background: #f8fafc;
+    border-radius: 0.75rem;
+    padding: 0.75rem;
+    border: 1px solid #e2e8f0;
+    transition: all 0.2s;
+}
+
+.pos-cart-item:hover {
+    background: #ffffff;
+    border-color: #cbd5e1;
+}
+
+.pos-field-label {
+    font-size: 7px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #64748b;
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.pos-field-input {
+    width: 100%;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    font-size: 10px;
+    font-weight: 700;
+    transition: all 0.2s;
+}
+
+.pos-field-input:focus {
+    background: #ffffff;
+    border-color: #808000;
+    box-shadow: 0 0 0 3px rgba(128, 128, 0, 0.1);
+}
+
+.pos-field-select {
+    width: 100%;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    font-size: 10px;
+    font-weight: 700;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+.pos-field-select:focus {
+    background: #ffffff;
+    border-color: #808000;
+    box-shadow: 0 0 0 3px rgba(128, 128, 0, 0.1);
+}
+
+.pos-discount-row {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+}
+
+.pos-totals-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+}
+
+.pos-checkout-panel {
+    background: #ffffff;
+    border-top: 1px solid #e2e8f0;
+}
+
+.pos-empty-icon-bg {
+    background: #f1f5f9;
+}
+
+.pos-empty-cart-icon {
+    background: #f1f5f9;
+}
+
+.pos-fab-cart {
+    background: linear-gradient(135deg, #808000 0%, #a4a400 100%);
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fadeIn {
+    animation: fadeIn 0.3s ease-out;
+}
+
+[x-cloak] { display: none !important; }
