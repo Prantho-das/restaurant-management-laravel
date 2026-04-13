@@ -29,6 +29,8 @@ function tm(string $method): string {
 }
 
 $GLOBALS['locale'] = $locale;
+$banglaFontPath = public_path('fonts/NotoSansBengali-Regular.ttf');
+$banglaFontAvailable = file_exists($banglaFontPath);
 @endphp
 <!DOCTYPE html>
 <html>
@@ -36,8 +38,20 @@ $GLOBALS['locale'] = $locale;
     <meta charset="utf-8">
     <title>@yield('title')</title>
     <style>
+        @if ($banglaFontAvailable)
+        @font-face {
+            font-family: 'NotoSansBengali';
+            font-style: normal;
+            font-weight: 400;
+            src: url('{{ $banglaFontPath }}') format('truetype');
+        }
+        @endif
+
         body {
-            font-family: 'Helvetica', sans-serif;
+            font-family: @if ($locale === 'bn' && $banglaFontAvailable)'NotoSansBengali', @endif 'DejaVu Sans', sans-serif;
+            @if ($locale === 'bn')
+            font-feature-settings: "liga" 1, "clig" 1;
+            @endif
             font-size: 12px;
             color: #333;
             line-height: 1.5;
