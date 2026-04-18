@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('pages', function (Blueprint $table) {
-            $table->boolean('')->default(false)->after('show_in_footer');
+            $table->boolean('show_in_header')->default(false)->after('show_in_footer');
         });
     }
 

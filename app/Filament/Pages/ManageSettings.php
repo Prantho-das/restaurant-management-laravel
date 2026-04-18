@@ -4,6 +4,7 @@ namespace App\Filament\Pages;
 
 use App\Models\Setting;
 use BackedEnum;
+use Filament\Actions\Action;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -15,6 +16,7 @@ use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\Artisan;
 use UnitEnum;
 
 class ManageSettings extends Page implements HasForms
@@ -32,6 +34,24 @@ class ManageSettings extends Page implements HasForms
     protected static ?string $title = 'General Settings';
 
     protected static ?string $slug = 'settings';
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            Action::make('generateSitemap')
+                ->label('Generate Sitemap')
+                ->icon('heroicon-o-globe-alt')
+                ->color('info')
+                ->action(function () {
+                    Artisan::call('seo:generate-sitemap');
+
+                    Notification::make()
+                        ->title('Sitemap generated successfully')
+                        ->success()
+                        ->send();
+                }),
+        ];
+    }
 
     public ?array $data = [];
 

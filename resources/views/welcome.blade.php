@@ -185,7 +185,8 @@
                     <span class="inline-block text-[#c01c1c] font-bold tracking-[0.3em] uppercase text-xs mb-3">{{
                         $cms->visual_story_subtitle ?? 'গ্যালারি' }}</span>
                     <h1 class="text-3xl md:text-4xl font-black text-[#333333]">{!! $cms->visual_story_title ?? 'আমাদের
-                        <span class="text-[#c01c1c]">পরিবেশ</span>' !!}</h1>
+                        <span class="text-[#c01c1c]">পরিবেশ</span>' !!}
+                    </h1>
                 </div>
             </div>
 
@@ -454,23 +455,24 @@
         <div class="container-wide">
             <div class="max-w-5xl mx-auto text-center mb-10">
                 <h2 class="text-4xl md:text-5xl font-black text-[#222222] mb-4 leading-tight">
-                    অনলাইন অর্ডার প্লেস
+                    {!! $cms->delivery_title ?? 'অনলাইন অর্ডার প্লেস' !!}
                 </h2>
                 <p class="text-[#6b7280] text-base md:text-lg leading-relaxed max-w-2xl mx-auto">
-                    একটি ক্লিকে প্রিয় প্ল্যাটফর্ম বেছে নিয়ে আমাদের থেকে অর্ডার করুন
+                    {{ $cms->delivery_description ?? 'একটি ক্লিকে প্রিয় প্ল্যাটফর্ম বেছে নিয়ে আমাদের থেকে অর্ডার করুন'
+                    }}
                 </p>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8 max-w-5xl mx-auto">
-                @foreach($activePartners->take(3) as $partner)
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 max-w-5xl mx-auto">
+                @foreach($activePartners->take(4) as $partner)
                 @if($partner->image)
                 <a href="{{ $partner->phone ? 'tel:' . $partner->phone : '#' }}"
-                    class="group relative h-52 md:h-56 rounded-2xl overflow-hidden bg-gradient-to-b from-[#f8fafc] via-[#bfc7d1] to-[#111827] shadow-lg border border-[#d1d5db] flex items-center justify-center px-8">
+                    class="group relative h-64 md:h-72 rounded-2xl overflow-hidden bg-white shadow-lg border-2 border-[#e5e5e5] hover:border-[#c01c1c] flex items-center justify-center px-8">
                     <img src="{{ Storage::url($partner->image) }}" alt="{{ $partner->name }}"
-                        class="max-h-14 md:max-h-16 object-contain transition-transform duration-500 group-hover:scale-110">
-                    <div class="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/70 to-transparent"></div>
+                        class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110">
+                    <div class="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/70 to-transparent"></div>
                     <span
-                        class="absolute bottom-4 left-6 text-white text-xl leading-none transition-transform duration-300 group-hover:translate-x-1">→</span>
+                        class="absolute bottom-6 left-6 text-white text-2xl leading-none transition-transform duration-300 group-hover:translate-x-1">→</span>
                 </a>
                 @endif
                 @endforeach

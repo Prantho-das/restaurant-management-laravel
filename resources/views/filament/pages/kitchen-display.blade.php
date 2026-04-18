@@ -1,5 +1,45 @@
 <div>
     @vite('resources/css/app.css')
+    <script src="https://unpkg.com/dexie/dist/dexie.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Listen for print-kot event dispatched from Livewire
+            window.addEventListener('print-kot', function(event) {
+                const kotId = event.detail.kotId;
+                fetch('/print/kot/' + kotId)
+                    .then(response => response.text())
+                    .then(html => {
+                        window.printKot(html);
+                    })
+                    .catch(err => console.error('Failed to load KOT:', err));
+            });
+
+            // KOT Print function
+            window.printKotById = function(kotId) { fetch(`/print/kot/${kotId}`).then(r => r.text()).then(html => window.printKot(html)).catch(e => console.error(e)); }; window.printKot = function(kotHtml) {
+                const printWindow = window.open('', '_blank', 'width=300,height=600');
+                printWindow.document.write(`
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <title>KOT Print</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; margin: 0; padding: 10px; font-size: 12px; }
+                            @media print {
+                                body { margin: 0; padding: 0; }
+                                @page { margin: 0; size: 80mm auto; }
+                            }
+                        </style>
+                    </head>
+                    <body>${kotHtml}</body>
+                    </html>
+                `);
+                printWindow.document.close();
+                printWindow.focus();
+                printWindow.print();
+                setTimeout(() => printWindow.close(), 500);
+            };
+        });
+    </script>
     <div class="grid grid-cols-4 gap-4 mb-6">
         <div class="bg-yellow-100 border-l-4 border-yellow-500 p-4 rounded">
             <div class="text-yellow-800 text-sm font-medium">Pending</div>
@@ -181,7 +221,7 @@
 
                         <div class="flex gap-2">
                             <button
-                                wire:click="printKot({{ $kot['id'] }})"
+                                onclick="printKotById({{ $kot['id'] }})"
                                 class="flex-1 py-2 bg-gray-600 text-white rounded font-medium hover:bg-gray-700"
                             >
                                 Print

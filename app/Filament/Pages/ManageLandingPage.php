@@ -210,6 +210,18 @@ class ManageLandingPage extends Page implements HasForms
                             ->placeholder('হেল্পলাইন'),
                     ])->columns(2),
 
+                Section::make('Delivery Partner Section')
+                    ->description('Manage online order partner section content shown on homepage.')
+                    ->schema([
+                        TextInput::make('lp_delivery_title')
+                            ->label('Delivery Title')
+                            ->placeholder('অনলাইন অর্ডার প্লেস'),
+                        Textarea::make('lp_delivery_description')
+                            ->label('Delivery Description')
+                            ->placeholder('একটি ক্লিকে প্রিয় প্ল্যাটফর্ম...')
+                            ->columnSpanFull(),
+                    ])->columns(2),
+
                 Section::make('Reviews Section')
                     ->description('Control review section heading content on homepage.')
                     ->schema([

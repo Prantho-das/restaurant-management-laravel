@@ -6,7 +6,9 @@ use App\Http\Controllers\ReportController;
 use App\Livewire\Frontend\Home;
 use App\Livewire\Frontend\Menu;
 use App\Livewire\TableMenu;
+use App\Models\KotOrder;
 use App\Models\Page;
+use App\Models\Setting;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
@@ -50,8 +52,8 @@ Route::middleware('auth')->prefix('api/offline')->name('api.offline.')->group(fu
 
 // KOT Print Route
 Route::middleware('auth')->get('/print/kot/{kotId}', function ($kotId) {
-    $kot = App\Models\KotOrder::with('items', 'order', 'createdBy')->findOrFail($kotId);
-    
+    $kot = KotOrder::with('items', 'order', 'sentBy')->findOrFail($kotId);
+
     return view('print.kot', [
         'kotNumber' => $kot->kot_number,
         'orderNumber' => $kot->order?->order_number,
@@ -67,10 +69,10 @@ Route::middleware('auth')->get('/print/kot/{kotId}', function ($kotId) {
             ];
         }),
         'notes' => $kot->order?->notes,
-        'sentBy' => $kot->createdBy?->name ?? 'System',
-        'restaurantName' => App\Models\Setting::getValue('site_name', config('app.name')),
-        'restaurantAddress' => App\Models\Setting::getValue('footer_address', ''),
-        'restaurantPhone' => App\Models\Setting::getValue('footer_phone', ''),
+        'sentBy' => $kot->sentBy?->name ?? 'System',
+        'restaurantName' => Setting::getValue('site_name', config('app.name')),
+        'restaurantAddress' => Setting::getValue('footer_address', ''),
+        'restaurantPhone' => Setting::getValue('footer_phone', ''),
     ]);
 })->name('print.kot');
 

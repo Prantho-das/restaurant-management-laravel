@@ -6,7 +6,7 @@
     $footerPages = \App\Models\Page::where('is_active', true)->where('show_in_footer', true)->get();
 @endphp
 
-<footer class="bg-[#c01c1c] text-white mt-0">
+<footer class="bg-gray-900 text-white mt-0">
     <div class="container-wide py-16">
         <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-10">
             <!-- Brand -->
