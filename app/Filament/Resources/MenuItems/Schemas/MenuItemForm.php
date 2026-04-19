@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\MenuItems\Schemas;
 
 use App\Models\Ingredient;
+use App\Models\MenuItem;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
@@ -30,7 +31,7 @@ class MenuItemForm
                     ->afterStateUpdated(fn (string $operation, $state, $set) => $operation === 'create' ? $set('slug', Str::slug($state)) : null),
                 TextInput::make('slug')
                     ->required()
-                    ->unique(ignoreRecord: true),
+                    ->unique(MenuItem::class, 'slug', ignoreRecord: true),
                 Textarea::make('description')
                     ->columnSpanFull(),
                 TextInput::make('base_price')
@@ -45,6 +46,7 @@ class MenuItemForm
                     ->numeric()
                     ->default(0),
                 FileUpload::make('image')
+                    ->disk('public')
                     ->image(),
                 Toggle::make('is_active')
                     ->required()

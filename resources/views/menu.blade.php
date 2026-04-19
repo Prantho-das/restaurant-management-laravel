@@ -1,5 +1,5 @@
 <x-layout>
-    <x-slot:title>মেনু - {{ App\Models\Setting::getValue('site_title', 'Kacchi Bhai') }}</x-slot:title>
+    <x-slot:title>{{ App\Models\Setting::getValue('menu_page_title', 'আমাদের মেনু') }} - {{ App\Models\Setting::getValue('site_title', 'Royal Dine') }}</x-slot:title>
 
     <div class="bg-white min-h-screen">
         <!-- Header -->

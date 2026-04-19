@@ -33,14 +33,27 @@ class ManageBrandingAndSeo extends Page implements HasForms
 
     public function mount(): void
     {
+        // Load settings from branding_seo and marketing groups
         $settings = Setting::whereIn('group', ['branding_seo', 'marketing'])->get();
-        if ($settings->isEmpty() || $settings->where('group', 'branding_seo')->isEmpty()) {
-            // Fallback to landing_page group for initial migration if they exist there
-            $legacySettings = Setting::whereIn('key', ['site_title', 'site_keywords', 'site_description', 'site_logo', 'site_favicon'])->get();
-            $this->form->fill(array_merge($legacySettings->pluck('value', 'key')->toArray(), $settings->pluck('value', 'key')->toArray()));
-        } else {
-            $this->form->fill($settings->pluck('value', 'key')->toArray());
+        $formData = $settings->pluck('value', 'key')->toArray();
+
+        // Compatibility check: Also look for qr_menu settings that might still be in 'general' group
+        $qrKeys = ['qr_menu_hero_title', 'qr_menu_hero_subtitle', 'qr_menu_badge_text', 'qr_menu_footer_text'];
+        foreach ($qrKeys as $key) {
+            if (! isset($formData[$key])) {
+                $formData[$key] = Setting::getValue($key);
+            }
         }
+
+        // Legacy fallback for SEO settings
+        $seoKeys = ['site_title', 'site_keywords', 'site_description', 'site_logo', 'site_favicon'];
+        foreach ($seoKeys as $key) {
+            if (! isset($formData[$key])) {
+                $formData[$key] = Setting::getValue($key);
+            }
+        }
+
+        $this->form->fill($formData);
     }
 
     public function form(Schema $schema): Schema
@@ -90,6 +103,24 @@ class ManageBrandingAndSeo extends Page implements HasForms
                             ->label('GTM Container ID')
                             ->placeholder('e.g. G-XXXXXXXXXX')
                             ->helperText('Enter your GTM container ID (e.g., G-XXXXXXX or GTM-XXXXXX)'),
+                    ])->columns(2),
+
+                Section::make('QR Menu Visuals')
+                    ->description('Customize the visual story and branding of your digital QR menu.')
+                    ->schema([
+                        TextInput::make('qr_menu_hero_title')
+                            ->label('Hero Title')
+                            ->placeholder('e.g., The Art of Fine Dining')
+                            ->helperText('Use <br> for line breaks. You can use Tailwind classes inside the title.'),
+                        TextInput::make('qr_menu_hero_subtitle')
+                            ->label('Hero Subtitle')
+                            ->placeholder('e.g., Explore our hand-crafted menu designed for your exquisite taste.'),
+                        TextInput::make('qr_menu_badge_text')
+                            ->label('Hero Badge Text')
+                            ->placeholder('e.g., Chef\'s Recommendation'),
+                        TextInput::make('qr_menu_footer_text')
+                            ->label('Footer Text')
+                            ->placeholder('e.g., Powered by Antigravity OS'),
                     ])->columns(2),
 
                 Section::make('Brand Assets')

@@ -20,6 +20,7 @@ class ReviewsTable
             ->columns([
                 ImageColumn::make('customer_image')
                     ->label('Image')
+                    ->disk('public')
                     ->circular()
                     ->defaultImageUrl(url('/placeholder.png')),
                 TextColumn::make('customer_name')
@@ -35,7 +36,7 @@ class ReviewsTable
                         5 => 'success',
                         default => 'gray',
                     })
-                    ->formatStateUsing(fn (int $state): string => $state . ' ★'),
+                    ->formatStateUsing(fn (int $state): string => $state.' ★'),
                 TextColumn::make('comment')
                     ->limit(50)
                     ->searchable(),

@@ -20,6 +20,7 @@ class DeliveryPartnersTable
             ->columns([
                 ImageColumn::make('image')
                     ->label('Photo')
+                    ->disk('public')
                     ->circular()
                     ->defaultImageUrl(url('/placeholder.png')),
                 TextColumn::make('name')

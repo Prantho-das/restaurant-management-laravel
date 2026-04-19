@@ -1,5 +1,4 @@
 <div class="homepage-wrapper">
-    <x-slot:title>{{ $cms->hero_subtitle ?? 'Kacchi Bhai' }} - Authentic Bangladeshi Cuisine</x-slot:title>
 
     <!-- Hero Section - Kacchi Bhai Style (White/Red) -->
     <section class="relative min-h-[90vh] flex items-center bg-[#fafafa]">

@@ -104,24 +104,6 @@ class ManageSettings extends Page implements HasForms
                             ->default(config('app.name')),
                     ])->columns(2),
 
-                Section::make('QR Menu Visuals')
-                    ->description('Customize the visual story and branding of your digital QR menu.')
-                    ->schema([
-                        TextInput::make('qr_menu_hero_title')
-                            ->label('Hero Title')
-                            ->placeholder('e.g., The Art of Fine Dining')
-                            ->helperText('Use <br> for line breaks. You can use Tailwind classes inside the title.'),
-                        TextInput::make('qr_menu_hero_subtitle')
-                            ->label('Hero Subtitle')
-                            ->placeholder('e.g., Explore our hand-crafted menu designed for your exquisite taste.'),
-                        TextInput::make('qr_menu_badge_text')
-                            ->label('Hero Badge Text')
-                            ->placeholder('e.g., Chef\'s Recommendation'),
-                        TextInput::make('qr_menu_footer_text')
-                            ->label('Footer Text')
-                            ->placeholder('e.g., Powered by Antigravity OS'),
-                    ])->columns(2),
-
                 Section::make('Footer Information')
                     ->schema([
                         Textarea::make('footer_about_text')
