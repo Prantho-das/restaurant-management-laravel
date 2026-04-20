@@ -3,6 +3,7 @@
 namespace App\Livewire\Frontend;
 
 use App\Models\Reservation;
+use App\Services\MetaService;
 use Livewire\Component;
 
 class ReservationForm extends Component
@@ -36,11 +37,11 @@ class ReservationForm extends Component
         $this->date = date('Y-m-d');
     }
 
-    public function submit()
+    public function submit(MetaService $metaService)
     {
         $this->validate();
 
-        Reservation::create([
+        $reservation = Reservation::create([
             'name' => $this->name,
             'phone' => $this->phone,
             'date' => $this->date,
@@ -48,6 +49,20 @@ class ReservationForm extends Component
             'arrangement' => $this->arrangement,
             'notes' => $this->notes,
             'status' => 'pending',
+        ]);
+
+        // Trigger conversion events
+        $this->dispatch('conversion-event', name: 'Lead', data: [
+            'content_name' => 'Table Reservation',
+            'content_category' => $this->arrangement,
+        ]);
+
+        // Server-side tracking (CAPI)
+        $metaService->sendEvent('Lead', [
+            'content_name' => 'Table Reservation',
+        ], [
+            'fn' => hash('sha256', strtolower(trim($this->name))),
+            'ph' => hash('sha256', preg_replace('/[^0-9]/', '', $this->phone)),
         ]);
 
         $this->isSuccess = true;

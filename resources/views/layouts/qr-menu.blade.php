@@ -15,6 +15,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <x-marketing.gtm-head />
+    <x-marketing.meta-pixel />
 </head>
 <body class="antialiased bg-neutral-50 font-sans">
     <x-marketing.gtm-body />

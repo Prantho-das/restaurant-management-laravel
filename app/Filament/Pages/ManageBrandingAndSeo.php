@@ -4,6 +4,7 @@ namespace App\Filament\Pages;
 
 use App\Models\Setting;
 use BackedEnum;
+use Filament\Actions\Action;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -13,6 +14,7 @@ use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\Artisan;
 use UnitEnum;
 
 class ManageBrandingAndSeo extends Page implements HasForms
@@ -28,6 +30,24 @@ class ManageBrandingAndSeo extends Page implements HasForms
     protected static ?int $navigationSort = 2;
 
     protected static ?string $title = 'Branding & SEO';
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            Action::make('generateSitemap')
+                ->label('Generate Sitemap')
+                ->icon('heroicon-o-globe-alt')
+                ->color('info')
+                ->action(function () {
+                    Artisan::call('seo:generate-sitemap');
+
+                    Notification::make()
+                        ->title('Sitemap generated successfully')
+                        ->success()
+                        ->send();
+                }),
+        ];
+    }
 
     public ?array $data = [];
 
@@ -78,6 +98,35 @@ class ManageBrandingAndSeo extends Page implements HasForms
                             ->label('Meta Description')
                             ->rows(3)
                             ->columnSpanFull(),
+                    ])->columns(2),
+
+                Section::make('Crawling & Indexing')
+                    ->description('Access and manage search engine crawl files.')
+                    ->schema([
+                        TextInput::make('sitemap_url')
+                            ->label('Sitemap URL')
+                            ->default(fn () => url('/sitemap.xml'))
+                            ->readOnly()
+                            ->copyable()
+                            ->suffixAction(
+                                Action::make('viewSitemap')
+                                    ->icon('heroicon-m-arrow-top-right-on-square')
+                                    ->tooltip('Open in new tab')
+                                    ->url(fn () => url('/sitemap.xml'))
+                                    ->openUrlInNewTab(),
+                            ),
+                        TextInput::make('robots_url')
+                            ->label('Robots.txt URL')
+                            ->default(fn () => url('/robots.txt'))
+                            ->readOnly()
+                            ->copyable()
+                            ->suffixAction(
+                                Action::make('viewRobots')
+                                    ->icon('heroicon-m-arrow-top-right-on-square')
+                                    ->tooltip('Open in new tab')
+                                    ->url(fn () => url('/robots.txt'))
+                                    ->openUrlInNewTab(),
+                            ),
                     ])->columns(2),
 
                 Section::make('Marketing (Facebook Meta)')

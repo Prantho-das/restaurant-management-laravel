@@ -7,6 +7,7 @@ use App\Models\MenuItem;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Services\BkashService;
+use App\Services\MetaService;
 use App\Services\SslcommerzeService;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
@@ -62,6 +63,23 @@ class CustomerOrder extends Component
                         ];
                     })->toArray();
                     $this->orderPlaced = true;
+
+                    // Trigger conversion events for payment success
+                    $this->dispatch('conversion-event', name: 'Purchase', data: [
+                        'value' => (float) $this->confirmedTotal,
+                        'currency' => 'BDT',
+                        'content_type' => 'product',
+                        'content_ids' => collect($this->confirmedOrderItems)->pluck('id')->toArray(),
+                    ]);
+
+                    // Server-side (CAPI)
+                    app(MetaService::class)->sendEvent('Purchase', [
+                        'value' => (float) $this->confirmedTotal,
+                        'currency' => 'BDT',
+                    ], [
+                        'fn' => hash('sha256', strtolower(trim($order->customer_name))),
+                    ]);
+
                     $this->cart = [];
                     $this->syncCartToSession();
                     session()->forget(['confirmed_order_id', 'payment_origin']);
@@ -136,6 +154,16 @@ class CustomerOrder extends Component
         }
 
         $this->syncCartToSession();
+
+        // Trigger conversion event
+        $this->dispatch('conversion-event', name: 'AddToCart', data: [
+            'content_name' => $item->name,
+            'content_ids' => [$item->id],
+            'content_type' => 'product',
+            'value' => (float) $item->final_price,
+            'currency' => 'BDT',
+        ]);
+
         $this->dispatch('notify', ['type' => 'success', 'message' => "{$item->name} added to cart!"]);
     }
 
@@ -260,6 +288,23 @@ class CustomerOrder extends Component
         $this->cart = [];
         $this->syncCartToSession();
         $this->orderPlaced = true;
+
+        // Trigger conversion events for cash success
+        $this->dispatch('conversion-event', name: 'Purchase', data: [
+            'value' => (float) $this->confirmedTotal,
+            'currency' => 'BDT',
+            'content_type' => 'product',
+            'content_ids' => collect($this->confirmedOrderItems)->pluck('id')->toArray(),
+        ]);
+
+        // Server-side (CAPI)
+        app(MetaService::class)->sendEvent('Purchase', [
+            'value' => (float) $this->confirmedTotal,
+            'currency' => 'BDT',
+        ], [
+            'fn' => hash('sha256', strtolower(trim($this->customerName))),
+            'ph' => hash('sha256', preg_replace('/[^0-9]/', '', $this->customerPhone)),
+        ]);
     }
 
     public function startNewOrder()
