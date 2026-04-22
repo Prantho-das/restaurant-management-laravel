@@ -97,6 +97,15 @@ class CustomerOrder extends Component
 
             return $this->redirect('/order', navigate: false);
         }
+
+        if (! empty($this->cart) && ! $this->orderPlaced) {
+            $this->dispatch('conversion-event', name: 'BeginCheckout', data: [
+                'value' => (float) $this->subtotal,
+                'currency' => 'BDT',
+                'content_type' => 'product',
+                'content_ids' => collect($this->cart)->pluck('id')->toArray(),
+            ]);
+        }
     }
 
     protected function syncCartToSession()

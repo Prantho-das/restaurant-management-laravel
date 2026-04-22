@@ -19,10 +19,63 @@ fbq('track', 'PageView');
 // Listen for custom conversion events from Livewire
 window.addEventListener('conversion-event', function(event) {
     if (event.detail && event.detail.name) {
+        const name = event.detail.name;
+        const data = event.detail.data || {};
+
+        // Meta Pixel
         if (event.detail.data) {
-            fbq('track', event.detail.name, event.detail.data);
+            fbq('track', name, data);
         } else {
-            fbq('track', event.detail.name);
+            fbq('track', name);
+        }
+
+        // Google Tag Manager / GA4
+        if (typeof dataLayer !== 'undefined') {
+            // Standard GA4 Events
+            if (name === 'AddToCart') {
+                dataLayer.push({
+                    event: 'add_to_cart',
+                    ecommerce: {
+                        value: data.value,
+                        currency: data.currency,
+                        items: [{
+                            item_id: data.content_ids ? data.content_ids[0] : '',
+                            item_name: data.content_name || '',
+                            price: data.value,
+                            quantity: 1
+                        }]
+                    }
+                });
+                // Custom event name specifically requested
+                dataLayer.push({
+                    event: 'incart',
+                    ...data
+                });
+            } else if (name === 'BeginCheckout') {
+                dataLayer.push({
+                    event: 'begin_checkout',
+                    ecommerce: {
+                        value: data.value,
+                        currency: data.currency,
+                        items: data.content_ids ? data.content_ids.map(id => ({ item_id: id })) : []
+                    }
+                });
+                // Custom event name specifically requested
+                dataLayer.push({
+                    event: 'checkout',
+                    ...data
+                });
+            } else if (name === 'Purchase') {
+                dataLayer.push({
+                    event: 'purchase',
+                    ecommerce: {
+                        transaction_id: data.transaction_id || '',
+                        value: data.value,
+                        currency: data.currency,
+                        items: data.content_ids ? data.content_ids.map(id => ({ item_id: id })) : []
+                    }
+                });
+            }
         }
     }
 });
