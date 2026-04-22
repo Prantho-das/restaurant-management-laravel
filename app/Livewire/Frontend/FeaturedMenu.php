@@ -37,6 +37,16 @@ class FeaturedMenu extends Component
         session()->put('cart', $this->cart);
         $count = collect($this->cart)->sum('quantity');
         $this->js("window.dispatchEvent(new CustomEvent('cart-updated', { detail: { count: {$count} } }))");
+
+        // Trigger conversion event
+        $this->dispatch('conversion-event', name: 'AddToCart', data: [
+            'content_name' => $item->name,
+            'content_ids' => [$item->id],
+            'content_type' => 'product',
+            'value' => (float) $item->final_price,
+            'currency' => 'BDT',
+        ]);
+
         $this->dispatch('notify', ['type' => 'success', 'message' => "{$item->name} added to cart!"]);
     }
 

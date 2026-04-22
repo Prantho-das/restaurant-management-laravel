@@ -14,6 +14,13 @@ class TableMenu extends Component
 
     public string $search = '';
 
+    public function mount()
+    {
+        $this->dispatch('conversion-event', name: 'ViewContent', data: [
+            'content_type' => 'product',
+        ]);
+    }
+
     #[Layout('layouts.qr-menu')]
     public function render()
     {

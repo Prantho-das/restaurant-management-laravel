@@ -22,6 +22,11 @@ class Menu extends Component
     public function mount(): void
     {
         $this->cart = session('cart', []);
+
+        // Trigger conversion event
+        $this->dispatch('conversion-event', name: 'ViewContent', data: [
+            'content_type' => 'product',
+        ]);
     }
 
     public function selectCategory(?int $id = null): void

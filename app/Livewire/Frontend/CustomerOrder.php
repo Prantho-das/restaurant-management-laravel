@@ -222,6 +222,15 @@ class CustomerOrder extends Component
             return;
         }
 
+        // Trigger conversion event
+        $this->dispatch('conversion-event', name: 'AddPaymentInfo', data: [
+            'value' => (float) $this->subtotal,
+            'currency' => 'BDT',
+            'payment_type' => $this->paymentMethod,
+            'content_type' => 'product',
+            'content_ids' => collect($this->cart)->pluck('id')->toArray(),
+        ]);
+
         $order = null;
 
         DB::transaction(function () use (&$order) {

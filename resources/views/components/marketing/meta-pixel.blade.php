@@ -31,7 +31,7 @@ window.addEventListener('conversion-event', function(event) {
 
         // Google Tag Manager / GA4
         if (typeof dataLayer !== 'undefined') {
-            // Standard GA4 Events
+            // Mapping strictly to requested GTM names
             if (name === 'AddToCart') {
                 dataLayer.push({
                     event: 'add_to_cart',
@@ -46,11 +46,6 @@ window.addEventListener('conversion-event', function(event) {
                         }]
                     }
                 });
-                // Custom event name specifically requested
-                dataLayer.push({
-                    event: 'incart',
-                    ...data
-                });
             } else if (name === 'BeginCheckout') {
                 dataLayer.push({
                     event: 'begin_checkout',
@@ -60,10 +55,22 @@ window.addEventListener('conversion-event', function(event) {
                         items: data.content_ids ? data.content_ids.map(id => ({ item_id: id })) : []
                     }
                 });
-                // Custom event name specifically requested
+            } else if (name === 'ViewContent') {
                 dataLayer.push({
-                    event: 'checkout',
-                    ...data
+                    event: 'view_item',
+                    ecommerce: {
+                        items: data.content_ids ? data.content_ids.map(id => ({ item_id: id })) : []
+                    }
+                });
+            } else if (name === 'AddPaymentInfo') {
+                dataLayer.push({
+                    event: 'add_payment_info',
+                    ecommerce: {
+                        value: data.value,
+                        currency: data.currency,
+                        payment_type: data.payment_type || '',
+                        items: data.content_ids ? data.content_ids.map(id => ({ item_id: id })) : []
+                    }
                 });
             } else if (name === 'Purchase') {
                 dataLayer.push({
