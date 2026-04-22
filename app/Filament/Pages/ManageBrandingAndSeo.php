@@ -73,6 +73,10 @@ class ManageBrandingAndSeo extends Page implements HasForms
             }
         }
 
+        // Populate Sitemap and Robots URLs
+        $formData['sitemap_url'] = url('/sitemap.xml');
+        $formData['robots_url'] = url('/robots.txt');
+
         $this->form->fill($formData);
     }
 
@@ -108,6 +112,7 @@ class ManageBrandingAndSeo extends Page implements HasForms
                             ->default(fn () => url('/sitemap.xml'))
                             ->readOnly()
                             ->copyable()
+                            ->dehydrated(false)
                             ->suffixAction(
                                 Action::make('viewSitemap')
                                     ->icon('heroicon-m-arrow-top-right-on-square')
@@ -120,6 +125,7 @@ class ManageBrandingAndSeo extends Page implements HasForms
                             ->default(fn () => url('/robots.txt'))
                             ->readOnly()
                             ->copyable()
+                            ->dehydrated(false)
                             ->suffixAction(
                                 Action::make('viewRobots')
                                     ->icon('heroicon-m-arrow-top-right-on-square')
