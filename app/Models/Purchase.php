@@ -4,9 +4,9 @@ namespace App\Models;
 
 use App\Services\InventoryService;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\DB;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
@@ -44,30 +44,24 @@ class Purchase extends Model
     {
         parent::boot();
 
-        static::created(function (Purchase $purchase) {
-            if ($purchase->is_stock_updated || $purchase->status !== 'received') {
-                return;
-            }
-
-            self::handleReceivedStatus($purchase);
-        });
-
-        static::updated(function (Purchase $purchase) {
-            if ($purchase->is_stock_updated || ! $purchase->isDirty('status') || $purchase->status !== 'received' || $purchase->getOriginal('status') === 'received') {
-                return;
-            }
-
-            self::handleReceivedStatus($purchase);
-        });
+        // Stock handling is moved to Observer/Filament hooks to ensure items are saved
     }
 
-    protected static function handleReceivedStatus(Purchase $purchase): void
+    public static function handleReceivedStatus(Purchase $purchase): void
     {
+        if ($purchase->is_stock_updated) {
+            return;
+        }
+
         $purchase->loadMissing(['items.ingredient', 'supplier']);
+
+        if ($purchase->items->isEmpty()) {
+            return;
+        }
 
         app(InventoryService::class)->addStockFromPurchase($purchase);
 
-        \App\Models\Expense::create([
+        Expense::create([
             'category' => 'Purchase',
             'title' => 'Purchase from '.($purchase->supplier?->name ?? 'Supplier'),
             'description' => "Reference: #{$purchase->reference_no}",
@@ -79,6 +73,7 @@ class Purchase extends Model
         ]);
 
         DB::table('purchases')->where('id', $purchase->id)->update(['is_stock_updated' => true]);
+        $purchase->is_stock_updated = true;
     }
 
     public function supplier(): BelongsTo

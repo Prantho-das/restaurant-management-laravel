@@ -8,7 +8,7 @@ return [
     'generated_on' => 'Generated on',
     'page' => 'Page',
     'overview' => 'Overview',
-    
+
     // Sales Summary
     'sales_summary' => 'Sales Summary',
     'sales_summary_report' => 'Sales Summary Report',
@@ -23,7 +23,7 @@ return [
     'payment' => 'Payment',
     'amount' => 'Amount',
     'grand_total' => 'Grand Total',
-    
+
     // Product Performance
     'product_performance' => 'Product Performance',
     'product_performance_report' => 'Product Performance Report',
@@ -33,7 +33,7 @@ return [
     'total_quantity' => 'Total Quantity',
     'total_revenue_product' => 'Total Revenue',
     'rank' => 'Rank',
-    
+
     // Inventory & Wastage
     'inventory_wastage' => 'Inventory & Wastage',
     'inventory_wastage_report' => 'Inventory & Wastage Report',
@@ -46,7 +46,7 @@ return [
     'ingredient' => 'Ingredient',
     'category' => 'Category',
     'quantity_in_stock' => 'Qty in Stock',
-    
+
     // Profit & Loss
     'profit_loss' => 'Profit & Loss',
     'profit_loss_report' => 'Profit & Loss Report',
@@ -58,7 +58,7 @@ return [
     'net_loss' => 'Net Loss',
     'income' => 'Income',
     'expenses' => 'Expenses',
-    
+
     // Staff Performance
     'staff_performance' => 'Staff Performance',
     'staff_performance_report' => 'Staff Performance Report',
@@ -68,7 +68,7 @@ return [
     'total_sales' => 'Total Sales',
     'name' => 'Name',
     'email' => 'Email',
-    
+
     // Purchases
     'purchases' => 'Purchases',
     'purchases_report' => 'Purchases Report',
@@ -78,7 +78,7 @@ return [
     'items' => 'Items',
     'status' => 'Status',
     'invoice_number' => 'Invoice #',
-    
+
     // Expenses
     'expense_report' => 'Expense Report',
     'total_expense_amount' => 'Total Amount',
@@ -86,7 +86,7 @@ return [
     'description' => 'Description',
     'category_expense' => 'Category',
     'added_by' => 'Added By',
-    
+
     // Stock Adjustments
     'stock_adjustments' => 'Stock Adjustments',
     'stock_adjustments_report' => 'Stock Adjustments Report',
@@ -98,7 +98,7 @@ return [
     'previous_qty' => 'Previous',
     'new_qty' => 'New',
     'change' => 'Change',
-    
+
     // Wastage
     'wastage_report' => 'Wastage Report',
     'wasted_item' => 'Wasted Item',
@@ -106,7 +106,7 @@ return [
     'wastage_reason' => 'Reason',
     'quantity_wasted' => 'Quantity Wasted',
     'cost_impact' => 'Cost Impact',
-    
+
     // Cash Flow
     'cash_flow' => 'Cash Flow',
     'cash_flow_report' => 'Cash Flow Report',
@@ -119,22 +119,38 @@ return [
     'purchase_costs' => 'Purchase Costs',
     'operational_expenses' => 'Operational Expenses',
     'salary_payments' => 'Salary Payments',
-    
+
     // Order Types
     'dine_in' => 'Dine In',
     'takeaway' => 'Takeaway',
     'delivery' => 'Delivery',
     'foodpanda' => 'Foodpanda',
     'pathao' => 'Pathao',
-    
+
     // Payment Methods
     'cash' => 'Cash',
     'card' => 'Card',
     'online' => 'Online',
     'digital_wallet' => 'Digital Wallet',
-    
+
     // Common
     'no_records' => 'No records found',
     'from' => 'From',
     'to' => 'To',
+
+    // New Reports
+    'category_report' => 'Category Report',
+    'total_categories' => 'Total Categories',
+    'items_sold' => 'Items Sold',
+    'summary' => 'Summary',
+    'waiter_report' => 'Waiter Report',
+    'total_waiters' => 'Total Waiters',
+    'due_report' => 'Due Report',
+    'total_due' => 'Total Due',
+    'customer' => 'Customer',
+    'discount_report' => 'Discount Report',
+    'total_discount' => 'Total Discount',
+    'channel_report' => 'Channel Report',
+    'channel' => 'Channel',
+    'orders' => 'Orders',
 ];

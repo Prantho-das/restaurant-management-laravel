@@ -4,8 +4,10 @@ namespace App\Providers;
 
 use App\Models\Order;
 use App\Models\Purchase;
+use App\Models\PurchaseItem;
 use App\Models\Wastage;
 use App\Observers\OrderObserver;
+use App\Observers\PurchaseItemObserver;
 use App\Observers\PurchaseObserver;
 use App\Observers\WastageObserver;
 use Carbon\CarbonImmutable;
@@ -34,6 +36,7 @@ class AppServiceProvider extends ServiceProvider
 
         Order::observe(OrderObserver::class);
         Purchase::observe(PurchaseObserver::class);
+        PurchaseItem::observe(PurchaseItemObserver::class);
         Wastage::observe(WastageObserver::class);
     }
 

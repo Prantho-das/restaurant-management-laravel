@@ -33,7 +33,7 @@ class ReportController extends Controller
         $this->setLocale($request->get('lang', 'en'));
         ReportHelper::setLocale($this->reportLocale);
         $reportLocale = $this->reportLocale;
-        
+
         $startDate = $request->get('start_date', now()->startOfMonth());
         $endDate = $request->get('end_date', now()->endOfMonth());
 
@@ -61,7 +61,7 @@ class ReportController extends Controller
         $this->setLocale($request->get('lang', 'en'));
         ReportHelper::setLocale($this->reportLocale);
         $reportLocale = $this->reportLocale;
-        
+
         $startDate = $request->get('start_date', now()->startOfMonth());
         $endDate = $request->get('end_date', now()->endOfMonth());
 
@@ -89,7 +89,7 @@ class ReportController extends Controller
         $this->setLocale($request->get('lang', 'en'));
         ReportHelper::setLocale($this->reportLocale);
         $reportLocale = $this->reportLocale;
-        
+
         $startDate = $request->get('start_date', now()->startOfMonth());
         $endDate = $request->get('end_date', now()->endOfMonth());
 
@@ -111,7 +111,7 @@ class ReportController extends Controller
         $this->setLocale($request->get('lang', 'en'));
         ReportHelper::setLocale($this->reportLocale);
         $reportLocale = $this->reportLocale;
-        
+
         $startDate = $request->get('start_date', now()->startOfMonth());
         $endDate = $request->get('end_date', now()->endOfMonth());
 
@@ -152,7 +152,7 @@ class ReportController extends Controller
         $this->setLocale($request->get('lang', 'en'));
         ReportHelper::setLocale($this->reportLocale);
         $reportLocale = $this->reportLocale;
-        
+
         $startDate = $request->get('start_date', now()->startOfMonth());
         $endDate = $request->get('end_date', now()->endOfMonth());
 
@@ -175,7 +175,7 @@ class ReportController extends Controller
         $this->setLocale($request->get('lang', 'en'));
         ReportHelper::setLocale($this->reportLocale);
         $reportLocale = $this->reportLocale;
-        
+
         $startDate = $request->get('start_date', now()->startOfMonth());
         $endDate = $request->get('end_date', now()->endOfMonth());
 
@@ -201,7 +201,7 @@ class ReportController extends Controller
         $this->setLocale($request->get('lang', 'en'));
         ReportHelper::setLocale($this->reportLocale);
         $reportLocale = $this->reportLocale;
-        
+
         $startDate = $request->get('start_date', now()->startOfMonth());
         $endDate = $request->get('end_date', now()->endOfMonth());
 
@@ -220,7 +220,7 @@ class ReportController extends Controller
         $this->setLocale($request->get('lang', 'en'));
         ReportHelper::setLocale($this->reportLocale);
         $reportLocale = $this->reportLocale;
-        
+
         $startDate = $request->get('start_date', now()->startOfMonth());
         $endDate = $request->get('end_date', now()->endOfMonth());
 
@@ -246,7 +246,7 @@ class ReportController extends Controller
         $this->setLocale($request->get('lang', 'en'));
         ReportHelper::setLocale($this->reportLocale);
         $reportLocale = $this->reportLocale;
-        
+
         $startDate = $request->get('start_date', now()->startOfMonth());
         $endDate = $request->get('end_date', now()->endOfMonth());
 
@@ -265,7 +265,7 @@ class ReportController extends Controller
         $this->setLocale($request->get('lang', 'en'));
         ReportHelper::setLocale($this->reportLocale);
         $reportLocale = $this->reportLocale;
-        
+
         $startDate = $request->get('start_date', now()->startOfMonth());
         $endDate = $request->get('end_date', now()->endOfMonth());
 
@@ -324,5 +324,125 @@ class ReportController extends Controller
         ));
 
         return $pdf->download("cash-flow-{$startDate}-to-{$endDate}.pdf");
+    }
+
+    public function categoryReport(Request $request)
+    {
+        $this->setLocale($request->get('lang', 'en'));
+        ReportHelper::setLocale($this->reportLocale);
+        $reportLocale = $this->reportLocale;
+
+        $startDate = $request->get('start_date', now()->startOfMonth());
+        $endDate = $request->get('end_date', now()->endOfMonth());
+
+        $categories = DB::table('order_items')
+            ->join('menu_items', 'order_items.menu_item_id', '=', 'menu_items.id')
+            ->join('categories', 'menu_items.category_id', '=', 'categories.id')
+            ->join('orders', 'order_items.order_id', '=', 'orders.id')
+            ->whereBetween('orders.created_at', [$startDate, $endDate])
+            ->where('orders.status', 'completed')
+            ->select(
+                'categories.name',
+                DB::raw('SUM(order_items.quantity) as total_quantity'),
+                DB::raw('SUM(order_items.quantity * order_items.price) as total_revenue')
+            )
+            ->groupBy('categories.id', 'categories.name')
+            ->orderByDesc('total_revenue')
+            ->get();
+
+        $pdf = Pdf::loadView('reports.category', compact('categories', 'startDate', 'endDate', 'reportLocale'));
+
+        return $pdf->download("category-report-{$startDate}-to-{$endDate}.pdf");
+    }
+
+    public function waiterReport(Request $request)
+    {
+        $this->setLocale($request->get('lang', 'en'));
+        ReportHelper::setLocale($this->reportLocale);
+        $reportLocale = $this->reportLocale;
+
+        $startDate = $request->get('start_date', now()->startOfMonth());
+        $endDate = $request->get('end_date', now()->endOfMonth());
+
+        $waiterData = User::withCount(['orders' => function ($query) use ($startDate, $endDate) {
+            $query->whereBetween('created_at', [$startDate, $endDate])->where('status', 'completed');
+        }])
+            ->withSum(['orders' => function ($query) use ($startDate, $endDate) {
+                $query->whereBetween('created_at', [$startDate, $endDate])->where('status', 'completed');
+            }], 'total_amount')
+            ->get()
+            ->filter(fn ($user) => $user->orders_count > 0);
+
+        $pdf = Pdf::loadView('reports.waiter', compact('waiterData', 'startDate', 'endDate', 'reportLocale'));
+
+        return $pdf->download("waiter-report-{$startDate}-to-{$endDate}.pdf");
+    }
+
+    public function dueReport(Request $request)
+    {
+        $this->setLocale($request->get('lang', 'en'));
+        ReportHelper::setLocale($this->reportLocale);
+        $reportLocale = $this->reportLocale;
+
+        $startDate = $request->get('start_date', now()->startOfMonth());
+        $endDate = $request->get('end_date', now()->endOfMonth());
+
+        $dueOrders = Order::with('user')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->where('payment_status', '!=', 'paid')
+            ->where('status', '!=', 'failed')
+            ->get();
+
+        $pdf = Pdf::loadView('reports.due', compact('dueOrders', 'startDate', 'endDate', 'reportLocale'));
+
+        return $pdf->download("due-report-{$startDate}-to-{$endDate}.pdf");
+    }
+
+    public function discountReport(Request $request)
+    {
+        $this->setLocale($request->get('lang', 'en'));
+        ReportHelper::setLocale($this->reportLocale);
+        $reportLocale = $this->reportLocale;
+
+        $startDate = $request->get('start_date', now()->startOfMonth());
+        $endDate = $request->get('end_date', now()->endOfMonth());
+
+        $discountedOrders = Order::whereBetween('created_at', [$startDate, $endDate])
+            ->where('discount_amount', '>', 0)
+            ->where('status', 'completed')
+            ->get();
+
+        $summary = [
+            'total_discount' => $discountedOrders->sum('discount_amount'),
+            'total_orders' => $discountedOrders->count(),
+        ];
+
+        $pdf = Pdf::loadView('reports.discount', compact('discountedOrders', 'summary', 'startDate', 'endDate', 'reportLocale'));
+
+        return $pdf->download("discount-report-{$startDate}-to-{$endDate}.pdf");
+    }
+
+    public function channelReport(Request $request)
+    {
+        $this->setLocale($request->get('lang', 'en'));
+        ReportHelper::setLocale($this->reportLocale);
+        $reportLocale = $this->reportLocale;
+
+        $startDate = $request->get('start_date', now()->startOfMonth());
+        $endDate = $request->get('end_date', now()->endOfMonth());
+
+        $channels = Order::whereBetween('created_at', [$startDate, $endDate])
+            ->where('status', 'completed')
+            ->select(
+                'order_type',
+                DB::raw('COUNT(*) as total_orders'),
+                DB::raw('SUM(total_amount) as total_revenue')
+            )
+            ->groupBy('order_type')
+            ->get();
+
+        $pdf = Pdf::loadView('reports.channel', compact('channels', 'startDate', 'endDate', 'reportLocale'));
+
+        return $pdf->download("channel-report-{$startDate}-to-{$endDate}.pdf");
     }
 }

@@ -196,17 +196,41 @@ class InventoryService
     {
         DB::transaction(function () use ($purchase) {
             foreach ($purchase->items as $item) {
-                $item->ingredient->increment('current_stock', $item->quantity);
-
-                InventoryLog::create([
-                    'ingredient_id' => $item->ingredient_id,
-                    'type' => 'stock_in',
-                    'quantity' => $item->quantity,
-                    'note' => "Purchase #{$purchase->reference_no}",
-                    'user_id' => $purchase->user_id,
-                ]);
+                $this->addStockFromPurchaseItem($item);
             }
         });
+    }
+
+    /**
+     * Add stock for a single purchase item.
+     */
+    public function addStockFromPurchaseItem(PurchaseItem $item): void
+    {
+        $item->ingredient->increment('current_stock', $item->quantity);
+
+        InventoryLog::create([
+            'ingredient_id' => $item->ingredient_id,
+            'type' => 'stock_in',
+            'quantity' => $item->quantity,
+            'note' => "Purchase #{$item->purchase->reference_no}",
+            'user_id' => $item->purchase->user_id ?? Auth::id(),
+        ]);
+    }
+
+    /**
+     * Remove stock for a single purchase item.
+     */
+    public function removeStockFromPurchaseItem(PurchaseItem $item): void
+    {
+        $item->ingredient->decrement('current_stock', $item->quantity);
+
+        InventoryLog::create([
+            'ingredient_id' => $item->ingredient_id,
+            'type' => 'stock_out',
+            'quantity' => $item->quantity,
+            'note' => "Purchase #{$item->purchase->reference_no} (Removed/Updated)",
+            'user_id' => $item->purchase->user_id ?? Auth::id(),
+        ]);
     }
 
     /**

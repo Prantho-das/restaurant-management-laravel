@@ -84,6 +84,12 @@
 
                     this.$nextTick(() => {
                         this.isReady = true;
+                        // Global click sound for POS buttons
+                        document.addEventListener('click', (e) => {
+                            if (e.target.closest('button') || e.target.closest('.cursor-pointer')) {
+                                this.playClickSound();
+                            }
+                        });
                     });
                 },
                 async saveOfflineOrder(cart, total, details) {
@@ -202,6 +208,23 @@
                         } finally {
                             this.isProcessing = false;
                         }
+                    }
+                },
+                playClickSound() {
+                    try {
+                        const context = new (window.AudioContext || window.webkitAudioContext)();
+                        const oscillator = context.createOscillator();
+                        const gain = context.createGain();
+                        oscillator.type = 'sine';
+                        oscillator.frequency.setValueAtTime(1000, context.currentTime);
+                        gain.gain.setValueAtTime(0.1, context.currentTime);
+                        gain.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 0.1);
+                        oscillator.connect(gain);
+                        gain.connect(context.destination);
+                        oscillator.start();
+                        oscillator.stop(context.currentTime + 0.1);
+                    } catch (e) {
+                        console.error('Audio context error:', e);
                     }
                 }
             };

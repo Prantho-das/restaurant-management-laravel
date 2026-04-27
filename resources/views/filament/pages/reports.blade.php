@@ -16,6 +16,11 @@
     ['name' => 'Stock Adjustments', 'slug' => 'stock-adjustments', 'icon' => 'heroicon-o-adjustments-horizontal', 'color' => 'warning', 'desc' => 'Manual stock corrections and audit trail.'],
     ['name' => 'Wastage Report', 'slug' => 'wastage', 'icon' => 'heroicon-o-trash', 'color' => 'danger', 'desc' => 'Registered wastage of ingredients and menu items.'],
     ['name' => 'Cash Flow', 'slug' => 'cash-flow', 'icon' => 'heroicon-o-arrows-right-left', 'color' => 'success', 'desc' => 'Net cash flow and balance overview.'],
+    ['name' => 'Category Report', 'slug' => 'category', 'icon' => 'heroicon-o-tag', 'color' => 'info', 'desc' => 'Sales performance by menu categories.'],
+    ['name' => 'Waiter Report', 'slug' => 'waiter', 'icon' => 'heroicon-o-user-group', 'color' => 'success', 'desc' => 'Sales and efficiency metrics per waiter.'],
+    ['name' => 'Due Report', 'slug' => 'due', 'icon' => 'heroicon-o-clock', 'color' => 'warning', 'desc' => 'Orders with pending payments.'],
+    ['name' => 'Discount Report', 'slug' => 'discount', 'icon' => 'heroicon-o-gift', 'color' => 'danger', 'desc' => 'Overview of discounts and promotions applied.'],
+    ['name' => 'Channel Report', 'slug' => 'channel', 'icon' => 'heroicon-o-truck', 'color' => 'info', 'desc' => 'Sales distribution by order channel (Delivery, Dine-in, etc).'],
     ];
 
     $languages = [

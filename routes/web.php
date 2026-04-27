@@ -40,6 +40,11 @@ Route::middleware(['auth'])->prefix('admin/reports')->group(function () {
     Route::get('/stock-adjustments', [ReportController::class, 'stockAdjustmentsReport'])->name('reports.stock-adjustments');
     Route::get('/wastage', [ReportController::class, 'wastageReport'])->name('reports.wastage');
     Route::get('/cash-flow', [ReportController::class, 'cashFlow'])->name('reports.cash-flow');
+    Route::get('/category', [ReportController::class, 'categoryReport'])->name('reports.category');
+    Route::get('/waiter', [ReportController::class, 'waiterReport'])->name('reports.waiter');
+    Route::get('/due', [ReportController::class, 'dueReport'])->name('reports.due');
+    Route::get('/discount', [ReportController::class, 'discountReport'])->name('reports.discount');
+    Route::get('/channel', [ReportController::class, 'channelReport'])->name('reports.channel');
 });
 
 // Offline Sync API Routes
