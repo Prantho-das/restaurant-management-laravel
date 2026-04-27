@@ -40,6 +40,13 @@
             };
         });
     </script>
+    <div class="mb-4">
+        <a href="{{ route('kds.index') }}" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg inline-flex items-center gap-2 shadow-sm transition">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" /></svg>
+            Open Fullscreen KDS App
+        </a>
+    </div>
+
     <div class="grid grid-cols-4 gap-4 mb-6">
         <div class="bg-yellow-100 border-l-4 border-yellow-500 p-4 rounded">
             <div class="text-yellow-800 text-sm font-medium">Pending</div>

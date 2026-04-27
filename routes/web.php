@@ -5,6 +5,7 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ReportController;
 use App\Livewire\Frontend\Home;
 use App\Livewire\Frontend\Menu;
+use App\Livewire\KdsBoard;
 use App\Livewire\TableMenu;
 use App\Models\KotOrder;
 use App\Models\Page;
@@ -27,6 +28,9 @@ Route::view('/order', 'order')->name('order');
 
 // QR Menu route points to Livewire component
 Route::get('/table/{table:slug}', TableMenu::class)->name('table.menu');
+
+// Standalone Full-Screen KDS
+Route::middleware(['auth'])->get('/kds', KdsBoard::class)->name('kds.index');
 
 // Note: Reports and other admin features
 Route::middleware(['auth'])->prefix('admin/reports')->group(function () {

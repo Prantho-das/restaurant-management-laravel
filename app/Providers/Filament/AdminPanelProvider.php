@@ -54,7 +54,10 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([])
-            ->plugin(FilamentShieldPlugin::make()->navigationLabel('Permission'))
+            ->plugin(FilamentShieldPlugin::make()
+			->navigationGroup('People')
+			->navigationLabel('Permission')
+			)
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,

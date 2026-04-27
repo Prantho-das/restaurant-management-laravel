@@ -25,12 +25,14 @@ class PurchaseItem extends Model
         'quantity',
         'unit_price',
         'subtotal',
+        'expiry_date',
     ];
 
     protected $casts = [
         'quantity' => 'decimal:2',
         'unit_price' => 'decimal:2',
         'subtotal' => 'decimal:2',
+        'expiry_date' => 'date',
     ];
 
     public function purchase(): BelongsTo

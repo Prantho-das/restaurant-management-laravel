@@ -98,8 +98,11 @@ class PurchaseForm
                                     ->numeric()
                                     ->readOnly()
                                     ->prefix('BDT'),
+                                DatePicker::make('expiry_date')
+                                    ->label('Expiry Date')
+                                    ->nullable(),
                             ])
-                            ->columns(4)
+                            ->columns(5)
                             ->live()
                             ->afterStateUpdated(fn (Get $get, Set $set) => self::updateTotalAmount($get, $set)),
                     ])->columnSpanFull(),
