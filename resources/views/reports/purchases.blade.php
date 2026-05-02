@@ -31,8 +31,8 @@
                 <tr>
                     <td>{{ $purchase->reference_no }}</td>
                     <td>{{ $purchase->purchase_date->format('M d, Y') }}</td>
-                    <td>{{ $purchase->supplier->name }}</td>
-                    <td>{{ $purchase->user->name }}</td>
+                    <td>{{ $purchase->supplier?->name ?? 'N/A' }}</td>
+                    <td>{{ $purchase->user?->name ?? 'N/A' }}</td>
                     <td class="text-right">৳{{ number_format($purchase->total_amount, 2) }}</td>
                 </tr>
             @empty

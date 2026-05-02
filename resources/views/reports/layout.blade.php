@@ -3,31 +3,6 @@ use App\Http\Controllers\ReportHelper;
 $locale = $reportLocale ?? 'en';
 ReportHelper::setLocale($locale);
 
-function t(string $key): string {
-    return ReportHelper::t($key);
-}
-
-function formatNum($num, int $decimals = 2): string {
-    $locale = $GLOBALS['locale'] ?? 'en';
-    $num = number_format((float) $num, $decimals);
-    if ($locale === 'bn') {
-        return ReportHelper::toBanglaNumbers($num);
-    }
-    return $num;
-}
-
-function formatDate($date, string $format = 'M d, Y'): string {
-    return ReportHelper::formatDate($date, $format);
-}
-
-function tt(string $type): string {
-    return ReportHelper::translateOrderType($type);
-}
-
-function tm(string $method): string {
-    return ReportHelper::translatePaymentMethod($method);
-}
-
 $GLOBALS['locale'] = $locale;
 $banglaFontPath = public_path('fonts/NotoSansBengali-Regular.ttf');
 $banglaFontAvailable = file_exists($banglaFontPath);
